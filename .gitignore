@@ -10,3 +10,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+.venv/
+__pycache__/
+.env
+.pytest_cache/
+*.pyc
