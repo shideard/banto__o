@@ -23,7 +23,11 @@ class TicketDomain:
     comments: List[CommentDomain] = field(default_factory=list)
 
     def validate_revision(self, new_status: str, note: Optional[str]):
-        if new_status == "Perlu Revisi" and (not note or not note.strip()):
+        """
+        Aturan Bisnis: Jika status diubah ke 'Perlu Revisi',
+        maka catatan/komentar penjelasan wajib ada.
+        """
+        if new_status == "Perlu Revisi" and (not note or len(note).strip() == 0):
             raise ValueError("Status 'Perlu Revisi' wajib menyertakan catatan penjelasan untuk mahasiswa.")
 
     def add_comment_logic(self, user_id: str, role: str, message: str):
