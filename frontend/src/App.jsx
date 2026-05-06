@@ -1,15 +1,16 @@
 // main.jsx
 import './index.css'
-import PublicNavbar from './components/layout/PublicNavbar'
-import Footer from './components/layout/Footer'
 import LoginPage from './pages/auth/LoginPage'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
+
+// Import semua komponen page
 import BuatTiketPage from "./pages/mahasiswa/BuatTiketPage";
+import DashboardPage from "./pages/mahasiswa/DashboardPage";
+import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
+import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage"; // <--- IMPORT INI
 
-
-// Route guard — redirect ke login kalau belum login
 function ProtectedRoute({ children, allowedRole }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -22,29 +23,41 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public */}
       <Route path="/login" element={user ? <Navigate to={user.role === "mahasiswa" ? "/dashboard" : "/staff/dashboard"} replace /> : <LoginPage />} />
 
-      {/* Mahasiswa */}
+      {/* Rute Mahasiswa */}
       <Route path="/dashboard" element={
         <ProtectedRoute allowedRole="mahasiswa">
-          <div style={{ padding: "40px" }}>Dashboard Mahasiswa — coming soon</div>
+          <DashboardPage />
         </ProtectedRoute>
       } />
+      
       <Route path="/tiket/buat" element={
         <ProtectedRoute allowedRole="mahasiswa">
           <BuatTiketPage />
         </ProtectedRoute>
       } />
 
-      {/* Staff */}
+      {/* Tambahkan Route Tiket Saya di sini */}
+      <Route path="/tiket/saya" element={
+        <ProtectedRoute allowedRole="mahasiswa">
+          <TiketSayaPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/chatbot" element={
+        <ProtectedRoute allowedRole="mahasiswa">
+          <ChatbotPage />
+        </ProtectedRoute>
+      } />
+
+      {/* Rute Staff */}
       <Route path="/staff/dashboard" element={
         <ProtectedRoute allowedRole="staff">
           <div style={{ padding: "40px" }}>Dashboard Staff — coming soon</div>
         </ProtectedRoute>
       } />
 
-      {/* Default */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
