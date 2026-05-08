@@ -527,40 +527,41 @@ export default function LoginPage() {
     else if (password.length < 6) errs.password = "Minimal 6 karakter";
     return errs;
   };
-// TODO: Ganti dengan API call kamu
-    // const res = await fetch("/api/auth/login", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ identifier, password, role }),
-    // });
-    // const data = await res.json();
-    // if (data.token) {
-    //   localStorage.setItem("token", data.token);
-    //   navigate(role === "mahasiswa" ? "/dashboard" : "/staff/dashboard");
-    // }
-const navigate = useNavigate();
-const { login } = useAuth();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const errs = validate();
-  if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-  setErrors({});
-  setLoading(true);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  try {
-    const data = await login(identifier, password, role);
-    if (data.role === "mahasiswa") {
-      navigate("/dashboard");
-    } else {
-      navigate("/staff/dashboard");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
     }
-  } catch {
-    setErrors({ identifier: "Login gagal, periksa kembali data kamu" });
-  } finally {
-    setLoading(false);
-  }
-};
+    setErrors({});
+    setLoading(true);
+
+    try {
+      // Call backend API: POST /api/v1/auth/login
+      // Backend returns: { access_token, token_type }
+      // AuthContext handles token storage & redirect setup
+      const data = await login(identifier, password, role);
+
+      if (data.access_token) {
+        if (role === "mahasiswa") {
+          navigate("/dashboard");
+        } else {
+          navigate("/staff/dashboard");
+        }
+      }
+    } catch (error) {
+      setErrors({
+        identifier: error?.detail || "Login gagal, periksa kembali data kamu"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <style>{styles}</style>
@@ -647,7 +648,7 @@ const handleSubmit = async (e) => {
             </button>
 
             <div className="lr-footer-note">
-              Belum punya akun? <a href="#">Buat akun baru</a><br />
+              Belum punya akun? <a href="/register">Buat akun baru</a><br />
               Butuh bantuan? <a href="#">Hubungi administrator</a>
             </div>
           </div>

@@ -1,36 +1,8 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import AppNavbar from "../../components/layout/AppNavbar";
-import { useAuth } from "../../hooks/useAuth";
 
 const styles = `
-  :root {
-    --ipb-blue-dark:  #0a1f5c;
-    --ipb-blue:       #1a4fad;
-    --ipb-blue-mid:   #2563eb;
-    --ipb-sky:        #0ea5e9;
-    --white:          #ffffff;
-    --off-white:      #f9fafb;
-    --gray-50:        #f1f5f9;
-    --gray-200:       #e2e8f0;
-    --gray-300:       #cbd5e1;
-    --gray-400:       #94a3b8;
-    --gray-500:       #64748b;
-    --gray-700:       #334155;
-    --gray-900:       #0f172a;
-    --warning-bg:     #fffbeb;
-    --warning-text:   #92400e;
-    --warning-border: #fcd34d;
-  }
-
-  .ts-page {
-    min-height: 100vh;
-    background: var(--off-white);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    display: flex;
-    flex-direction: column;
-  }
-
+  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
   .ts-main {
     flex: 1;
     padding: 32px 40px;
@@ -44,6 +16,8 @@ const styles = `
     color: var(--gray-500);
     margin-bottom: 16px;
   }
+  .ts-breadcrumb a { color: var(--gray-500); text-decoration: none; transition: color 0.2s; }
+  .ts-breadcrumb a:hover { color: var(--gray-900); }
   .ts-breadcrumb span { margin: 0 8px; }
 
   .ts-header-row {
@@ -157,11 +131,10 @@ const styles = `
   }
 
   .table-scroll-area {
-    max-height: 500px; /* Batas tinggi tabel sebelum scroll */
+    max-height: 500px;
     overflow-y: auto;
   }
 
-  /* Custom scrollbar untuk tabel */
   .table-scroll-area::-webkit-scrollbar { width: 6px; }
   .table-scroll-area::-webkit-scrollbar-track { background: var(--gray-50); }
   .table-scroll-area::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
@@ -172,7 +145,6 @@ const styles = `
     text-align: left;
   }
   
-  /* Sticky Header supaya judul kolom tidak ikut ke-scroll */
   thead th {
     position: sticky;
     top: 0;
@@ -192,7 +164,7 @@ const styles = `
     cursor: pointer;
     transition: background 0.2s;
   }
-  tbody tr:hover { background: var(--off-white); }
+  tbody tr:hover { background: var(--gray-50); }
   tbody tr:last-child { border-bottom: none; }
 
   td {
@@ -204,7 +176,6 @@ const styles = `
 
   .td-id { font-weight: 700; color: var(--ipb-blue-mid); }
   .td-subjek p { font-weight: 600; margin-bottom: 4px; }
-  .td-subjek span { font-size: 12px; color: var(--gray-400); }
   .td-date { color: var(--gray-500); font-size: 13px; }
 
   /* Status Pills */
@@ -234,7 +205,7 @@ const styles = `
     inset: 0;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 100;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -295,7 +266,6 @@ const styles = `
   }
 `;
 
-// Data dummy yang diperbanyak agar tabel bisa di-scroll
 const MOCK_TICKETS = [
   { id: "#0028", subjek: "Kendala Login SSO", kategori: "Administrasi Umum", status: "Dibuka", waktu: "Baru saja", deskripsi: "Saya tidak bisa login menggunakan SSO IPB sejak pagi ini. Keterangannya selalu password salah padahal sudah direset." },
   { id: "#0027", subjek: "Pengajuan Cuti Akademik", kategori: "Akademik & Kurikulum", status: "Diproses", waktu: "2 jam lalu", deskripsi: "Saya ingin mengajukan cuti akademik untuk semester depan karena alasan kesehatan. Dokumen medis sudah saya lampirkan." },
@@ -309,10 +279,9 @@ const MOCK_TICKETS = [
 ];
 
 export default function TiketSayaPage() {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Semua");
-  const [selectedTicket, setSelectedTicket] = useState(null); // State untuk modal
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
   const getStatusClass = (status) => {
     switch (status.toLowerCase()) {
@@ -324,7 +293,6 @@ export default function TiketSayaPage() {
     }
   };
 
-  // Filter Data Tiket
   const filteredTickets = useMemo(() => {
     return MOCK_TICKETS.filter(ticket => {
       const matchSearch = ticket.subjek.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -337,140 +305,136 @@ export default function TiketSayaPage() {
   return (
     <>
       <style>{styles}</style>
-      <div className="ts-page">
-        <AppNavbar activePath="/tiket/saya" user={user || { name: "Mut" }} />
+      
+      {/* KONTEN UTAMA - Tanpa Navbar/Footer/Sidebar */}
+      <main className="ts-main">
+        <div className="ts-breadcrumb">
+          <Link to="/dashboard">Dashboard</Link> <span>›</span> Tiket Saya
+        </div>
 
-        <main className="ts-main">
-          <div className="ts-breadcrumb">
-            <Link to="/dashboard" style={{color: 'inherit', textDecoration: 'none'}}>Dashboard</Link> 
-            <span>›</span> Tiket Saya
+        <div className="ts-header-row">
+          <div className="ts-header-text">
+            <h1>Tiket Saya</h1>
+            <p>Kelola dan pantau semua tiket yang pernah kamu buat.</p>
+          </div>
+          <Link to="/tiket/buat" className="btn-primary">
+            + Buat Tiket
+          </Link>
+        </div>
+
+        <div className="ts-alert">
+          <span>⚠️</span>
+          <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
+        </div>
+
+        <div className="ts-controls">
+          <div className="search-wrap">
+            <span className="search-icon">🔍</span>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Cari ID atau subjek tiket..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div className="ts-header-row">
-            <div className="ts-header-text">
-              <h1>Tiket Saya</h1>
-              <p>Kelola dan pantau semua tiket yang pernah kamu buat.</p>
-            </div>
-            <Link to="/tiket/buat" className="btn-primary">
-              + Buat Tiket
-            </Link>
+          <div className="tabs">
+            {["Semua", "Dibuka", "Diproses", "Selesai", "Ditutup"].map(tab => (
+              <button 
+                key={tab}
+                className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === "Semua" ? `Semua (${MOCK_TICKETS.length})` : tab}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div className="ts-alert">
-            <span>⚠️</span>
-            <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
-          </div>
-
-          <div className="ts-controls">
-            <div className="search-wrap">
-              <span className="search-icon">🔍</span>
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Cari ID atau subjek tiket..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="tabs">
-              {["Semua", "Dibuka", "Diproses", "Selesai", "Ditutup"].map(tab => (
-                <button 
-                  key={tab}
-                  className={`tab-btn ${activeTab === tab ? "active" : ""}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab === "Semua" ? `Semua (${MOCK_TICKETS.length})` : tab}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Area Tabel dengan Scroll */}
-          <div className="table-container">
-            <div className="table-scroll-area">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Subjek</th>
-                    <th>Kategori</th>
-                    <th>Status</th>
-                    <th>Dibuat</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTickets.length > 0 ? (
-                    filteredTickets.map((ticket, idx) => (
-                      <tr key={idx} onClick={() => setSelectedTicket(ticket)}>
-                        <td className="td-id">{ticket.id}</td>
-                        <td className="td-subjek">
-                          <p>{ticket.subjek}</p>
-                        </td>
-                        <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
-                        <td>
-                          <span className={`status-pill ${getStatusClass(ticket.status)}`}>
-                            {ticket.status}
-                          </span>
-                        </td>
-                        <td className="td-date">{ticket.waktu}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "var(--gray-400)" }}>
-                        Tidak ada tiket yang ditemukan.
+        <div className="table-container">
+          <div className="table-scroll-area">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Subjek</th>
+                  <th>Kategori</th>
+                  <th>Status</th>
+                  <th>Dibuat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTickets.length > 0 ? (
+                  filteredTickets.map((ticket, idx) => (
+                    <tr key={idx} onClick={() => setSelectedTicket(ticket)}>
+                      <td className="td-id">{ticket.id}</td>
+                      <td className="td-subjek">
+                        <p>{ticket.subjek}</p>
                       </td>
+                      <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
+                      <td>
+                        <span className={`status-pill ${getStatusClass(ticket.status)}`}>
+                          {ticket.status}
+                        </span>
+                      </td>
+                      <td className="td-date">{ticket.waktu}</td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "var(--gray-400)" }}>
+                      Tidak ada tiket yang ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </main>
+        </div>
+      </main>
 
-        {/* MODAL DETAIL TIKET */}
-        {selectedTicket && (
-          <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <div className="modal-title-group">
-                  <h2>Detail Tiket {selectedTicket.id}</h2>
-                  <span className={`status-pill ${getStatusClass(selectedTicket.status)}`}>
-                    {selectedTicket.status}
-                  </span>
-                </div>
-                <button className="modal-close" onClick={() => setSelectedTicket(null)}>✕</button>
+      {/* MODAL DETAIL TIKET */}
+      {selectedTicket && (
+        <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <h2>Detail Tiket {selectedTicket.id}</h2>
+                <span className={`status-pill ${getStatusClass(selectedTicket.status)}`}>
+                  {selectedTicket.status}
+                </span>
               </div>
+              <button className="modal-close" onClick={() => setSelectedTicket(null)}>✕</button>
+            </div>
 
-              <div className="detail-group">
-                <div className="detail-label">Subjek</div>
-                <div className="detail-value" style={{ fontWeight: 600, fontSize: "16px" }}>
-                  {selectedTicket.subjek}
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div className="detail-group">
-                  <div className="detail-label">Kategori</div>
-                  <div className="detail-value">{selectedTicket.kategori}</div>
-                </div>
-                <div className="detail-group">
-                  <div className="detail-label">Waktu Dibuat</div>
-                  <div className="detail-value">{selectedTicket.waktu}</div>
-                </div>
-              </div>
-
-              <div className="detail-group">
-                <div className="detail-label">Deskripsi Masalah</div>
-                <div className="detail-desc-box">
-                  {selectedTicket.deskripsi}
-                </div>
+            <div className="detail-group">
+              <div className="detail-label">Subjek</div>
+              <div className="detail-value" style={{ fontWeight: 600, fontSize: "16px" }}>
+                {selectedTicket.subjek}
               </div>
             </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div className="detail-group">
+                <div className="detail-label">Kategori</div>
+                <div className="detail-value">{selectedTicket.kategori}</div>
+              </div>
+              <div className="detail-group">
+                <div className="detail-label">Waktu Dibuat</div>
+                <div className="detail-value">{selectedTicket.waktu}</div>
+              </div>
+            </div>
+
+            <div className="detail-group">
+              <div className="detail-label">Deskripsi Masalah</div>
+              <div className="detail-desc-box">
+                {selectedTicket.deskripsi}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }

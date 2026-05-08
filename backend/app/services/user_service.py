@@ -35,12 +35,17 @@ class UserService:
 
     # Registrasi & Database Integration
     def create_user(self, db: Session, user: UserCreate):
+        # Check if email already exists
+        existing_user = db.query(UserORM).filter(UserORM.email == user.email).first()
+        if existing_user:
+            raise ValueError(f"Email {user.email} sudah terdaftar")
+        
         hashed_password = self.get_password_hash(user.password)
         db_user = UserORM(
             email=user.email,
             nama=user.nama,
             password=hashed_password,
-            role="Mahasiswa"  # Default role
+            role="mahasiswa"  # Default role
         )
         db.add(db_user)
         db.commit()
@@ -67,10 +72,11 @@ class UserService:
         if db.query(UserORM).filter(UserORM.nim == data.nim).first():
             raise ValueError("NIM sudah terdaftar.")
 
+        hashed_password = self.get_password_hash(data.password)
         user = UserORM(
             nama=data.nama,
             email=data.email,
-            password=data.password,  # TODO: hash dengan bcrypt saat auth diimplementasi
+            password=hashed_password,
             role="mahasiswa",
             nim=data.nim,
         )
@@ -83,10 +89,11 @@ class UserService:
         if db.query(UserORM).filter(UserORM.email == data.email).first():
             raise ValueError("Email sudah terdaftar.")
 
+        hashed_password = self.get_password_hash(data.password)
         user = UserORM(
             nama=data.nama,
             email=data.email,
-            password=data.password,  # TODO: hash dengan bcrypt saat auth diimplementasi
+            password=hashed_password,
             role="staf",
             divisi_id=data.divisi_id,
         )

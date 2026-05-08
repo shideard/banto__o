@@ -20,20 +20,23 @@ const styles = `
   }
 
   .app-nav { position: sticky; top: 0; z-index: 100; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--white); border-bottom: 1.5px solid var(--gray-200); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
-  .app-nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 20px; }
+  
+  /* Diubah menjadi justify-content: space-between agar kiri dan kanan terpisah rapi */
+  .app-nav-inner { width: 100%; padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
 
-  .app-nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; margin-right: 8px; }
+  .nav-left-group { display: flex; align-items: center; gap: 16px; }
+
+  /* Tombol Hamburger Baru */
+  .btn-toggle-sidebar { background: transparent; border: none; font-size: 24px; color: var(--gray-500); cursor: pointer; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .btn-toggle-sidebar:hover { background: var(--gray-100); color: var(--gray-900); }
+
+  .app-nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
   .app-nav-brand-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 2px 8px rgba(37,99,235,0.22); flex-shrink: 0; }
   .app-nav-brand-text .brand-uni { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gray-500); display: block; line-height: 1; margin-bottom: 1px; }
   .app-nav-brand-text .brand-product { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--gray-900); line-height: 1; letter-spacing: -0.2px; }
 
-  .app-nav-links { display: flex; align-items: center; gap: 2px; list-style: none; margin: 0; padding: 0; flex: 1; }
-  .app-nav-link { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--gray-500); text-decoration: none; cursor: pointer; background: none; border: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s ease; white-space: nowrap; position: relative; }
-  .app-nav-link:hover { background: var(--gray-100); color: var(--gray-900); }
-  .app-nav-link.active { color: var(--ipb-blue-mid); background: rgba(37,99,235,0.07); }
-  .app-nav-link.active::after { content: ''; position: absolute; bottom: -18px; left: 12px; right: 12px; height: 2px; background: var(--ipb-blue-mid); border-radius: 2px 2px 0 0; }
-
-  .app-nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .app-nav-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  
   .app-btn-new-ticket { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.18s; box-shadow: 0 2px 8px rgba(37,99,235,0.25); white-space: nowrap; text-decoration: none; }
   .app-btn-new-ticket:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.38); }
 
@@ -43,9 +46,15 @@ const styles = `
 
   .notif-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 340px; background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.12); overflow: hidden; animation: dropIn 0.18s ease both; }
   .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--gray-200); }
-  .notif-header h4 { font-size: 13px; font-weight: 700; color: var(--gray-900); }
+  .notif-header h4 { font-size: 13px; font-weight: 700; color: var(--gray-900); margin: 0; }
   .notif-mark-all { font-size: 11px; font-weight: 600; color: var(--ipb-blue-mid); background: none; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
   .notif-list { max-height: 280px; overflow-y: auto; }
+  
+  /* Scrollbar custom untuk dropdown notif */
+  .notif-list::-webkit-scrollbar { width: 4px; }
+  .notif-list::-webkit-scrollbar-track { background: transparent; }
+  .notif-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+
   .notif-item { display: flex; gap: 10px; padding: 12px 16px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid var(--gray-200); }
   .notif-item:last-child { border-bottom: none; }
   .notif-item:hover { background: var(--gray-50); }
@@ -58,7 +67,7 @@ const styles = `
   .notif-footer { padding: 10px 16px; border-top: 1px solid var(--gray-200); text-align: center; }
   .notif-footer-btn { font-size: 12px; font-weight: 600; color: var(--ipb-blue-mid); background: none; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-  .app-user-btn { display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border: 1.5px solid var(--gray-200); border-radius: 100px; background: var(--white); cursor: pointer; transition: all 0.18s; }
+  .app-user-btn { display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border: 1.5px solid var(--gray-200); border-radius: 100px; background: var(--white); cursor: pointer; transition: all 0.18s; margin-left: 8px; }
   .app-user-btn:hover { background: var(--gray-50); border-color: var(--ipb-blue-lite); }
   .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0; }
   .user-name { font-size: 12.5px; font-weight: 600; color: var(--gray-700); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
@@ -81,26 +90,11 @@ const styles = `
   @keyframes dropIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
   @media (max-width: 900px) {
-    .app-nav-links { display: none; }
     .user-name { display: none; }
     .app-btn-new-ticket span:last-child { display: none; }
     .app-btn-new-ticket { padding: 7px 10px; }
   }
 `;
-
-const mahasiswaLinks = [
-  { icon: "🏠", label: "Dashboard",  to: "/dashboard" },
-  { icon: "🎫", label: "Tiket Saya", to: "/tiket" },
-  { icon: "➕", label: "Buat Tiket", to: "/tiket/buat" },
-  { icon: "🤖", label: "Chatbot",    to: "/chatbot" },
-];
-
-const staffLinks = [
-  { icon: "🏠", label: "Dashboard",   to: "/staff/dashboard" },
-  { icon: "📋", label: "Semua Tiket", to: "/staff/tiket" },
-  { icon: "✅", label: "Tiket Saya",  to: "/staff/tiket/saya" },
-  { icon: "📊", label: "Laporan",     to: "/staff/laporan" },
-];
 
 const sampleNotifs = [
   { id: 1, title: "Tiket #0023 Diperbarui", desc: "Staff admin telah mengubah status tiket kamu menjadi Diproses.", time: "5 menit lalu", unread: true },
@@ -108,7 +102,8 @@ const sampleNotifs = [
   { id: 3, title: "Tiket #0019 Selesai", desc: "Tiket kamu telah diselesaikan. Beri penilaian layanan.", time: "Kemarin", unread: false },
 ];
 
-export default function AppNavbar({ activePath = "/dashboard" }) {
+// TAMBAHKAN onToggleSidebar sebagai prop
+export default function AppNavbar({ onToggleSidebar }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -119,7 +114,6 @@ export default function AppNavbar({ activePath = "/dashboard" }) {
 
   const role = user?.role || "mahasiswa";
   const unreadCount = notifs.filter(n => n.unread).length;
-  const links = role === "staff" ? staffLinks : mahasiswaLinks;
   const initials = (user?.name || user?.nama || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
   useEffect(() => {
@@ -144,24 +138,24 @@ export default function AppNavbar({ activePath = "/dashboard" }) {
       <nav className="app-nav">
         <div className="app-nav-inner">
 
-          <Link className="app-nav-brand" to="/">
-            <div className="app-nav-brand-logo">🎓</div>
-            <div className="app-nav-brand-text">
-              <span className="brand-uni">IPB University</span>
-              <span className="brand-product">Help Center</span>
-            </div>
-          </Link>
+          {/* BAGIAN KIRI: Tombol Hamburger & Logo */}
+          <div className="nav-left-group">
+            <button className="btn-toggle-sidebar" onClick={onToggleSidebar}>
+              ☰
+            </button>
 
-          <ul className="app-nav-links">
-            {links.map(link => (
-              <li key={link.to}>
-                <Link className={`app-nav-link ${activePath === link.to ? "active" : ""}`} to={link.to}>
-                  <span>{link.icon}</span>{link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+            <Link className="app-nav-brand" to="/dashboard">
+              <div className="app-nav-brand-logo">🎓</div>
+              <div className="app-nav-brand-text">
+                <span className="brand-uni">IPB University</span>
+                <span className="brand-product">Help Center</span>
+              </div>
+            </Link>
+          </div>
 
+          {/* BAGIAN TENGAH (app-nav-links) DIHAPUS karena sudah ada Sidebar */}
+
+          {/* BAGIAN KANAN: Tombol Buat Tiket, Notifikasi & Profil */}
           <div className="app-nav-actions">
             {role === "mahasiswa" && (
               <Link className="app-btn-new-ticket" to="/tiket/buat">
@@ -228,6 +222,7 @@ export default function AppNavbar({ activePath = "/dashboard" }) {
               )}
             </div>
           </div>
+
         </div>
       </nav>
     </>

@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import AppNavbar from "../../components/layout/AppNavbar";
-import { useAuth } from "../../hooks/useAuth";
 
 const styles = `
   :root {
@@ -20,7 +18,7 @@ const styles = `
   }
 
   .cb-page {
-    height: 100vh;
+    height: calc(100vh - 70px); 
     display: flex;
     flex-direction: column;
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -32,10 +30,9 @@ const styles = `
     display: flex;
     flex: 1;
     overflow: hidden;
-    border-top: 1px solid var(--gray-200);
   }
 
-  /* --- SIDEBAR RIWAYAT --- */
+  /* --- SIDEBAR RIWAYAT CHAT --- */
   .cb-sidebar {
     width: 280px;
     background: var(--white);
@@ -90,7 +87,6 @@ const styles = `
     gap: 8px;
   }
 
-  /* Custom Scrollbar for sidebar */
   .cb-history-list::-webkit-scrollbar { width: 4px; }
   .cb-history-list::-webkit-scrollbar-track { background: transparent; }
   .cb-history-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
@@ -347,7 +343,6 @@ const DEFAULT_GREETING = {
   text: "Halo! Aku BantO__O 🤖 Asisten virtualmu untuk layanan IPB Help Center. Ada yang bisa aku bantu?",
 };
 
-// State awal: Daftar riwayat chat beserta isinya
 const INITIAL_SESSIONS = [
   {
     id: 1,
@@ -378,21 +373,17 @@ const INITIAL_SESSIONS = [
 ];
 
 export default function ChatbotPage() {
-  const { user } = useAuth();
-  
-  // State untuk menyimpan daftar semua percakapan
   const [chatSessions, setChatSessions] = useState(INITIAL_SESSIONS);
-  // State untuk melacak percakapan mana yang sedang dibuka
   const [activeSessionId, setActiveSessionId] = useState(INITIAL_SESSIONS[0].id);
   
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  const idCounterRef = useRef(10);
 
-  // Mengambil data percakapan yang sedang aktif
   const activeSession = chatSessions.find(session => session.id === activeSessionId);
-  const currentMessages = useMemo(() => activeSession?.messages || [], [activeSession]);
+  
+  // PERBAIKAN 2: Menggunakan useMemo agar reference array tidak berganti-ganti setiap render
+  const currentMessages = useMemo(() => activeSession?.messages || [], [activeSession?.messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -402,15 +393,14 @@ export default function ChatbotPage() {
     scrollToBottom();
   }, [currentMessages, isTyping]);
 
-  // Fungsi untuk Membuat Percakapan Baru
   const handleNewChat = () => {
-    // Jika chat teratas masih kosong/baru, jangan buat yang baru lagi
     if (chatSessions[0].title === "Percakapan Baru" && chatSessions[0].messages.length === 1) {
       setActiveSessionId(chatSessions[0].id);
       return;
     }
 
-    const newSessionId = idCounterRef.current++;
+    // PERBAIKAN 1: Generate ID murni menggunakan panjang array + 1 (Pengganti Date.now())
+    const newSessionId = chatSessions.length > 0 ? Math.max(...chatSessions.map(s => s.id)) + 1 : 1;
     const newSession = {
       id: newSessionId,
       title: "Percakapan Baru",
@@ -422,15 +412,15 @@ export default function ChatbotPage() {
     setActiveSessionId(newSessionId);
   };
 
-  // Fungsi Mengirim Pesan
   const handleSend = (text) => {
     if (!text.trim()) return;
     
-    const newUserMsg = { id: idCounterRef.current++, type: "user", text: text };
+    // PERBAIKAN 1: Generate ID pesan secara murni (Pengganti Date.now())
+    const newUserMsgId = currentMessages.length > 0 ? Math.max(...currentMessages.map(m => m.id)) + 1 : 1;
+    const newUserMsg = { id: newUserMsgId, type: "user", text: text };
     
     setChatSessions(prevSessions => prevSessions.map(session => {
       if (session.id === activeSessionId) {
-        // Otomatis ubah judul "Percakapan Baru" menjadi isi pesan pertama mahasiswa
         const newTitle = session.title === "Percakapan Baru" 
           ? text.length > 25 ? text.substring(0, 25) + "..." : text 
           : session.title;
@@ -448,11 +438,11 @@ export default function ChatbotPage() {
     setInputText("");
     setIsTyping(true);
 
-    // Simulasi bot membalas
     setTimeout(() => {
       setIsTyping(false);
       const botReply = {
-        id: idCounterRef.current++,
+        // PERBAIKAN 1: ID pesan bot adalah ID pesan user + 1
+        id: newUserMsgId + 1,
         type: "bot",
         text: "Terima kasih atas pertanyaannya! Saat ini saya sedang dalam mode demonstrasi. Silakan ajukan Tiket Layanan jika kamu butuh bantuan dari staf administrasi ya."
       };
@@ -466,17 +456,17 @@ export default function ChatbotPage() {
         }
         return session;
       }));
-    }, 1500); // delay 1.5 detik
+    }, 1500); 
   };
 
   return (
     <>
       <style>{styles}</style>
+      
+      {/* LANGSUNG KE KONTEN CHAT - Tanpa Navbar/Sidebar Utama */}
       <div className="cb-page">
-        <AppNavbar activePath="/chatbot" user={user || { name: "Mutia Saniya" }} />
-
         <div className="cb-layout">
-          {/* SIDEBAR */}
+          {/* SIDEBAR RIWAYAT CHAT */}
           <aside className="cb-sidebar">
             <div className="cb-sidebar-top">
               <button className="btn-new-chat" onClick={handleNewChat}>+ Percakapan Baru</button>
@@ -489,7 +479,7 @@ export default function ChatbotPage() {
                 <div 
                   key={item.id} 
                   className={`history-item ${item.id === activeSessionId ? "active" : ""}`}
-                  onClick={() => setActiveSessionId(item.id)} // Pindah-pindah chat
+                  onClick={() => setActiveSessionId(item.id)}
                 >
                   <h4>{item.title}</h4>
                   <p>{item.time}</p>
@@ -534,7 +524,6 @@ export default function ChatbotPage() {
                 </div>
               ))}
               
-              {/* Animasi Mengetik */}
               {isTyping && (
                 <div className="msg-row bot">
                   <div className="msg-avatar">🤖</div>
@@ -546,13 +535,12 @@ export default function ChatbotPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
             <div className="cb-footer">
               <div className="input-wrapper">
                 <input 
                   type="text" 
                   className="cb-input" 
-                  placeholder="Tulis pesanmu..." 
+                  placeholder="Tanya sesuatu..." 
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => {

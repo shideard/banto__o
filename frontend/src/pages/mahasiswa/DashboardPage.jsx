@@ -1,119 +1,15 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AppNavbar from "../../components/layout/AppNavbar"; // Asumsi kamu punya ini dari kode sebelumnya
 import { useAuth } from "../../hooks/useAuth";
+import { listTiket } from "../../services/ticketService";
 
 const styles = `
-  :root {
-    --ipb-blue-dark:  #0a1f5c;
-    --ipb-blue:       #1a4fad;
-    --ipb-blue-mid:   #2563eb;
-    --ipb-sky:        #0ea5e9;
-    --white:          #ffffff;
-    --off-white:      #f8fafc;
-    --gray-50:        #f1f5f9;
-    --gray-200:       #e2e8f0;
-    --gray-400:       #94a3b8;
-    --gray-500:       #64748b;
-    --gray-700:       #334155;
-    --gray-900:       #0f172a;
-    --success:        #10b981;
-    --warning-bg:     #fffbeb;
-    --warning-text:   #92400e;
-    --warning-border: #fcd34d;
-  }
-
-  .db-page { 
-    min-height: 100vh; 
-    background: var(--off-white); 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Layout Bawah Navbar */
-  .db-layout {
-    display: flex;
-    flex: 1;
-  }
-
-  /* --- SIDEBAR --- */
-  .db-sidebar {
-    width: 260px;
-    background: var(--white);
-    border-right: 1.5px solid var(--gray-200);
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-  }
-
-  .sidebar-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .sidebar-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gray-400);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding-left: 12px;
-    margin-bottom: 4px;
-  }
-
-  .sidebar-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--gray-700);
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.2s;
-  }
-
-  .sidebar-link:hover {
-    background: var(--gray-50);
-  }
-
-  .sidebar-link.active {
-    background: rgba(37,99,235,0.08);
-    color: var(--ipb-blue-mid);
-  }
-
-  .sidebar-link-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .sidebar-icon {
-    font-size: 18px;
-    color: var(--gray-500);
-  }
-
-  .sidebar-link.active .sidebar-icon {
-    color: var(--ipb-blue-mid);
-  }
-
-  .badge {
-    background: var(--ipb-blue-mid);
-    color: var(--white);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 100px;
-  }
-
-  /* --- MAIN CONTENT --- */
+  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA SAJA --- */
   .db-main {
-    flex: 1;
     padding: 32px 40px;
     max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .db-breadcrumb {
@@ -232,6 +128,7 @@ const styles = `
     font-weight: 600;
     color: var(--gray-700);
     cursor: pointer;
+    text-decoration: none;
     transition: all 0.2s;
   }
 
@@ -269,7 +166,7 @@ const styles = `
   }
 
   .td-id { font-weight: 700; color: var(--ipb-blue-mid); }
-  
+
   .td-subjek p { font-weight: 600; margin-bottom: 4px; }
   .td-subjek span { font-size: 12px; color: var(--gray-400); }
 
@@ -310,144 +207,143 @@ const styles = `
   }
 `;
 
-// Mock Data Tiket (Bisa diganti dari API nanti)
-const RECENT_TICKETS = [
-  { id: "#0023", subjek: "Permohonan perbaikan nilai semester 5", kategori: "Akademik & Kurikulum", status: "Diproses", waktu: "5 menit lalu" },
-  { id: "#0021", subjek: "Informasi beasiswa Peningkatan Prestasi Akademik", kategori: "Keuangan & Beasiswa", status: "Dibuka", waktu: "1 jam lalu" },
-  { id: "#0019", subjek: "Hujan Gerimis", kategori: "eaaaa", status: "Selesai", waktu: "Kemarin" },
-  { id: "#0017", subjek: "Kicaw", kategori: "eaa", status: "Ditutup", waktu: "3 hari lalu" },
-];
-
 export default function DashboardPage() {
   const { user } = useAuth();
-  
-  // Fungsi kecil untuk menentukan style pill status
+  const [tickets, setTickets] = useState([]);
+
   const getStatusClass = (status) => {
-    switch (status.toLowerCase()) {
-      case "diproses": return "pill-diproses";
-      case "dibuka": return "pill-dibuka";
-      case "selesai": return "pill-selesai";
-      case "ditutup": return "pill-ditutup";
-      default: return "pill-ditutup";
+    const s = String(status || "").toLowerCase();
+    switch (s) {
+      case "diproses":
+        return "pill-diproses";
+      case "dibuka":
+        return "pill-dibuka";
+      case "selesai":
+        return "pill-selesai";
+      case "ditutup":
+        return "pill-ditutup";
+      default:
+        return "pill-ditutup";
     }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const res = await listTiket();
+        const data = res?.data;
+        if (!mounted) return;
+        setTickets(Array.isArray(data) ? data : []);
+      } catch {
+        if (!mounted) return;
+        setTickets([]);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const stats = {
+    total: tickets.length,
+    diproses: tickets.filter((t) => String(t?.status).toLowerCase() === "diproses").length,
+    selesai: tickets.filter((t) => String(t?.status).toLowerCase() === "selesai").length,
   };
 
   return (
     <>
       <style>{styles}</style>
-      <div className="db-page">
-        {/* Asumsi AppNavbar sudah handle header bagian atas seperti di desain */}
-        <AppNavbar activePath="/dashboard" user={user || { name: "X" }} />
-
-        <div className="db-layout">
-          {/* SIDEBAR */}
-          <aside className="db-sidebar">
-            <div className="sidebar-section">
-              <div className="sidebar-title">Menu</div>
-              <Link to="/dashboard" className="sidebar-link active">
-                <div className="sidebar-link-left"><span className="sidebar-icon">🏠</span> Dashboard</div>
-              </Link>
-              <Link to="/tiket/saya" className="sidebar-link">
-                <div className="sidebar-link-left"><span className="sidebar-icon">🎫</span> Tiket Saya</div>
-                <span className="badge">1</span>
-              </Link>
-              <Link to="/tiket/buat" className="sidebar-link">
-                <div className="sidebar-link-left"><span className="sidebar-icon">➕</span> Buat Tiket</div>
-              </Link>
-              <Link to="/chatbot" className="sidebar-link">
-                <div className="sidebar-link-left"><span className="sidebar-icon">🤖</span> Chatbot</div>
-              </Link>
-            </div>
-
-            <div className="sidebar-section">
-              <div className="sidebar-title">Akun</div>
-              <Link to="/profil" className="sidebar-link">
-                <div className="sidebar-link-left"><span className="sidebar-icon">👤</span> Profil Saya</div>
-              </Link>
-              <Link to="/pengaturan" className="sidebar-link">
-                <div className="sidebar-link-left"><span className="sidebar-icon">⚙️</span> Pengaturan</div>
-              </Link>
-            </div>
-          </aside>
-
-          {/* MAIN CONTENT */}
-          <main className="db-main">
-            <div className="db-breadcrumb">
-              Beranda <span>›</span> Dashboard
-            </div>
-
-            <div className="db-header">
-              {/* Ambil nama user dari context, fallback ke "X" jika kosong */}
-              <h1>Halo, {user?.nama || "X"}!</h1>
-              <p>Selamat datang kembali. Berikut ringkasan tiket kamu.</p>
-            </div>
-
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-title">Total Tiket</div>
-                <div className="stat-value">10</div>
-                <div className="stat-desc success">↑ 3 bulan ini</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-title">Diproses</div>
-                <div className="stat-value">1</div>
-                <div className="stat-desc warning">Menunggu balasan</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-title">Selesai</div>
-                <div className="stat-value">5</div>
-                <div className="stat-desc" style={{ color: "var(--gray-400)" }}>—</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-title">Avg. Respons</div>
-                <div className="stat-value">6j</div>
-                <div className="stat-desc" style={{ color: "var(--gray-400)" }}>—</div>
-              </div>
-            </div>
-
-            <div className="db-alert">
-              <span>⚠️</span>
-              <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
-            </div>
-
-            <div className="table-card">
-              <div className="table-header">
-                <h2>Tiket Terbaru</h2>
-                <button className="btn-outline">Lihat Semua</button>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Subjek</th>
-                    <th>Kategori</th>
-                    <th>Status</th>
-                    <th>Dibuat</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RECENT_TICKETS.map((ticket, idx) => (
-                    <tr key={idx}>
-                      <td className="td-id">{ticket.id}</td>
-                      <td className="td-subjek">
-                        <p>{ticket.subjek}</p>
-                        <span>{ticket.kategori.split(' & ')[0]}</span>
-                      </td>
-                      <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
-                      <td>
-                        <span className={`status-pill ${getStatusClass(ticket.status)}`}>
-                          {ticket.status}
-                        </span>
-                      </td>
-                      <td className="td-date">{ticket.waktu}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </main>
+      
+      {/* KONTEN UTAMA - TANPA NAVBAR DAN SIDEBAR */}
+      <main className="db-main">
+        <div className="db-breadcrumb">
+          Beranda <span>›</span> Dashboard
         </div>
-      </div>
+
+        <div className="db-header">
+          <h1>Halo, {user?.nama || "Mut"}!</h1>
+          <p>Selamat datang kembali. Berikut ringkasan tiket kamu.</p>
+        </div>
+
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-title">Total Tiket</div>
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-desc success">—</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Diproses</div>
+            <div className="stat-value">{stats.diproses}</div>
+            <div className="stat-desc warning">Menunggu balasan</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Selesai</div>
+            <div className="stat-value">{stats.selesai}</div>
+            <div className="stat-desc" style={{ color: "var(--gray-400)" }}>—</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Avg. Respons</div>
+            <div className="stat-value">—</div>
+            <div className="stat-desc" style={{ color: "var(--gray-400)" }}>—</div>
+          </div>
+        </div>
+
+        <div className="db-alert">
+          <span>⚠️</span>
+          <span>
+            Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang
+            tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.
+          </span>
+        </div>
+
+        <div className="table-card">
+          <div className="table-header">
+            <h2>Tiket Terbaru</h2>
+            {/* Ubah button jadi Link agar berfungsi menuju Tiket Saya */}
+            <Link to="/tiket/saya" className="btn-outline">
+              Lihat Semua
+            </Link>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Subjek</th>
+                <th>Kategori</th>
+                <th>Status</th>
+                <th>Dibuat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tickets.length > 0 ? (
+                tickets.slice(0, 4).map((ticket, idx) => (
+                  <tr key={idx}>
+                    <td className="td-id">{ticket.id}</td>
+                    <td className="td-subjek">
+                      <p>{ticket.subjek}</p>
+                      <span>{String(ticket.kategori || "").split(" & ")[0]}</span>
+                    </td>
+                    <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
+                    <td>
+                      <span className={`status-pill ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
+                    </td>
+                    <td className="td-date">{ticket.waktu}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", padding: "32px", color: "var(--gray-400)" }}>
+                    Belum ada tiket yang dibuat.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </>
   );
 }

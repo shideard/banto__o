@@ -1,16 +1,56 @@
-// main.jsx
+// App.jsx
 import './index.css'
-import LoginPage from './pages/auth/LoginPage'
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
+import { useState } from "react";
+// Import Komponen Layout
+import AppNavbar from "./components/layout/AppNavbar";
+import Sidebar from "./components/layout/Sidebar";
+import Footer from "./components/layout/Footer";
 
-// Import semua komponen page
-import BuatTiketPage from "./pages/mahasiswa/BuatTiketPage";
+// Import Halaman
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardPage from "./pages/mahasiswa/DashboardPage";
+import BuatTiketPage from "./pages/mahasiswa/BuatTiketPage";
+import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage";
 import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
-import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage"; // <--- IMPORT INI
 
+// --- LAYOUT MAHASISWA ---
+function MahasiswaLayout() {
+  const { user } = useAuth();
+  // State untuk kontrol buka-tutup sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  
+  return (
+    <div className="app-root">
+      {/* Kirim fungsi toggle ke Navbar */}
+      <AppNavbar user={user} onToggleSidebar={toggleSidebar} />
+      
+      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
+        {/* Kirim status isOpen ke Sidebar */}
+        <Sidebar isOpen={isSidebarOpen} /> 
+        
+        <main style={{ 
+          flex: 1, 
+          background: "#f8fafc", 
+          overflowY: "auto",
+          transition: "margin-left 0.3s ease" // Animasi halus saat sidebar geser
+        }}>
+          <Outlet /> 
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+// --- PROTECTED ROUTE GUARD ---
 function ProtectedRoute({ children, allowedRole }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -23,33 +63,21 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to={user.role === "mahasiswa" ? "/dashboard" : "/staff/dashboard"} replace /> : <LoginPage />} />
+      {/* Rute Publik */}
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
 
-      {/* Rute Mahasiswa */}
-      <Route path="/dashboard" element={
+      {/* Rute Mahasiswa (Terbungkus Layout & Protection) */}
+      <Route element={
         <ProtectedRoute allowedRole="mahasiswa">
-          <DashboardPage />
+          <MahasiswaLayout />
         </ProtectedRoute>
-      } />
-      
-      <Route path="/tiket/buat" element={
-        <ProtectedRoute allowedRole="mahasiswa">
-          <BuatTiketPage />
-        </ProtectedRoute>
-      } />
-
-      {/* Tambahkan Route Tiket Saya di sini */}
-      <Route path="/tiket/saya" element={
-        <ProtectedRoute allowedRole="mahasiswa">
-          <TiketSayaPage />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/chatbot" element={
-        <ProtectedRoute allowedRole="mahasiswa">
-          <ChatbotPage />
-        </ProtectedRoute>
-      } />
+      }>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/tiket/buat" element={<BuatTiketPage />} />
+        <Route path="/tiket/saya" element={<TiketSayaPage />} />
+        <Route path="/chatbot" element={<ChatbotPage />} />
+      </Route>
 
       {/* Rute Staff */}
       <Route path="/staff/dashboard" element={
@@ -58,6 +86,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
+      {/* Default Redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
