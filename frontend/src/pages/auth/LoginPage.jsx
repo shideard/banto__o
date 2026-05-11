@@ -548,10 +548,10 @@ export default function LoginPage() {
       const data = await login(identifier, password, role);
 
       if (data.access_token) {
-        if (role === "mahasiswa") {
+        if (data.role === "mahasiswa") {
           navigate("/dashboard");
         } else {
-          navigate("/staff/dashboard");
+          navigate("/staf/dashboard");
         }
       }
     } catch (error) {
@@ -605,7 +605,7 @@ export default function LoginPage() {
 
             <div className="role-selector">
               <button type="button" className={`role-btn ${role === "mahasiswa" ? "active" : ""}`} onClick={() => setRole("mahasiswa")}>🎓 Mahasiswa</button>
-              <button type="button" className={`role-btn ${role === "staff" ? "active" : ""}`} onClick={() => setRole("staff")}>🏛️ Staff Admin</button>
+              <button type="button" className={`role-btn ${role === "staf" ? "active" : ""}`} onClick={() => setRole("staf")}>🏛️ Staff Admin</button>
             </div>
 
             <form onSubmit={handleSubmit} noValidate>

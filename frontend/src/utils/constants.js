@@ -2,7 +2,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:80
 
 export const ROLES = {
   MAHASISWA: "mahasiswa",
-  STAFF: "staff",
+  STAFF: "staf",
 };
 
 export const TICKET_STATUS = {

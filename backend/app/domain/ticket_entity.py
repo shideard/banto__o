@@ -90,6 +90,8 @@ class TiketDomain:
         self, new_status: StatusPengajuan, catatan: Optional[str]
     ) -> None:
         """Status REVISI wajib disertai catatan penjelasan."""
+        if self.status == StatusPengajuan.SELESAI:
+            raise ValueError("Status tiket sudah SELESAI dan tidak dapat diubah lagi.")
         if new_status == StatusPengajuan.REVISI and (not catatan or not catatan.strip()):
             raise ValueError(
                 "Status 'REVISI' wajib menyertakan catatan penjelasan untuk mahasiswa."

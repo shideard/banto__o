@@ -24,12 +24,15 @@ export function AuthProvider({ children }) {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
-      
-
+      const user = response?.data?.user || {};
+      const normalizedRole = user.role || role || "mahasiswa";
       const data = {
         access_token: response.data.access_token,
-        role,
-        identifier,
+        role: normalizedRole,
+        identifier: user.email || identifier,
+        id: user.id,
+        nama: user.nama,
+        email: user.email,
       };
 
       localStorage.setItem(TOKEN_KEY, data.access_token);
@@ -49,9 +52,8 @@ export function AuthProvider({ children }) {
       // Sesuaikan key (nama, username/email, password) dengan yang diminta backend FastAPI kamu
       await api.post("/auth/register", {
         nama: userData.nama,
-        username: userData.identifier, 
+        email: userData.identifier,
         password: userData.password,
-        // role: userData.role // Aktifkan ini jika backend kamu menyimpan role
       });
 
       // 2. AUTO-LOGIN: Jika register sukses, langsung panggil fungsi login di atas

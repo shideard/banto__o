@@ -79,10 +79,10 @@ function AppRoutes() {
         <Route path="/chatbot" element={<ChatbotPage />} />
       </Route>
 
-      {/* Rute Staff */}
-      <Route path="/staff/dashboard" element={
-        <ProtectedRoute allowedRole="staff">
-          <div style={{ padding: "40px" }}>Dashboard Staff — coming soon</div>
+      {/* Rute Staf */}
+      <Route path="/staf/dashboard" element={
+        <ProtectedRoute allowedRole="staf">
+          <div style={{ padding: "40px" }}>Dashboard Staf — coming soon</div>
         </ProtectedRoute>
       } />
 

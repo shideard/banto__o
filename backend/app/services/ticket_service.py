@@ -61,6 +61,25 @@ class TicketService:
     def get_all_tiket(self, db: Session) -> List[TiketORM]:
         return db.query(TiketORM).order_by(TiketORM.tanggal_dibuat.desc()).all()
 
+    def get_tiket_for_user(self, db: Session, tiket_id: int, user_id: int, role: str) -> TiketORM:
+        tiket = self.get_tiket(db, tiket_id)
+
+        if role == "mahasiswa" and tiket.mahasiswa_id != user_id:
+            raise ValueError("Anda tidak memiliki akses ke tiket ini.")
+        if role == "staf" and tiket.staf_id not in (None, user_id):
+            raise ValueError("Tiket ini sudah dikelola oleh staf lain.")
+        return tiket
+
+    def get_all_tiket_for_user(self, db: Session, user_id: int, role: str) -> List[TiketORM]:
+        query = db.query(TiketORM)
+        if role == "mahasiswa":
+            query = query.filter(TiketORM.mahasiswa_id == user_id)
+        elif role == "staf":
+            query = query.filter(
+                (TiketORM.staf_id == user_id) | (TiketORM.staf_id.is_(None))
+            )
+        return query.order_by(TiketORM.tanggal_dibuat.desc()).all()
+
     def klaim_tiket(self, db: Session, tiket_id: int, data: TiketAssignStaf) -> dict:
         tiket_orm = db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
         if not tiket_orm:
