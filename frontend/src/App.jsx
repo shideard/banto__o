@@ -1,15 +1,56 @@
-// main.jsx
+// App.jsx
 import './index.css'
-import PublicNavbar from './components/layout/PublicNavbar'
-import Footer from './components/layout/Footer'
-import LoginPage from './pages/auth/LoginPage'
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
+import { useState } from "react";
+// Import Komponen Layout
+import AppNavbar from "./components/layout/AppNavbar";
+import Sidebar from "./components/layout/Sidebar";
+import Footer from "./components/layout/Footer";
+
+// Import Halaman
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import DashboardPage from "./pages/mahasiswa/DashboardPage";
 import BuatTiketPage from "./pages/mahasiswa/BuatTiketPage";
+import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage";
+import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 
+// --- LAYOUT MAHASISWA ---
+function MahasiswaLayout() {
+  const { user } = useAuth();
+  // State untuk kontrol buka-tutup sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-// Route guard — redirect ke login kalau belum login
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  
+  return (
+    <div className="app-root">
+      {/* Kirim fungsi toggle ke Navbar */}
+      <AppNavbar user={user} onToggleSidebar={toggleSidebar} />
+      
+      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
+        {/* Kirim status isOpen ke Sidebar */}
+        <Sidebar isOpen={isSidebarOpen} /> 
+        
+        <main style={{ 
+          flex: 1, 
+          background: "#f8fafc", 
+          overflowY: "auto",
+          transition: "margin-left 0.3s ease" // Animasi halus saat sidebar geser
+        }}>
+          <Outlet /> 
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+// --- PROTECTED ROUTE GUARD ---
 function ProtectedRoute({ children, allowedRole }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -22,29 +63,30 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={user ? <Navigate to={user.role === "mahasiswa" ? "/dashboard" : "/staff/dashboard"} replace /> : <LoginPage />} />
+      {/* Rute Publik */}
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
 
-      {/* Mahasiswa */}
-      <Route path="/dashboard" element={
+      {/* Rute Mahasiswa (Terbungkus Layout & Protection) */}
+      <Route element={
         <ProtectedRoute allowedRole="mahasiswa">
-          <div style={{ padding: "40px" }}>Dashboard Mahasiswa — coming soon</div>
+          <MahasiswaLayout />
         </ProtectedRoute>
-      } />
-      <Route path="/tiket/buat" element={
-        <ProtectedRoute allowedRole="mahasiswa">
-          <BuatTiketPage />
-        </ProtectedRoute>
-      } />
+      }>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/tiket/buat" element={<BuatTiketPage />} />
+        <Route path="/tiket/saya" element={<TiketSayaPage />} />
+        <Route path="/chatbot" element={<ChatbotPage />} />
+      </Route>
 
-      {/* Staff */}
+      {/* Rute Staff */}
       <Route path="/staff/dashboard" element={
         <ProtectedRoute allowedRole="staff">
           <div style={{ padding: "40px" }}>Dashboard Staff — coming soon</div>
         </ProtectedRoute>
       } />
 
-      {/* Default */}
+      {/* Default Redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

@@ -1,7 +1,13 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict,  EmailStr
 from typing import Optional, List
 from datetime import datetime
 
+class UserBase(BaseModel):
+    email: EmailStr
+    nama: str
+
+class UserCreate(UserBase):
+    password: str
 
 class DivisiStafCreate(BaseModel):
     nama_divisi: str

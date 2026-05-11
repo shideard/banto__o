@@ -1,44 +1,37 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import AppNavbar from "../../components/layout/AppNavbar";
-import Footer from "../../components/layout/Footer";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const styles = `
-  :root {
-    --ipb-blue-dark:  #0a1f5c;
-    --ipb-blue:       #1a4fad;
-    --ipb-blue-mid:   #2563eb;
-    --ipb-blue-lite:  #3b82f6;
-    --ipb-sky:        #0ea5e9;
-    --white:          #ffffff;
-    --off-white:      #f7f9fc;
-    --gray-50:        #f8fafc;
-    --gray-100:       #f1f5f9;
-    --gray-200:       #e2e8f0;
-    --gray-400:       #94a3b8;
-    --gray-500:       #64748b;
-    --gray-700:       #334155;
-    --gray-900:       #0f172a;
-    --error:          #dc2626;
+  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
+  .bt-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
-  .bt-page { min-height: 100vh; background: var(--off-white); font-family: 'Plus Jakarta Sans', sans-serif; }
-
-  .bt-header { background: linear-gradient(135deg, var(--ipb-blue-dark) 0%, var(--ipb-blue) 60%, var(--ipb-blue-mid) 100%); padding: 36px 0 48px; position: relative; overflow: hidden; }
+  .bt-header { 
+    background: linear-gradient(135deg, var(--ipb-blue-dark) 0%, var(--ipb-blue) 60%, var(--ipb-blue-mid) 100%); 
+    padding: 36px 0 48px; 
+    position: relative; 
+    overflow: hidden; 
+  }
   .bt-header::before { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.06); top: -150px; right: -100px; pointer-events: none; }
   .bt-header::after { content: ''; position: absolute; width: 250px; height: 250px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.06); bottom: -100px; left: 10%; pointer-events: none; }
-  .bt-header-inner { max-width: 1200px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+  
+  .bt-header-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 1; }
   .bt-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 14px; }
   .bt-breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.15s; }
   .bt-breadcrumb a:hover { color: rgba(255,255,255,0.9); }
   .bt-breadcrumb span { color: rgba(255,255,255,0.9); font-weight: 600; }
+  
   .bt-header h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; margin-bottom: 6px; }
   .bt-header p { font-size: 14px; color: rgba(255,255,255,0.65); }
 
-  .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 28px; position: relative; z-index: 2; }
+  .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 40px; position: relative; z-index: 2; }
   .bt-alert-inner { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #92400e; line-height: 1.6; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
 
-  .bt-content { max-width: 1200px; margin: 24px auto 48px; padding: 0 28px; display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+  .bt-content { max-width: 1200px; margin: 24px auto 48px; padding: 0 40px; display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
 
   .bt-form-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
   .bt-form-card-header { padding: 20px 24px; border-bottom: 1.5px solid var(--gray-200); display: flex; align-items: center; gap: 10px; }
@@ -81,7 +74,8 @@ const styles = `
   .bt-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.38); }
   .bt-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
-  .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 80px; display: flex; flex-direction: column; height: 560px; }
+  /* Chatbot UI di Halaman Buat Tiket */
+  .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
   .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
   .chatbot-header-name { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 3px; }
@@ -153,7 +147,7 @@ const TOPIK_GUIDE = {
 const INITIAL_MESSAGES = [
   {
     id: 1, type: "bot",
-    text: "Halo! Aku BantO__O 🤖 Asisten virtualmu untuk layanan IPB Help Center. Ada yang bisa aku bantu sebelum kamu buat tiket?",
+    text: "Halo! Aku BantO__O 🤖 Asisten virtualmu. Ada yang bisa aku bantu sebelum kamu buat tiket?",
     time: "Sekarang",
     quickReplies: ["Cara mengisi tiket", "Topik apa yang tersedia?", "Berapa lama proses tiket?"],
   },
@@ -228,30 +222,24 @@ export default function BuatTiketPage() {
     setErrors({});
     setSubmitting(true);
 
-    // TODO: Ganti dengan API call
-    // const formData = new FormData();
-    // formData.append("subject", subjek);
-    // formData.append("description", deskripsi);
-    // formData.append("category", topik);
-    // files.forEach(f => formData.append("files", f));
-    // await api.post("/tickets", formData);
-
+    // Mock API Call
     setTimeout(() => {
       setSubmitting(false);
-      alert("Tiket berhasil dibuat! (Mock)");
+      alert("Tiket berhasil dibuat!");
+      // window.location.href = "/tiket/saya"; // Bisa di-uncomment jika ingin redirect setelah buat tiket
     }, 1500);
   };
 
   return (
     <>
       <style>{styles}</style>
-      <div className="bt-page">
-        <AppNavbar activePath="/tiket/buat" user={user || { name: "Mutia Saniya", nim: "G6401231002" }} />
-
+      
+      {/* KONTEN UTAMA - TANPA NAVBAR DAN SIDEBAR */}
+      <main className="bt-main">
         <div className="bt-header">
           <div className="bt-header-inner">
             <div className="bt-breadcrumb">
-              <a href="/dashboard">Dashboard</a>
+              <Link to="/dashboard">Dashboard</Link>
               <span>›</span>
               <span>Buka Tiket Baru</span>
             </div>
@@ -281,7 +269,7 @@ export default function BuatTiketPage() {
                 </div>
                 <div className="bt-user-info-item">
                   <div className="bt-user-info-label">Klien</div>
-                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"} — {user?.nama || "Mutia Saniya"}</div>
+                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"} — {user?.nama || "Mut"}</div>
                 </div>
               </div>
 
@@ -346,7 +334,7 @@ export default function BuatTiketPage() {
             </div>
           </div>
 
-          {/* Chatbot */}
+          {/* Chatbot Bantuan di Samping Kanan */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
               <div className="chatbot-avatar">🤖</div>
@@ -394,9 +382,7 @@ export default function BuatTiketPage() {
             </div>
           </div>
         </div>
-
-        <Footer />
-      </div>
+      </main>
     </>
   );
 }

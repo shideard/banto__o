@@ -1,11 +1,56 @@
+import os
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 from app.persistence.user_orm import UserORM, DivisiStafORM, NotifikasiORM
-from app.schemas.user_schema import MahasiswaCreate, StafCreate, DivisiStafCreate
+from app.schemas.user_schema import MahasiswaCreate, StafCreate, DivisiStafCreate, UserCreate
 
+
+# Konfigurasi Keamanan
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserService:
+
+    # Logika Hashing
+    def verify_password(self, plain_password, hashed_password):
+        return pwd_context.verify(plain_password, hashed_password)
+
+    def get_password_hash(self, password):
+        safe_password = password[:72]
+        return pwd_context.hash(safe_password)
+
+    # Pembuatan Token JWT
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
+        to_encode = data.copy()
+        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+        to_encode.update({"exp": expire})
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    # Registrasi & Database Integration
+    def create_user(self, db: Session, user: UserCreate):
+        # Check if email already exists
+        existing_user = db.query(UserORM).filter(UserORM.email == user.email).first()
+        if existing_user:
+            raise ValueError(f"Email {user.email} sudah terdaftar")
+        
+        hashed_password = self.get_password_hash(user.password)
+        db_user = UserORM(
+            email=user.email,
+            nama=user.nama,
+            password=hashed_password,
+            role="mahasiswa"  # Default role
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
 
     # ── Divisi ────────────────────────────────────────────────────────────────
 
@@ -27,10 +72,11 @@ class UserService:
         if db.query(UserORM).filter(UserORM.nim == data.nim).first():
             raise ValueError("NIM sudah terdaftar.")
 
+        hashed_password = self.get_password_hash(data.password)
         user = UserORM(
             nama=data.nama,
             email=data.email,
-            password=data.password,  # TODO: hash dengan bcrypt saat auth diimplementasi
+            password=hashed_password,
             role="mahasiswa",
             nim=data.nim,
         )
@@ -43,10 +89,11 @@ class UserService:
         if db.query(UserORM).filter(UserORM.email == data.email).first():
             raise ValueError("Email sudah terdaftar.")
 
+        hashed_password = self.get_password_hash(data.password)
         user = UserORM(
             nama=data.nama,
             email=data.email,
-            password=data.password,  # TODO: hash dengan bcrypt saat auth diimplementasi
+            password=hashed_password,
             role="staf",
             divisi_id=data.divisi_id,
         )

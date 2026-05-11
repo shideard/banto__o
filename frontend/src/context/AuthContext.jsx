@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TOKEN_KEY, USER_KEY } from "../utils/constants";
 import { AuthContext } from "./AuthContextValue";
+import api from "../services/api";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -13,18 +14,55 @@ export function AuthProvider({ children }) {
   });
 
   const login = async (identifier, password, role) => {
-    // MOCK — nanti ganti dengan API call sungguhan
-    const data = {
-      access_token: "mock-token-123",
-      role,
-      nama: role === "mahasiswa" ? "Mutia Saniya" : "Staff Admin",
-      identifier,
-    };
-    localStorage.setItem(TOKEN_KEY, data.access_token);
-    localStorage.setItem(USER_KEY, JSON.stringify(data));
-    setToken(data.access_token);
-    setUser(data);
-    return data;
+    try {
+      const formData = new URLSearchParams();
+      formData.append("username", identifier);
+      formData.append("password", password);
+
+      const response = await api.post("/auth/login", formData, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+      
+
+      const data = {
+        access_token: response.data.access_token,
+        role,
+        identifier,
+      };
+
+      localStorage.setItem(TOKEN_KEY, data.access_token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data));
+      setToken(data.access_token);
+      setUser(data);
+      return data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  };
+
+  // --- FUNGSI REGISTER BARU ---
+  const register = async (userData) => {
+    try {
+      // 1. Kirim data registrasi ke API backend
+      // Sesuaikan key (nama, username/email, password) dengan yang diminta backend FastAPI kamu
+      await api.post("/auth/register", {
+        nama: userData.nama,
+        username: userData.identifier, 
+        password: userData.password,
+        // role: userData.role // Aktifkan ini jika backend kamu menyimpan role
+      });
+
+      // 2. AUTO-LOGIN: Jika register sukses, langsung panggil fungsi login di atas
+      // Agar state `user` dan `token` langsung terisi
+      const loginData = await login(userData.identifier, userData.password, userData.role || "mahasiswa");
+      
+      // 3. Kembalikan data login agar if (data) di RegisterPage terpenuhi
+      return loginData;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   };
 
   const logout = () => {
@@ -35,7 +73,8 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    // --- JANGAN LUPA TAMBAHKAN `register` DI PROVIDER VALUE ---
+    <AuthContext.Provider value={{ user, token, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
