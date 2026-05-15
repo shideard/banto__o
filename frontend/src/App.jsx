@@ -20,11 +20,11 @@ import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage";
 import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 
 // Halaman Staf
-import StafDashboardPage from "./pages/staf/StafDashboardPage";
+import StafDashboardPage from "./pages/Staf/StafDashboardPage";
 
 
 // Halaman Admin
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
 
 // ── Helper redirect berdasarkan role ─────────────────────────────────────────
 function getDashboard(role) {
