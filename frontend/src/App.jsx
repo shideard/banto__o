@@ -20,7 +20,7 @@ import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage";
 import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 
 // Halaman Staf
-import StafDashboardPage from "./pages/staf/StafDashboardPage";
+import StafDashboardPage from "./pages/Staf/StafDashboardPage";
 
 
 // Halaman Admin
