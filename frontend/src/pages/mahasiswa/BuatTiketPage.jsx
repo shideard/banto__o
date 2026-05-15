@@ -141,8 +141,9 @@ const TOPIK_GUIDE = {
   kemahasiswaan: "💡 Untuk topik Kemahasiswaan, sertakan: nama organisasi/kegiatan dan nomor surat jika ada.",
   administrasi: "💡 Untuk topik Administrasi, sertakan: jenis dokumen yang dibutuhkan dan keperluan penggunaannya.",
   penelitian: "💡 Untuk topik Penelitian, sertakan: judul penelitian, nama dosen pembimbing, dan status pengajuan.",
-  lainnya: "💡 Deskripsikan kebutuhanmu sedetail mungkin agar staff dapat membantu dengan tepat.",
+  lainnya: "💡 Deskripsikan kebutuhanmu sedetail mungkin agar staf dapat membantu dengan tepat.",
 };
+
 
 const INITIAL_MESSAGES = [
   {
@@ -154,11 +155,12 @@ const INITIAL_MESSAGES = [
 ];
 
 const BOT_RESPONSES = {
-  "cara mengisi tiket": "Untuk mengisi tiket: 1️⃣ Pilih topik bantuan yang sesuai, 2️⃣ Isi deskripsi masalah secara detail, 3️⃣ Lampirkan dokumen pendukung jika ada, 4️⃣ Klik Buat Tiket. Staff kami akan segera memproses!",
+  "cara mengisi tiket": "Untuk mengisi tiket: 1️⃣ Pilih topik bantuan yang sesuai, 2️⃣ Isi deskripsi masalah secara detail, 3️⃣ Lampirkan dokumen pendukung jika ada, 4️⃣ Klik Buat Tiket. Staf kami akan segera memproses!",
   "topik apa yang tersedia?": "Tersedia 6 topik: 📚 Akademik & Kurikulum, 💰 Keuangan & Beasiswa, 🎓 Kemahasiswaan, 📋 Administrasi Umum, 🔬 Penelitian & PKM, dan ❓ Lainnya.",
   "berapa lama proses tiket?": "Tiket biasanya diproses dalam 1-3 hari kerja. Kamu bisa memantau status tiket di menu Tiket Saya. Kami akan notifikasi kamu setiap ada update! 📬",
-  default: "Terima kasih sudah bertanya! Untuk pertanyaan lebih lanjut, silakan buat tiket dan staff kami akan membantu kamu secara langsung. 😊",
+  default: "Terima kasih sudah bertanya! Untuk pertanyaan lebih lanjut, silakan buat tiket dan staf kami akan membantu kamu secara langsung. 😊",
 };
+
 
 function getNow() {
   return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });

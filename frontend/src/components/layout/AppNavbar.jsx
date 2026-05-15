@@ -97,10 +97,29 @@ const styles = `
 `;
 
 const sampleNotifs = [
-  { id: 1, title: "Tiket #0023 Diperbarui", desc: "Staff admin telah mengubah status tiket kamu menjadi Diproses.", time: "5 menit lalu", unread: true },
-  { id: 2, title: "Komentar Baru", desc: "Ada balasan baru pada tiket #0021 dari Staff Akademik.", time: "1 jam lalu", unread: true },
-  { id: 3, title: "Tiket #0019 Selesai", desc: "Tiket kamu telah diselesaikan. Beri penilaian layanan.", time: "Kemarin", unread: false },
+  {
+    id: 1,
+    title: "Tiket #0023 Diperbarui",
+    desc: "Staff admin telah mengubah status tiket kamu menjadi Diproses.",
+    time: "5 menit lalu",
+    unread: true,
+  },
+  {
+    id: 2,
+    title: "Komentar Baru",
+    desc: "Ada balasan baru pada tiket #0021 dari Staf Akademik.",
+    time: "1 jam lalu",
+    unread: true,
+  },
+  {
+    id: 3,
+    title: "Tiket #0019 Selesai",
+    desc: "Tiket kamu telah diselesaikan. Beri penilaian layanan.",
+    time: "Kemarin",
+    unread: false,
+  },
 ];
+
 
 // TAMBAHKAN onToggleSidebar sebagai prop
 export default function AppNavbar({ onToggleSidebar }) {

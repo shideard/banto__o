@@ -1,654 +1,411 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
-// Add to your index.html <head>:
-// <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --ipb-blue-dark:  #0a1f5c;
-    --ipb-blue:       #1a4fad;
-    --ipb-blue-mid:   #2563eb;
-    --ipb-blue-lite:  #3b82f6;
-    --ipb-sky:        #0ea5e9;
-    --white:          #ffffff;
-    --off-white:      #f7f9fc;
-    --gray-50:        #f0f4f8;
-    --gray-200:       #e2e8f0;
-    --gray-400:       #94a3b8;
-    --gray-500:       #64748b;
-    --gray-700:       #334155;
-    --gray-900:       #0f172a;
-    --error:          #dc2626;
+    --blue-950: #0a1f5c;
+    --blue-800: #1a4fad;
+    --blue-600: #2563eb;
+    --blue-400: #3b82f6;
+    --blue-300: #60a5fa;
+    --white:    #ffffff;
+    --gray-50:  #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-900: #0f172a;
+    --error:    #dc2626;
+    --font:     'Poppins', sans-serif;
   }
 
-  .lr-root {
-    min-height: 100vh;
-    display: flex;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--off-white);
-  }
+  .pg { min-height: 100vh; display: flex; font-family: var(--font); }
 
-  /* ─── LEFT PANEL ─── */
-  .lr-left {
-    width: 52%;
+  /* ── LEFT ── */
+  .pg-left {
+    width: 48%;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 48px 56px;
-    background: linear-gradient(145deg, #0a1f5c 0%, #1a4fad 50%, #2563eb 100%);
+    padding: 44px 52px;
+    background: linear-gradient(150deg, var(--blue-950) 0%, var(--blue-800) 55%, var(--blue-600) 100%);
   }
 
-  .lr-left::before {
+  /* noise texture */
+  .pg-left::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  /* sky accent blob */
-  .lr-left::after {
-    content: '';
-    position: absolute;
-    width: 400px; height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(14,165,233,0.2), transparent 70%);
-    bottom: -100px; right: -100px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
     pointer-events: none;
   }
 
-  .deco-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.07);
-    pointer-events: none;
-  }
-  .deco-ring-1 { width: 560px; height: 560px; top: -180px; right: -180px; }
-  .deco-ring-2 { width: 340px; height: 340px; bottom: -100px; left: -100px; }
-  .deco-ring-3 { width: 200px; height: 200px; bottom: 80px; left: 40px; }
-  .deco-ring-4 { width: 120px; height: 120px; top: 30%; right: 60px; border-color: rgba(255,255,255,0.12); }
-
-  .deco-dot {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    pointer-events: none;
-  }
-  .deco-dot-1 { width: 10px; height: 10px; top: 22%; right: 18%; }
-  .deco-dot-2 { width: 6px;  height: 6px;  top: 55%; right: 30%; background: rgba(255,255,255,0.2); }
-  .deco-dot-3 { width: 14px; height: 14px; bottom: 28%; left: 42%; }
-
-  .lr-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    z-index: 1;
-    animation: fadeSlideDown 0.6s ease both;
+  /* decorative circles */
+  .deco { position: absolute; border-radius: 50%; pointer-events: none; }
+  .deco-c1 { width: 520px; height: 520px; top: -200px; right: -160px; border: 1px solid rgba(255,255,255,0.06); }
+  .deco-c2 { width: 300px; height: 300px; bottom: -80px; left: -80px;  border: 1px solid rgba(255,255,255,0.06); }
+  .deco-c3 { width: 160px; height: 160px; bottom: 100px; left: 60px;   border: 1px solid rgba(255,255,255,0.09); }
+  .deco-blob {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+    bottom: -80px; right: -80px;
   }
 
-  .lr-brand-logo {
-    width: 52px; height: 52px;
-    background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    border-radius: 14px;
+  .brand {
+    display: flex; align-items: center; gap: 14px;
+    position: relative; z-index: 1;
+    animation: fadeDown 0.5s ease both;
+  }
+  .brand-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.22);
     display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-    backdrop-filter: blur(8px);
+    font-size: 22px; backdrop-filter: blur(8px);
+  }
+  .brand-text { color: var(--white); }
+  .brand-text .univ {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    opacity: 0.65; display: block; margin-bottom: 1px;
+  }
+  .brand-text .prod {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
   }
 
-  .lr-brand-text { color: var(--white); }
-  .lr-brand-text .university {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0.7;
-    display: block;
-    margin-bottom: 2px;
+  .hero { position: relative; z-index: 1; animation: fadeUp 0.6s 0.08s ease both; }
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: 11.5px; font-weight: 500;
+    color: rgba(255,255,255,0.8); margin-bottom: 22px;
   }
-  .lr-brand-text .product {
-    font-family: 'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    line-height: 1;
+  .hero h1 {
+    font-size: clamp(30px, 3.2vw, 44px);
+    font-weight: 800; color: var(--white);
+    line-height: 1.12; letter-spacing: -1.2px;
+    margin-bottom: 18px;
   }
-
-  .lr-hero {
-    position: relative;
-    z-index: 1;
-    animation: fadeSlideUp 0.7s 0.1s ease both;
+  .hero h1 em { font-style: italic; font-weight: 300; opacity: 0.7; }
+  .hero p {
+    color: rgba(255,255,255,0.55);
+    font-size: 14px; line-height: 1.75; max-width: 320px;
+    margin-bottom: 38px;
   }
 
-  .lr-hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 100px;
-    padding: 5px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
-    letter-spacing: 0.3px;
-    margin-bottom: 24px;
+  .stats { display: flex; gap: 28px; }
+  .stat { animation: fadeUp 0.5s ease both; }
+  .stat:nth-child(1) { animation-delay: 0.28s; }
+  .stat:nth-child(2) { animation-delay: 0.36s; }
+  .stat:nth-child(3) { animation-delay: 0.44s; }
+  .stat-num {
+    font-size: 26px; font-weight: 800; color: var(--white);
+    letter-spacing: -1px; line-height: 1; margin-bottom: 3px;
+  }
+  .stat-lbl {
+    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; letter-spacing: 1px;
   }
 
-  .lr-hero h1 {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(32px, 3.5vw, 48px);
-    font-weight: 900;
-    color: var(--white);
-    line-height: 1.1;
-    letter-spacing: -1px;
-    margin-bottom: 20px;
+  /* ── RIGHT ── */
+  .pg-right {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 40px; background: var(--white);
+    animation: fadeIn 0.4s ease both;
+  }
+  .form-box { width: 100%; max-width: 388px; }
+
+  .form-head { margin-bottom: 28px; }
+  .form-head h2 {
+    font-size: 26px; font-weight: 800;
+    color: var(--gray-900); letter-spacing: -0.6px;
+    margin-bottom: 5px;
+  }
+  .form-head p { font-size: 13.5px; color: var(--gray-500); line-height: 1.55; }
+
+  /* role tabs */
+  .role-tabs {
+    display: flex; background: var(--gray-100);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px; padding: 4px;
+    margin-bottom: 24px; gap: 4px;
+  }
+  .role-tab {
+    flex: 1; padding: 9px 10px;
+    border: none; border-radius: 9px;
+    background: transparent;
+    font-family: var(--font); font-size: 13px; font-weight: 600;
+    color: var(--gray-500); cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .role-tab.on {
+    background: var(--white); color: var(--blue-600);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07), 0 0 0 1px rgba(37,99,235,0.15);
   }
 
-  .lr-hero h1 em {
-    font-style: italic;
-    color: rgba(255,255,255,0.65);
-  }
-
-  .lr-hero p {
-    color: rgba(255,255,255,0.6);
-    font-size: 15px;
-    line-height: 1.7;
-    max-width: 340px;
-    margin-bottom: 40px;
-  }
-
-  .lr-stats { display: flex; gap: 32px; }
-
-  .lr-stat { animation: fadeSlideUp 0.6s ease both; }
-  .lr-stat:nth-child(1) { animation-delay: 0.35s; }
-  .lr-stat:nth-child(2) { animation-delay: 0.45s; }
-  .lr-stat:nth-child(3) { animation-delay: 0.55s; }
-
-  .lr-stat-num {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--white);
-    letter-spacing: -1px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .lr-stat-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-
-  /* ─── RIGHT PANEL ─── */
-  .lr-right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 40px;
-    position: relative;
-    background: var(--white);
-    animation: fadeIn 0.5s ease both;
-  }
-
-  .lr-right-inner { width: 100%; max-width: 400px; }
-
-  .lr-form-header { margin-bottom: 32px; }
-
-  .lr-form-header h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--gray-900);
-    letter-spacing: -0.8px;
+  /* fields */
+  .field { margin-bottom: 15px; }
+  .field-lbl {
+    display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 6px;
   }
-
-  .lr-form-header p {
-    font-size: 14px;
-    color: var(--gray-500);
-    line-height: 1.6;
-  }
-
-  /* Role selector */
-  .role-selector {
-    display: flex;
-    background: var(--gray-50);
-    border: 1.5px solid var(--gray-200);
-    border-radius: 14px;
-    padding: 5px;
-    margin-bottom: 28px;
-    gap: 4px;
-  }
-
-  .role-btn {
-    flex: 1;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--gray-500);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .role-btn.active {
-    background: var(--white);
-    color: var(--ipb-blue-mid);
-    box-shadow: 0 1px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(37,99,235,0.2);
-  }
-
-  /* Fields */
-  .field { margin-bottom: 18px; }
-
-  .field-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 7px;
-  }
-
-  .field-label span {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--gray-700);
-  }
-
-  .field-input-wrap { position: relative; }
-
-  .field-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-400);
-    font-size: 15px;
-    pointer-events: none;
-    line-height: 1;
-  }
-
-  .field-input {
-    width: 100%;
-    height: 48px;
-    padding: 0 14px 0 42px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: 12px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    color: var(--gray-900);
-    background: var(--white);
-    outline: none;
-    transition: all 0.2s ease;
-  }
-
-  .field-input::placeholder { color: var(--gray-400); }
-
-  .field-input:focus {
-    border-color: var(--ipb-blue-lite);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-  }
-
-  .field-input.has-error {
-    border-color: var(--error);
-    box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
-  }
-
-  .toggle-pass {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--gray-400);
-    font-size: 15px;
-    padding: 0;
-    line-height: 1;
+  .field-lbl span { font-size: 12.5px; font-weight: 600; color: var(--gray-600); }
+  .forgot {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 600;
+    color: var(--blue-600); padding: 0;
     transition: color 0.15s;
   }
-  .toggle-pass:hover { color: var(--gray-700); }
+  .forgot:hover { color: var(--blue-400); }
 
-  .field-error {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--error);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400); font-size: 15px; pointer-events: none;
   }
-
-  .forgot-btn {
-    background: none;
-    border: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ipb-blue-mid);
-    cursor: pointer;
-    padding: 0;
+  .fi {
+    width: 100%; height: 46px;
+    padding: 0 13px 0 40px;
+    border: 1.5px solid var(--gray-200); border-radius: 10px;
+    font-family: var(--font); font-size: 13.5px; color: var(--gray-900);
+    background: var(--white); outline: none;
+    transition: all 0.18s ease;
+  }
+  .fi::placeholder { color: var(--gray-400); }
+  .fi:focus { border-color: var(--blue-400); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .fi.err { border-color: var(--error); box-shadow: 0 0 0 3px rgba(220,38,38,0.07); }
+  .eye {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--gray-400); font-size: 15px; padding: 0;
     transition: color 0.15s;
   }
-  .forgot-btn:hover { color: var(--ipb-blue-lite); }
+  .eye:hover { color: var(--gray-600); }
+  .ferr { margin-top: 4px; font-size: 11.5px; color: var(--error); }
 
-  /* Submit */
-  .submit-btn {
-    width: 100%;
-    height: 50px;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--white);
-    cursor: pointer;
-    background: linear-gradient(135deg, var(--ipb-blue) 0%, var(--ipb-blue-mid) 60%, var(--ipb-sky) 100%);
-    box-shadow: 0 4px 20px rgba(37,99,235,0.3);
-    transition: all 0.22s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 8px;
-    position: relative;
-    overflow: hidden;
+  /* submit */
+  .btn-submit {
+    width: 100%; height: 48px; margin-top: 6px;
+    border: none; border-radius: 10px;
+    font-family: var(--font); font-size: 14px; font-weight: 700;
+    color: var(--white); cursor: pointer;
+    background: linear-gradient(130deg, var(--blue-800) 0%, var(--blue-600) 60%, #0ea5e9 100%);
+    box-shadow: 0 4px 18px rgba(37,99,235,0.28);
+    transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    position: relative; overflow: hidden;
   }
-
-  .submit-btn::before {
+  .btn-submit::after {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.09), transparent);
     transform: translateX(-100%);
     transition: transform 0.5s ease;
   }
-
-  .submit-btn:hover:not(:disabled)::before { transform: translateX(100%); }
-  .submit-btn:hover:not(:disabled) {
+  .btn-submit:hover:not(:disabled)::after { transform: translateX(100%); }
+  .btn-submit:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(37,99,235,0.4);
+    box-shadow: 0 8px 24px rgba(37,99,235,0.38);
   }
-  .submit-btn:active:not(:disabled) { transform: translateY(0); }
-  .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  .spinner {
-    width: 16px; height: 16px;
+  .spin {
+    width: 15px; height: 15px;
     border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.65s linear infinite;
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.6s linear infinite;
   }
 
-  .or-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 22px 0 18px;
-    font-size: 12px;
-    color: var(--gray-400);
-    font-weight: 500;
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 20px 0 16px; font-size: 11.5px; color: var(--gray-400);
   }
-  .or-divider::before, .or-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--gray-200);
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--gray-200);
   }
 
-  .sso-btn {
-    width: 100%;
-    height: 46px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: 12px;
-    background: var(--white);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-700);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s ease;
+  .footer-note {
+    margin-top: 24px; font-size: 12.5px;
+    color: var(--gray-500); text-align: center; line-height: 1.9;
   }
-  .sso-btn:hover {
-    border-color: var(--ipb-blue-mid);
-    color: var(--ipb-blue-mid);
-    background: rgba(37,99,235,0.03);
+  .footer-note a {
+    color: var(--blue-600); font-weight: 700; text-decoration: none;
   }
+  .footer-note a:hover { text-decoration: underline; }
 
-  .sso-logo {
-    width: 22px; height: 22px;
-    background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky));
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
-    color: white;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-
-  .lr-footer-note {
-    margin-top: 28px;
-    font-size: 12px;
-    color: var(--gray-400);
-    text-align: center;
-    line-height: 1.8;
-  }
-
-  .lr-footer-note a {
-    color: var(--ipb-blue-mid);
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .lr-footer-note a:hover { text-decoration: underline; }
-
-  .lr-top-actions {
-    position: absolute;
-    top: 28px;
-    right: 32px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .top-action-btn {
-    background: var(--gray-50);
-    border: 1.5px solid var(--gray-200);
-    border-radius: 8px;
-    padding: 6px 13px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gray-500);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.15s;
-  }
-  .top-action-btn:hover { border-color: var(--gray-400); color: var(--gray-700); }
-
-  @keyframes fadeSlideDown {
-    from { opacity: 0; transform: translateY(-16px); }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
 
-  @media (max-width: 860px) {
-    .lr-left { display: none; }
-    .lr-right { padding: 32px 24px; }
+  @media (max-width: 820px) {
+    .pg-left { display: none; }
+    .pg-right { padding: 32px 20px; }
   }
 `;
 
 export default function LoginPage() {
-  const [role, setRole] = useState("mahasiswa");
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const navigate   = useNavigate();
+  const { login }  = useAuth();
+
+  const [role,       setRole]       = useState("mahasiswa");
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [showPass,   setShowPass]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [errors,     setErrors]     = useState({});
 
   const validate = () => {
-    const errs = {};
-    if (!identifier.trim()) errs.identifier = "Username / Email wajib diisi";
-    if (!password) errs.password = "Kata sandi wajib diisi";
-    else if (password.length < 6) errs.password = "Minimal 6 karakter";
-    return errs;
+    const e = {};
+    if (!email.trim())    e.email    = "E-mail wajib diisi";
+    if (!password)        e.password = "Kata sandi wajib diisi";
+    else if (password.length < 6) e.password = "Minimal 6 karakter";
+    return e;
   };
 
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
-    }
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
     setLoading(true);
-
     try {
-      // Call backend API: POST /api/v1/auth/login
-      // Backend returns: { access_token, token_type }
-      // AuthContext handles token storage & redirect setup
-      const data = await login(identifier, password, role);
-
-      if (data.access_token) {
-        if (data.role === "mahasiswa") {
-          navigate("/dashboard");
-        } else {
-          navigate("/staf/dashboard");
-        }
-      }
-    } catch (error) {
-      setErrors({
-        identifier: error?.detail || "Login gagal, periksa kembali data kamu"
-      });
+      const data = await login(email, password);
+      if (data.role === "mahasiswa") navigate("/dashboard");
+      else if (data.role === "staf") navigate("/staff/dashboard");
+      else if (data.role === "admin") navigate("/admin/dashboard");
+      else navigate("/login");
+    } catch (err) {
+      setErrors({ email: err?.detail || "Login gagal, periksa kembali data kamu" });
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <>
       <style>{styles}</style>
-      <div className="lr-root">
-        <div className="lr-left">
-          <div className="deco-ring deco-ring-1" /><div className="deco-ring deco-ring-2" />
-          <div className="deco-ring deco-ring-3" /><div className="deco-ring deco-ring-4" />
-          <div className="deco-dot deco-dot-1" /><div className="deco-dot deco-dot-2" /><div className="deco-dot deco-dot-3" />
+      <div className="pg">
 
-          <div className="lr-brand">
-            <div className="lr-brand-logo">🎓</div>
-            <div className="lr-brand-text">
-              <span className="university">IPB University</span>
-              <span className="product">Help Center</span>
+        {/* ── LEFT ── */}
+        <div className="pg-left">
+          <div className="deco deco-c1" />
+          <div className="deco deco-c2" />
+          <div className="deco deco-c3" />
+          <div className="deco deco-blob" />
+
+          <div className="brand">
+            <div className="brand-icon">🎓</div>
+            <div className="brand-text">
+              <span className="univ">IPB University</span>
+              <span className="prod">Help Center</span>
             </div>
           </div>
 
-          <div className="lr-hero">
-            <div className="lr-hero-tag">✦ Layanan Akademik Terpadu</div>
+          <div className="hero">
+            <div className="hero-pill">⊙ Layanan Akademik Terpadu</div>
             <h1>Satu tempat<br />untuk semua<br /><em>bantuan</em> akademik.</h1>
             <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB — kapan saja, di mana saja.</p>
-            <div className="lr-stats">
-              <div className="lr-stat"><div className="lr-stat-num">98%</div><div className="lr-stat-label">Resolved</div></div>
-              <div className="lr-stat"><div className="lr-stat-num">&lt;24j</div><div className="lr-stat-label">Respons</div></div>
-              <div className="lr-stat"><div className="lr-stat-num">12+</div><div className="lr-stat-label">Layanan</div></div>
+            <div className="stats">
+              <div className="stat"><div className="stat-num">98%</div><div className="stat-lbl">Resolved</div></div>
+              <div className="stat"><div className="stat-num">&lt;24j</div><div className="stat-lbl">Respons</div></div>
+              <div className="stat"><div className="stat-num">12+</div><div className="stat-lbl">Layanan</div></div>
             </div>
           </div>
         </div>
 
-        <div className="lr-right">
-          <div className="lr-top-actions">
-            <button className="top-action-btn" type="button">🇮🇩 ID</button>
-            <button className="top-action-btn" type="button">👤 Pengguna Tamu</button>
-          </div>
-
-          <div className="lr-right-inner">
-            <div className="lr-form-header">
+        {/* ── RIGHT ── */}
+        <div className="pg-right">
+          <div className="form-box">
+            <div className="form-head">
               <h2>Masuk ke akun IPB</h2>
-              <p>Gunakan username atau e-mail IPB kamu untuk melanjutkan.</p>
+              <p>Gunakan e-mail IPB kamu untuk melanjutkan.</p>
             </div>
 
-            <div className="role-selector">
-              <button type="button" className={`role-btn ${role === "mahasiswa" ? "active" : ""}`} onClick={() => setRole("mahasiswa")}>🎓 Mahasiswa</button>
-              <button type="button" className={`role-btn ${role === "staf" ? "active" : ""}`} onClick={() => setRole("staf")}>🏛️ Staff Admin</button>
+            {/* Role selector — hanya UI, role asli dari backend */}
+            <div className="role-tabs">
+              <button type="button"
+                className={`role-tab ${role === "mahasiswa" ? "on" : ""}`}
+                onClick={() => setRole("mahasiswa")}>
+                🎓 Mahasiswa
+              </button>
+              <button type="button"
+                className={`role-tab ${role === "staf" ? "on" : ""}`}
+                onClick={() => setRole("staf")}>
+                🏛 Staf Admin
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
+              {/* E-mail */}
               <div className="field">
-                <div className="field-label"><span>IPB Username / E-mail</span></div>
-                <div className="field-input-wrap">
-                  <span className="field-icon">✉</span>
-                  <input type="text" className={`field-input ${errors.identifier ? "has-error" : ""}`}
-                    placeholder={role === "mahasiswa" ? "nim atau email@apps.ipb.ac.id" : "username atau email@ipb.ac.id"}
-                    value={identifier} onChange={(e) => { setIdentifier(e.target.value); setErrors(p => ({...p, identifier: ""})); }} autoComplete="username" />
+                <div className="field-lbl"><span>E-mail</span></div>
+                <div className="input-wrap">
+                  <span className="input-icon">✉</span>
+                  <input
+                    type="email"
+                    className={`fi ${errors.email ? "err" : ""}`}
+                    placeholder={role === "mahasiswa" ? "email@apps.ipb.ac.id" : "email@ipb.ac.id"}
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setErrors(p => ({...p, email: ""})); }}
+                    autoComplete="email"
+                  />
                 </div>
-                {errors.identifier && <div className="field-error">⚠ {errors.identifier}</div>}
+                {errors.email && <div className="ferr">⚠ {errors.email}</div>}
               </div>
 
+              {/* Kata Sandi */}
               <div className="field">
-                <div className="field-label">
+                <div className="field-lbl">
                   <span>Kata Sandi</span>
-                  <button type="button" className="forgot-btn">Lupa kata sandi?</button>
+                  <button type="button" className="forgot">Lupa kata sandi?</button>
                 </div>
-                <div className="field-input-wrap">
-                  <span className="field-icon">🔑</span>
-                  <input type={showPass ? "text" : "password"} className={`field-input ${errors.password ? "has-error" : ""}`}
-                    placeholder="Masukkan kata sandi" value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors(p => ({...p, password: ""})); }}
-                    autoComplete="current-password" style={{ paddingRight: "44px" }} />
-                  <button type="button" className="toggle-pass" onClick={() => setShowPass(!showPass)}>{showPass ? "🙈" : "👁️"}</button>
+                <div className="input-wrap">
+                  <span className="input-icon">🔑</span>
+                  <input
+                    type={showPass ? "text" : "password"}
+                    className={`fi ${errors.password ? "err" : ""}`}
+                    placeholder="Masukkan kata sandi"
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setErrors(p => ({...p, password: ""})); }}
+                    autoComplete="current-password"
+                    style={{ paddingRight: 42 }}
+                  />
+                  <button type="button" className="eye" onClick={() => setShowPass(!showPass)}>
+                    {showPass ? "🙈" : "👁️"}
+                  </button>
                 </div>
-                {errors.password && <div className="field-error">⚠ {errors.password}</div>}
+                {errors.password && <div className="ferr">⚠ {errors.password}</div>}
               </div>
 
-              <button className="submit-btn" type="submit" disabled={loading}>
-                {loading ? <><div className="spinner" /> Memverifikasi...</> : <>Masuk →</>}
+              <button className="btn-submit" type="submit" disabled={loading}>
+                {loading ? <><div className="spin" /> Memverifikasi...</> : "Masuk →"}
               </button>
             </form>
 
-            <div className="or-divider">atau lanjutkan dengan</div>
-            <button className="sso-btn" type="button">
-              <div className="sso-logo">IP</div>
-              Masuk dengan SSO IPB University
-            </button>
+            <div className="divider">atau</div>
 
-            <div className="lr-footer-note">
-              Belum punya akun? <a href="/register">Buat akun baru</a><br />
+            <div className="footer-note">
+              Belum punya akun? <Link to="/register">Buat akun baru</Link><br />
               Butuh bantuan? <a href="#">Hubungi administrator</a>
             </div>
           </div>

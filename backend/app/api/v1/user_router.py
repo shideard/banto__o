@@ -38,21 +38,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = user_service.create_access_token(
-        data={
-            "sub": user.email,
-            "user_id": user.id,
-            "role": user.role,
-            "nama": user.nama,
-        }
-    )
+    access_token = user_service.create_access_token(data={"sub": user.email})
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "nama": user.nama,
-            "email": user.email,
-            "role": user.role,
-        },
+        "role": user.role,        # ← tambah ini
+        "nama": user.nama,        # ← opsional tapi berguna di FE
     }

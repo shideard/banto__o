@@ -444,7 +444,7 @@ export default function ChatbotPage() {
         // PERBAIKAN 1: ID pesan bot adalah ID pesan user + 1
         id: newUserMsgId + 1,
         type: "bot",
-        text: "Terima kasih atas pertanyaannya! Saat ini saya sedang dalam mode demonstrasi. Silakan ajukan Tiket Layanan jika kamu butuh bantuan dari staf administrasi ya."
+        text: "Baik, saya bantu arahkan ke staf administrasi. Silakan jelaskan kebutuhan Anda sedikit lebih detail ya."
       };
 
       setChatSessions(prevSessions => prevSessions.map(session => {

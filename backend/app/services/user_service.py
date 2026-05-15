@@ -42,17 +42,20 @@ class UserService:
 
     # Registrasi & Database Integration
     def create_user(self, db: Session, user: UserCreate):
-        # Check if email already exists
         existing_user = db.query(UserORM).filter(UserORM.email == user.email).first()
         if existing_user:
             raise ValueError(f"Email {user.email} sudah terdaftar")
-        
+
+        # Validasi role
+        if user.role not in ("mahasiswa", "staf", "admin"):
+            raise ValueError("Role tidak valid")
+
         hashed_password = self.get_password_hash(user.password)
         db_user = UserORM(
             email=user.email,
             nama=user.nama,
             password=hashed_password,
-            role="mahasiswa"  # Default role
+            role=user.role,  # ← dari request, bukan hardcode
         )
         db.add(db_user)
         db.commit()
