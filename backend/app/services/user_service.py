@@ -29,9 +29,16 @@ class UserService:
     # Pembuatan Token JWT
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
-        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    def decode_access_token(self, token: str) -> dict:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        except JWTError as exc:
+            raise ValueError("Token tidak valid atau sudah kedaluwarsa.") from exc
+        return payload
 
     # Registrasi & Database Integration
     def create_user(self, db: Session, user: UserCreate):
