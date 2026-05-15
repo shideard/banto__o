@@ -8,6 +8,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: str = "mahasiswa"  # Default mahasiswa
 
 class DivisiStafCreate(BaseModel):
     nama_divisi: str

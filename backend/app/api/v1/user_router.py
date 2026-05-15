@@ -39,4 +39,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         )
 
     access_token = user_service.create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user.role,        # ← tambah ini
+        "nama": user.nama,        # ← opsional tapi berguna di FE
+    }

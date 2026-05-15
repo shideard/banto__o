@@ -294,7 +294,7 @@ export default function DashboardPage() {
         <div className="db-alert">
           <span>⚠️</span>
           <span>
-            Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang
+staf.
             tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.
           </span>
         </div>
