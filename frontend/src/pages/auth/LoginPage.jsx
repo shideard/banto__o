@@ -324,12 +324,7 @@ export default function LoginPage() {
           <div className="hero">
             <div className="hero-pill">⊙ Layanan Akademik Terpadu</div>
             <h1>Satu tempat<br />untuk semua<br /><em>bantuan</em> akademik.</h1>
-            <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB — kapan saja, di mana saja.</p>
-            <div className="stats">
-              <div className="stat"><div className="stat-num">98%</div><div className="stat-lbl">Resolved</div></div>
-              <div className="stat"><div className="stat-num">&lt;24j</div><div className="stat-lbl">Respons</div></div>
-              <div className="stat"><div className="stat-num">12+</div><div className="stat-lbl">Layanan</div></div>
-            </div>
+            <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB - kapan saja, di mana saja.</p>
           </div>
         </div>
 

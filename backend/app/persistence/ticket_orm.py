@@ -72,3 +72,26 @@ class KomentarORM(Base):
 
     tiket   = relationship("TiketORM", back_populates="komentar")
     penulis = relationship("UserORM",  back_populates="komentar")
+
+class ChatSessionORM(Base):
+    __tablename__ = "chat_sessions"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title      = Column(String(255), default="Percakapan Baru")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    messages = relationship("ChatMessageORM", back_populates="session", cascade="all, delete-orphan")
+
+
+class ChatMessageORM(Base):
+    __tablename__ = "chat_messages"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=False)
+    type       = Column(String(10), nullable=False)   # "user" atau "bot"
+    text       = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship("ChatSessionORM", back_populates="messages")
