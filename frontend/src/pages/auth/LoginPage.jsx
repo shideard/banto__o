@@ -364,7 +364,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     className={`fi ${errors.email ? "err" : ""}`}
-                    placeholder={role === "mahasiswa" ? "email@apps.ipb.ac.id" : "email@ipb.ac.id"}
+                    placeholder={role === "mahasiswa" ? "username@apps.ipb.ac.id" : "username@ipb.ac.id"}
                     value={email}
                     onChange={e => { setEmail(e.target.value); setErrors(p => ({...p, email: ""})); }}
                     autoComplete="email"
@@ -406,7 +406,6 @@ export default function LoginPage() {
 
             <div className="footer-note">
               Belum punya akun? <Link to="/register">Buat akun baru</Link><br />
-              Butuh bantuan? <a href="#">Hubungi administrator</a>
             </div>
           </div>
         </div>

@@ -22,9 +22,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired / tidak valid → hapus dan redirect ke login
-      localStorage.removeItem(TOKEN_KEY);
-      window.location.href = "/login";
+      if (!window.location.pathname.includes("/login")) {
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

@@ -20,7 +20,7 @@ class UserService:
 
     # Logika Hashing
     def verify_password(self, plain_password, hashed_password):
-        return pwd_context.verify(plain_password, hashed_password)
+        return pwd_context.verify(plain_password[:72], hashed_password)
 
     def get_password_hash(self, password):
         safe_password = password[:72]

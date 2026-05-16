@@ -229,6 +229,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let mounted = true;
+    const token = localStorage.getItem("banto_token"); // ← cek token dulu
+    if (!token) return; // ← kalau tidak ada token, skip fetch
 
     (async () => {
       try {
@@ -242,9 +244,7 @@ export default function DashboardPage() {
       }
     })();
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   const stats = {

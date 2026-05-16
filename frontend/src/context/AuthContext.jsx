@@ -24,11 +24,10 @@ export function AuthProvider({ children }) {
 
       const data = {
         access_token: response.data.access_token,
-        role: response.data.role,  // dari backend
+        role: response.data.role,
         nama: response.data.nama,
-        identifier,
+        email: response.data.email,  // ← dari backend, bukan dari input user
       };
-
       localStorage.setItem(TOKEN_KEY, data.access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(data));
       setToken(data.access_token);

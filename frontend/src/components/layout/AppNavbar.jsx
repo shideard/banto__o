@@ -133,7 +133,7 @@ export default function AppNavbar({ onToggleSidebar }) {
 
   const role = user?.role || "mahasiswa";
   const unreadCount = notifs.filter(n => n.unread).length;
-  const initials = (user?.name || user?.nama || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = (user?.nama || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const handler = (e) => {
@@ -225,7 +225,7 @@ export default function AppNavbar({ onToggleSidebar }) {
                     <div className="user-dropdown-name">{user?.name || user?.nama}</div>
                     <div className="user-dropdown-role">
                       <span className="role-badge">{role}</span>
-                      {user?.nim || user?.identifier}
+                      {user?.email}
                     </div>
                   </div>
                   <div className="user-dropdown-menu">

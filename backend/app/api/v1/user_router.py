@@ -38,10 +38,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Ticket router butuh payload.user_id
     access_token = user_service.create_access_token(data={"sub": user.email})
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "role": user.role,        # ← tambah ini
-        "nama": user.nama,        # ← opsional tapi berguna di FE
+        "role": user.role,
+        "nama": user.nama,
+        "email": user.email,  
     }
+
