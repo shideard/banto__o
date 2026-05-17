@@ -29,10 +29,10 @@ typedef struct _greenlet {
 #define PyGreenlet_Check(op) (op && PyObject_TypeCheck(op, &PyGreenlet_Type))
 
 
-/* C API functions */
+/* C ApiClient functions */
 
 /* Total number of symbols that are exported */
-#define PyGreenlet_API_pointers 12
+#define PyGreenlet_ApiClient_pointers 12
 
 #define PyGreenlet_Type_NUM 0
 #define PyExc_GreenletError_NUM 1
@@ -50,17 +50,17 @@ typedef struct _greenlet {
 #define PyGreenlet_GET_PARENT_NUM 11
 
 #ifndef GREENLET_MODULE
-/* This section is used by modules that uses the greenlet C API */
-static void** _PyGreenlet_API = NULL;
+/* This section is used by modules that uses the greenlet C ApiClient */
+static void** _PyGreenlet_ApiClient = NULL;
 
 #    define PyGreenlet_Type \
-        (*(PyTypeObject*)_PyGreenlet_API[PyGreenlet_Type_NUM])
+        (*(PyTypeObject*)_PyGreenlet_ApiClient[PyGreenlet_Type_NUM])
 
 #    define PyExc_GreenletError \
-        ((PyObject*)_PyGreenlet_API[PyExc_GreenletError_NUM])
+        ((PyObject*)_PyGreenlet_ApiClient[PyExc_GreenletError_NUM])
 
 #    define PyExc_GreenletExit \
-        ((PyObject*)_PyGreenlet_API[PyExc_GreenletExit_NUM])
+        ((PyObject*)_PyGreenlet_ApiClient[PyExc_GreenletExit_NUM])
 
 /*
  * PyGreenlet_New(PyObject *args)
@@ -69,7 +69,7 @@ static void** _PyGreenlet_API = NULL;
  */
 #    define PyGreenlet_New                                        \
         (*(PyGreenlet * (*)(PyObject * run, PyGreenlet * parent)) \
-             _PyGreenlet_API[PyGreenlet_New_NUM])
+             _PyGreenlet_ApiClient[PyGreenlet_New_NUM])
 
 /*
  * PyGreenlet_GetCurrent(void)
@@ -77,7 +77,7 @@ static void** _PyGreenlet_API = NULL;
  * greenlet.getcurrent()
  */
 #    define PyGreenlet_GetCurrent \
-        (*(PyGreenlet * (*)(void)) _PyGreenlet_API[PyGreenlet_GetCurrent_NUM])
+        (*(PyGreenlet * (*)(void)) _PyGreenlet_ApiClient[PyGreenlet_GetCurrent_NUM])
 
 /*
  * PyGreenlet_Throw(
@@ -93,7 +93,7 @@ static void** _PyGreenlet_API = NULL;
                           PyObject * typ,    \
                           PyObject * val,    \
                           PyObject * tb))    \
-             _PyGreenlet_API[PyGreenlet_Throw_NUM])
+             _PyGreenlet_ApiClient[PyGreenlet_Throw_NUM])
 
 /*
  * PyGreenlet_Switch(PyGreenlet *greenlet, PyObject *args)
@@ -103,7 +103,7 @@ static void** _PyGreenlet_API = NULL;
 #    define PyGreenlet_Switch                                              \
         (*(PyObject *                                                      \
            (*)(PyGreenlet * greenlet, PyObject * args, PyObject * kwargs)) \
-             _PyGreenlet_API[PyGreenlet_Switch_NUM])
+             _PyGreenlet_ApiClient[PyGreenlet_Switch_NUM])
 
 /*
  * PyGreenlet_SetParent(PyObject *greenlet, PyObject *new_parent)
@@ -112,7 +112,7 @@ static void** _PyGreenlet_API = NULL;
  */
 #    define PyGreenlet_SetParent                                 \
         (*(int (*)(PyGreenlet * greenlet, PyGreenlet * nparent)) \
-             _PyGreenlet_API[PyGreenlet_SetParent_NUM])
+             _PyGreenlet_ApiClient[PyGreenlet_SetParent_NUM])
 
 /*
  * PyGreenlet_GetParent(PyObject* greenlet)
@@ -125,7 +125,7 @@ static void** _PyGreenlet_API = NULL;
  */
 #     define PyGreenlet_GetParent                                    \
     (*(PyGreenlet* (*)(PyGreenlet*))                                 \
-     _PyGreenlet_API[PyGreenlet_GET_PARENT_NUM])
+     _PyGreenlet_ApiClient[PyGreenlet_GET_PARENT_NUM])
 
 /*
  * deprecated, undocumented alias.
@@ -134,26 +134,26 @@ static void** _PyGreenlet_API = NULL;
 
 #     define PyGreenlet_MAIN                                         \
     (*(int (*)(PyGreenlet*))                                         \
-     _PyGreenlet_API[PyGreenlet_MAIN_NUM])
+     _PyGreenlet_ApiClient[PyGreenlet_MAIN_NUM])
 
 #     define PyGreenlet_STARTED                                      \
     (*(int (*)(PyGreenlet*))                                         \
-     _PyGreenlet_API[PyGreenlet_STARTED_NUM])
+     _PyGreenlet_ApiClient[PyGreenlet_STARTED_NUM])
 
 #     define PyGreenlet_ACTIVE                                       \
     (*(int (*)(PyGreenlet*))                                         \
-     _PyGreenlet_API[PyGreenlet_ACTIVE_NUM])
+     _PyGreenlet_ApiClient[PyGreenlet_ACTIVE_NUM])
 
 
 
 
-/* Macro that imports greenlet and initializes C API */
-/* NOTE: This has actually moved to ``greenlet._greenlet._C_API``, but we
+/* Macro that imports greenlet and initializes C ApiClient */
+/* NOTE: This has actually moved to ``greenlet._greenlet._C_ApiClient``, but we
    keep the older definition to be sure older code that might have a copy of
    the header still works. */
 #    define PyGreenlet_Import()                                               \
         {                                                                     \
-            _PyGreenlet_API = (void**)PyCapsule_Import("greenlet._C_API", 0); \
+            _PyGreenlet_ApiClient = (void**)PyCapsule_Import("greenlet._C_ApiClient", 0); \
         }
 
 #endif /* GREENLET_MODULE */

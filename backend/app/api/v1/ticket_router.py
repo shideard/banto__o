@@ -177,7 +177,7 @@ def tanya_chatbot(payload: ChatbotQuery):
     }
 
 
-# ── Chat Session (riwayat percakapan tersimpan di DB) ─────────────────────────
+# ── Chat Session ──────────────────────────────────────────────────────────────
 
 @router.get("/chat/sessions", response_model=List[ChatSessionResponse], tags=["Chatbot"])
 def get_chat_sessions(
@@ -224,15 +224,12 @@ def send_chat_message(
     if not session:
         raise HTTPException(status_code=404, detail="Sesi chat tidak ditemukan.")
 
-    # Simpan pesan user
     user_msg = ChatMessageORM(session_id=session_id, type="user", text=payload.text)
     db.add(user_msg)
 
-    # Update judul sesi jika masih default
     if session.title == "Percakapan Baru":
         session.title = payload.text[:40] + ("..." if len(payload.text) > 40 else "")
 
-    # Proses chatbot dan simpan balasan bot
     bot_text = chatbot.proses_input(payload.text)
     bot_msg  = ChatMessageORM(session_id=session_id, type="bot", text=bot_text)
     db.add(bot_msg)

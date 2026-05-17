@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-
+import ticketService from "../../services/TicketService";
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
   .bt-main {
@@ -176,7 +176,6 @@ export default function BuatTiketPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [chatInput, setChatInput] = useState("");
   const [botTyping, setBotTyping] = useState(false);
@@ -218,19 +217,32 @@ export default function BuatTiketPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    setErrors({});
-    setSubmitting(true);
+  e.preventDefault();
+  const errs = validate();
+  if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+  setErrors({});
+  setSubmitting(true);
 
-    // Mock API Call
-    setTimeout(() => {
-      setSubmitting(false);
-      alert("Tiket berhasil dibuat!");
-      // window.location.href = "/tiket/saya"; // Bisa di-uncomment jika ingin redirect setelah buat tiket
-    }, 1500);
-  };
+  try {
+    await ticketService.createTicket({
+      subjek,
+      deskripsi,
+      kategori_id: topik ? parseInt(topik) : null,
+    });
+    alert("Tiket berhasil dibuat!");
+    window.location.href = "/tiket/saya";
+  } catch (error) {
+    // ✅ ambil pesan error yang benar dari backend
+    const msg =
+      error?.response?.data?.detail ||
+      error?.response?.data?.message ||
+      error?.message ||
+      "Gagal membuat tiket.";
+    alert("Error: " + msg);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <>

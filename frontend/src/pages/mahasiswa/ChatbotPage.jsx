@@ -1,10 +1,6 @@
+// frontend/src/pages/mahasiswa/ChatbotPage.jsx
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  getChatSessions,
-  createChatSession,
-  sendChatMessage,
-  deleteChatSession,
-} from "../../services/ticketService";
+import chatService from "../../services/ChatService";
 
 const GREETING = "Halo! Aku BantO__O 🤖 Asisten virtualmu untuk layanan IPB Help Center. Ada yang bisa aku bantu?";
 
@@ -98,18 +94,18 @@ function formatTime(dateStr) {
 }
 
 export default function ChatbotPage() {
-  const [sessions, setSessions]           = useState([]);
+  const [sessions, setSessions]               = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [messages, setMessages]           = useState([]);
-  const [inputText, setInputText]         = useState("");
-  const [isTyping, setIsTyping]           = useState(false);
+  const [messages, setMessages]               = useState([]);
+  const [inputText, setInputText]             = useState("");
+  const [isTyping, setIsTyping]               = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const messagesEndRef = useRef(null);
 
   // ── Load sesi dari backend ─────────────────────────────────────────────────
   const loadSessions = useCallback(async () => {
     try {
-      const res = await getChatSessions();
+      const res = await chatService.getSessions();
       setSessions(res.data || []);
     } catch {
       setSessions([]);
@@ -125,7 +121,6 @@ export default function ChatbotPage() {
     if (!activeSessionId) { setMessages([]); return; }
     const session = sessions.find(s => s.id === activeSessionId);
     if (session) {
-      // Tambahkan greeting sebagai pesan pertama di UI (tidak disimpan ke DB)
       const dbMessages = session.messages || [];
       const greetingMsg = { id: "greeting", type: "bot", text: GREETING };
       setMessages([greetingMsg, ...dbMessages]);
@@ -139,7 +134,7 @@ export default function ChatbotPage() {
   // ── Buat sesi baru ─────────────────────────────────────────────────────────
   const handleNewChat = async () => {
     try {
-      const res = await createChatSession("Percakapan Baru");
+      const res = await chatService.createSession("Percakapan Baru");
       const newSession = res.data;
       setSessions(prev => [newSession, ...prev]);
       setActiveSessionId(newSession.id);
@@ -152,9 +147,8 @@ export default function ChatbotPage() {
   const handleSend = async (text) => {
     if (!text.trim() || isTyping) return;
     if (!activeSessionId) {
-      // Buat sesi baru otomatis jika belum ada
       try {
-        const res = await createChatSession(text.slice(0, 40));
+        const res = await chatService.createSession(text.slice(0, 40));
         const newSession = res.data;
         setSessions(prev => [newSession, ...prev]);
         setActiveSessionId(newSession.id);
@@ -166,24 +160,21 @@ export default function ChatbotPage() {
   };
 
   const doSend = async (sessionId, text) => {
-    // Tampilkan pesan user langsung di UI
     const tempUserMsg = { id: `tmp-${Date.now()}`, type: "user", text };
     setMessages(prev => [...prev, tempUserMsg]);
     setInputText("");
     setIsTyping(true);
 
     try {
-      const res = await sendChatMessage(sessionId, text);
+      const res = await chatService.sendMessage(sessionId, text);
       const [userMsg, botMsg] = res.data;
 
-      // Update messages dengan data asli dari backend
       setMessages(prev => [
         ...prev.filter(m => m.id !== tempUserMsg.id),
         userMsg,
         botMsg,
       ]);
 
-      // Update judul sesi di sidebar
       setSessions(prev => prev.map(s =>
         s.id === sessionId
           ? { ...s, title: text.slice(0, 40) + (text.length > 40 ? "..." : ""), updated_at: new Date().toISOString() }
@@ -202,7 +193,7 @@ export default function ChatbotPage() {
     e.stopPropagation();
     if (!confirm("Hapus sesi percakapan ini?")) return;
     try {
-      await deleteChatSession(sessionId);
+      await chatService.deleteSession(sessionId);
       setSessions(prev => prev.filter(s => s.id !== sessionId));
       if (activeSessionId === sessionId) {
         setActiveSessionId(null);

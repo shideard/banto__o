@@ -1,37 +1,32 @@
-import api from "./api";
+// frontend/src/services/TicketService.js
+import apiClient from "./ApiClient";
 
-export async function listKategori() {
-  return api.get("/kategori");
-}
-export async function listTiket() {
-  return api.get("/tiket");
-}
-export async function getTiketById(tiketId) {
-  return api.get(`/tiket/${tiketId}`);
-}
-export async function createTiket(payload) {
-  return api.post("/tiket", payload);
-}
-export async function claimTiket(tiketId, payload) {
-  return api.post(`/tiket/${tiketId}/klaim`, payload);
-}
-export async function updateTiketStatus(tiketId, payload) {
-  return api.patch(`/tiket/${tiketId}/status`, payload);
-}
-export async function addKomentar(tiketId, payload) {
-  return api.post(`/tiket/${tiketId}/komentar`, payload);
+class TicketService {
+  async getKategori() {
+    const res = await apiClient.get("/kategori");
+    return res.data;
+  }
+
+  async getMyTickets() {
+    const res = await apiClient.get("/tiket");
+    return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getTicketById(tiketId) {
+    const res = await apiClient.get(`/tiket/${tiketId}`);
+    return res.data;
+  }
+
+  async createTicket(payload) {
+    const res = await apiClient.post("/tiket", payload);
+    return res.data;
+  }
+
+  async addKomentar(tiketId, isi) {
+    const res = await apiClient.post(`/tiket/${tiketId}/komentar`, { isi });
+    return res.data;
+  }
 }
 
-// ── Chat Session ──────────────────────────────────────────────────────────────
-export async function getChatSessions() {
-  return api.get("/chat/sessions");
-}
-export async function createChatSession(title = "Percakapan Baru") {
-  return api.post("/chat/sessions", { title });
-}
-export async function sendChatMessage(sessionId, text) {
-  return api.post(`/chat/sessions/${sessionId}/messages`, { text, type: "user" });
-}
-export async function deleteChatSession(sessionId) {
-  return api.delete(`/chat/sessions/${sessionId}`);
-}
+const ticketService = new TicketService();
+export default ticketService;

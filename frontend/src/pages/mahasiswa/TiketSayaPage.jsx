@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { listTiket } from "../../services/ticketService";
+import ticketService from "../../services/TicketService";
+
+
 
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
@@ -278,11 +280,10 @@ export default function TiketSayaPage() {
   const [loading, setLoading] = useState(hasToken);
 
   useEffect(() => {
-    // Jika tidak ada token, langsung berhenti tanpa memicu re-render
     if (!hasToken) return;
 
-    listTiket()
-      .then((res) => setTickets(Array.isArray(res.data) ? res.data : []))
+    ticketService.getMyTickets()
+      .then(data => setTickets(data))
       .catch(() => setTickets([]))
       .finally(() => setLoading(false));
   }, [hasToken]);
