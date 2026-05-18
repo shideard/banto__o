@@ -185,13 +185,6 @@ export default function StafSidebar({ isOpen = true }) {
                 Tiket Belum Diklaim
               </div>
             </Link>
-
-            <Link to="/staff/chatbot" className={`staf-sidebar-link ${isActive("/staff/chatbot") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">🤖</span>
-                Chatbot
-              </div>
-            </Link>
           </div>
 
           {/* AKUN */}

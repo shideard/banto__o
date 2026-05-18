@@ -71,8 +71,8 @@ export default function AntreanTiketPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.TicketService.listTiket();
-      setTickets(Array.isArray(res.data) ? res.data : []);
+      const res = await ticketService.getAllTiket();
+      setTickets(Array.isArray(res) ? res : []);
     } catch {
       setError("Gagal memuat antrean tiket.");
     } finally {

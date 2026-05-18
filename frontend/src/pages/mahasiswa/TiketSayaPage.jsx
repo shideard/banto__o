@@ -370,12 +370,13 @@ export default function TiketSayaPage() {
                   <th>Kategori</th>
                   <th>Status</th>
                   <th>Dibuat</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                    <td colSpan="6" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
                       Memuat tiket...
                     </td>
                   </tr>
@@ -397,11 +398,29 @@ export default function TiketSayaPage() {
                       <td className="td-date">
                         {ticket.tanggal_dibuat ? new Date(ticket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
                       </td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <Link
+                          to={`/tiket/${ticket.id}`}
+                          style={{
+                            display: "inline-block",
+                            padding: "5px 12px",
+                            background: "#eff6ff",
+                            color: "#2563eb",
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            textDecoration: "none",
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          Lihat Detail →
+                        </Link>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                    <td colSpan="6" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
                       Tidak ada tiket ditemukan.
                     </td>
                   </tr>

@@ -50,12 +50,19 @@ class UserService:
         if user.role not in ("mahasiswa", "staf", "admin"):
             raise ValueError("Role tidak valid")
 
+        # PERBAIKAN: cek NIM duplikat jika mahasiswa
+        if user.role == "mahasiswa" and user.nim:
+            if db.query(UserORM).filter(UserORM.nim == user.nim).first():
+                raise ValueError(f"NIM {user.nim} sudah terdaftar")
+
         hashed_password = self.get_password_hash(user.password)
         db_user = UserORM(
             email=user.email,
             nama=user.nama,
             password=hashed_password,
-            role=user.role,  # ← dari request, bukan hardcode
+            role=user.role,
+            nim=user.nim if user.role == "mahasiswa" else None,           # PERBAIKAN
+            divisi_id=user.divisi_id if user.role == "staf" else None,   # PERBAIKAN
         )
         db.add(db_user)
         db.commit()

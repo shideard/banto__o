@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict,  EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
@@ -8,7 +8,9 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    role: str = "mahasiswa"  # Default mahasiswa
+    role: str = "mahasiswa"   # 'mahasiswa' | 'staf'
+    nim: Optional[str] = None          # PERBAIKAN: ditambahkan untuk mahasiswa
+    divisi_id: Optional[int] = None   # PERBAIKAN: ditambahkan untuk staf
 
 class DivisiStafCreate(BaseModel):
     nama_divisi: str

@@ -1,34 +1,38 @@
-import './index.css'
+import './index.css';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import { useState } from "react";
 
-// Layout
+// ── Komponen Layout ───────────────────────────────────────────────────────────
 import AppNavbar from "./components/layout/AppNavbar";
 import Sidebar from "./components/layout/Sidebar";
 import StafSidebar from "./components/layout/StafSidebar";
 import Footer from "./components/layout/Footer";
 
-// Halaman Auth
+// ── Halaman Auth ──────────────────────────────────────────────────────────────
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
-// Halaman Mahasiswa
+// ── Halaman Mahasiswa ─────────────────────────────────────────────────────────
 import DashboardPage from "./pages/mahasiswa/DashboardPage";
 import BuatTiketPage from "./pages/mahasiswa/BuatTiketPage";
 import TiketSayaPage from "./pages/mahasiswa/TiketSayaPage";
+import DetailTiketPage from "./pages/mahasiswa/DetailTiketPage";
 import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
+import ProfilPage from "./pages/mahasiswa/ProfilPage";
 
-// Halaman Staf
+// ── Halaman Staf ──────────────────────────────────────────────────────────────
 import StafDashboardPage from "./pages/Staf/StafDashboardPage";
 import TugasSayaPage from "./pages/Staf/TugasSayaPage";
 import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
 import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
 import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
+import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
-// Halaman Admin
+// ── Halaman Admin ─────────────────────────────────────────────────────────────
 import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
+
 
 // ── Helper redirect berdasarkan role ─────────────────────────────────────────
 function getDashboard(role) {
@@ -41,6 +45,7 @@ function getDashboard(role) {
 function MahasiswaLayout() {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
   return (
     <div className="app-root">
       <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
@@ -59,6 +64,7 @@ function MahasiswaLayout() {
 function StafLayout() {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
   return (
     <div className="app-root">
       <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
@@ -73,10 +79,11 @@ function StafLayout() {
   );
 }
 
-// ── Layout Admin (pakai StafSidebar atau buat AdminSidebar sendiri) ───────────
+// ── Layout Admin ──────────────────────────────────────────────────────────────
 function AdminLayout() {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
   return (
     <div className="app-root">
       <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
@@ -94,17 +101,20 @@ function AdminLayout() {
 // ── Protected Route ───────────────────────────────────────────────────────────
 function ProtectedRoute({ children, allowedRole }) {
   const { user } = useAuth();
+  
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRole && user.role !== allowedRole) return <Navigate to="/login" replace />;
+  
   return children;
 }
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 function AppRoutes() {
   const { user } = useAuth();
+  
   return (
     <Routes>
-      {/* Publik */}
+      {/* ── Publik ── */}
       <Route path="/login" element={
         user ? <Navigate to={getDashboard(user.role)} replace /> : <LoginPage />
       } />
@@ -112,7 +122,7 @@ function AppRoutes() {
         user ? <Navigate to={getDashboard(user.role)} replace /> : <RegisterPage />
       } />
 
-      {/* Mahasiswa */}
+      {/* ── Mahasiswa ── */}
       <Route element={
         <ProtectedRoute allowedRole="mahasiswa">
           <MahasiswaLayout />
@@ -121,10 +131,12 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/tiket/buat" element={<BuatTiketPage />} />
         <Route path="/tiket/saya" element={<TiketSayaPage />} />
+        <Route path="/tiket/:id" element={<DetailTiketPage />} />
         <Route path="/chatbot" element={<ChatbotPage />} />
+        <Route path="/profil" element={<ProfilPage />} />
       </Route>
 
-      {/* Staf */}
+      {/* ── Staf ── */}
       <Route element={
         <ProtectedRoute allowedRole="staf">
           <StafLayout />
@@ -135,10 +147,10 @@ function AppRoutes() {
         <Route path="/staff/antrean-tiket" element={<AntreanTiketPage />} />
         <Route path="/staff/buat-tiket" element={<BuatTiketStafPage />} />
         <Route path="/staff/tiket/:id" element={<DetailTiketStafPage />} />
-        {/* Tambahkan route staf lain di sini */}
+        <Route path="/staff/profil" element={<ProfilStafPage />} />
       </Route>
 
-      {/* Admin */}
+      {/* ── Admin ── */}
       <Route element={
         <ProtectedRoute allowedRole="admin">
           <AdminLayout />
@@ -147,12 +159,13 @@ function AppRoutes() {
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
       </Route>
 
-      {/* Default */}
+      {/* ── Default / Fallback ── */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
 
+// ── App Root ──────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <BrowserRouter>

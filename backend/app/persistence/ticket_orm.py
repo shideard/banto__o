@@ -49,13 +49,15 @@ class PengajuanORM(Base):
 
 
 class LampiranORM(Base):
-    """Komposisi dari Pengajuan — endpoint upload butuh storage service."""
+    """Komposisi dari Pengajuan — file disimpan di folder uploads/."""
     __tablename__ = "lampiran"
 
-    id           = Column(Integer, primary_key=True, index=True)
-    pengajuan_id = Column(Integer, ForeignKey("pengajuan.id"), nullable=False)
-    nama_file    = Column(String(255), nullable=False)
-    tipe_file    = Column(String(100), nullable=False)
+    id             = Column(Integer, primary_key=True, index=True)
+    pengajuan_id   = Column(Integer, ForeignKey("pengajuan.id"), nullable=False)
+    nama_file      = Column(String(255), nullable=False)
+    tipe_file      = Column(String(100), nullable=False)
+    url_file       = Column(String(512), nullable=True)   # path relatif di server
+    tanggal_upload = Column(DateTime, default=datetime.utcnow)
 
     pengajuan = relationship("PengajuanORM", back_populates="lampiran")
 

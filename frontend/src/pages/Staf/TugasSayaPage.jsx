@@ -75,9 +75,9 @@ export default function TugasSayaPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.TicketService.listTiket();
+      const res = await ticketService.getAllTiket();
       // Filter hanya tiket yang milik staf ini
-      const all = Array.isArray(res.data) ? res.data : [];
+      const all = Array.isArray(res) ? res : [];
       const mine = all.filter(t => t.staf_id === user?.id);
       setTickets(mine);
     } catch {
