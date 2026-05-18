@@ -63,8 +63,8 @@ export default function BuatTiketStafPage() {
 
   // Load kategori dari backend
   useEffect(() => {
-    ticketService.listKategori()
-      .then(res => setKategoriList(Array.isArray(res.data) ? res.data : []))
+    ticketService.getKategori()
+      .then(res => setKategoriList(Array.isArray(res) ? res : []))
       .catch(() => {});
   }, []);
 
@@ -93,7 +93,7 @@ export default function BuatTiketStafPage() {
         // Untuk sementara, tiket dibuat atas nama staf yang login
       };
 
-      await ticketService.createTiket(payload);
+      await ticketService.createTicketByStaf(payload);
       setSuccessMsg("Tiket berhasil dibuat! Mengalihkan ke dashboard...");
       setTimeout(() => navigate("/staff/dashboard"), 1500);
     } catch (err) {

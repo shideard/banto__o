@@ -67,8 +67,8 @@ export default function StafDashboardPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.TicketService.listTiket();
-      setTickets(Array.isArray(res.data) ? res.data : []);
+      const res = await ticketService.getAllTiket();
+      setTickets(Array.isArray(res) ? res : []);
     } catch {
       setError("Gagal memuat data tiket. Coba refresh halaman.");
     } finally {

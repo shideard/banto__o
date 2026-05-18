@@ -130,7 +130,7 @@ export default function DetailTiketStafPage() {
       setLoading(true);
       setError(null);
       const res = await ticketService.getTiketById(id);
-      setTiket(res.data);
+      setTiket(res);
     } catch {
       setError("Tiket tidak ditemukan atau Anda tidak memiliki akses.");
     } finally {
@@ -144,7 +144,7 @@ export default function DetailTiketStafPage() {
     if (!reply.trim()) return;
     try {
       setSending(true);
-      await ticketService.addKomentar(id, { isi: reply });
+      await ticketService.addKomentar(id, reply);
       setReply("");
       await fetchTiket();
     } catch (err) {
@@ -206,8 +206,8 @@ export default function DetailTiketStafPage() {
 
       <main className="staf-main">
         <div className="staf-breadcrumb">
-          <a href="/staff/dashboard">Dashboard</a><span>›</span>
-          <a href="/staff/antrean-tiket">Antrean Tiket</a><span>›</span>
+          <Link to="/staff/dashboard">Dashboard</Link><span>›</span>
+          <Link to="/staff/antrean-tiket">Antrean Tiket</Link><span>›</span>
           <strong>Tiket #{id}</strong>
         </div>
 

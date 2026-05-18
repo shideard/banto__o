@@ -1,737 +1,479 @@
-// frontend/src/pages/mahasiswa/ProfilPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
-import apiClient from "../../services/ApiClient";
 
-// ─────────────────────────── STYLES ───────────────────────────────────────────
+
+
 const styles = `
-  /* Layout */
-  .profil-main {
+  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
+  .ts-main {
+    flex: 1;
     padding: 32px 40px;
-    max-width: 1100px;
-    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 100%;
   }
-  .profil-breadcrumb {
+
+  .ts-breadcrumb {
     font-size: 13px;
-    color: #64748b;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
   }
-  .profil-breadcrumb a { color: #64748b; text-decoration: none; transition: color 0.2s; }
-  .profil-breadcrumb a:hover { color: #2563eb; }
-  .profil-breadcrumb span { color: #cbd5e1; }
+  .ts-breadcrumb a { color: var(--gray-500); text-decoration: none; transition: color 0.2s; }
+  .ts-breadcrumb a:hover { color: var(--gray-900); }
+  .ts-breadcrumb span { margin: 0 8px; }
 
-  .profil-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  /* ── Card umum ── */
-  .profil-card {
-    background: #fff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 18px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .profil-card-header {
-    padding: 18px 22px 14px;
-    border-bottom: 1.5px solid #f1f5f9;
+  .ts-header-row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-  }
-  .profil-card-title {
-    font-size: 11px;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-  }
-  .profil-card-body {
-    padding: 22px;
+    align-items: flex-start;
+    margin-bottom: 24px;
   }
 
-  /* ── Avatar & identitas ── */
-  .profil-avatar-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 22px 24px;
-    text-align: center;
-  }
-  .profil-avatar {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1a4fad 0%, #0ea5e9 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .ts-header-text h1 {
     font-family: 'Fraunces', serif;
     font-size: 32px;
-    font-weight: 900;
-    color: #fff;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
-    position: relative;
-    flex-shrink: 0;
-  }
-  .profil-avatar-badge {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 22px;
-    height: 22px;
-    background: #10b981;
-    border: 3px solid #fff;
-    border-radius: 50%;
-  }
-  .profil-nama {
-    font-family: 'Fraunces', serif;
-    font-size: 20px;
     font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 4px;
+    color: var(--gray-900);
+    margin-bottom: 8px;
   }
-  .profil-role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 12px;
-    background: #eff6ff;
-    color: #2563eb;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-  .profil-divider {
-    width: 100%;
-    height: 1px;
-    background: #f1f5f9;
-    margin-bottom: 20px;
+  .ts-header-text p {
+    font-size: 14px;
+    color: var(--gray-500);
   }
 
-  /* Info rows di sidebar */
-  .profil-info-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  .btn-primary {
+    background: var(--ipb-blue-mid);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
   }
-  .profil-info-item {
+  .btn-primary:hover { background: var(--ipb-blue); }
+
+  .ts-alert {
+    background: var(--warning-bg);
+    border: 1.5px solid var(--warning-border);
+    border-radius: 12px;
+    padding: 14px 20px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
+    font-size: 13px;
+    color: var(--warning-text);
+    margin-bottom: 24px;
+  }
+
+  .ts-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .search-wrap {
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+  }
+  .search-input {
+    width: 280px;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--ipb-blue-lite); }
+
+  .tabs {
+    display: flex;
+    background: var(--gray-200);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--white);
+    color: var(--gray-900);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* Table Styles with Scroll */
+  .table-container {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+
+  .table-scroll-area {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .table-scroll-area::-webkit-scrollbar { width: 6px; }
+  .table-scroll-area::-webkit-scrollbar-track { background: var(--gray-50); }
+  .table-scroll-area::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
     text-align: left;
   }
-  .profil-info-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: #f1f5f9;
+  
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 16px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    background: var(--gray-50);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid var(--gray-200);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: var(--gray-50); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--gray-900);
+    vertical-align: middle;
+  }
+
+  .td-id { font-weight: 700; color: var(--ipb-blue-mid); }
+  .td-subjek p { font-weight: 600; margin-bottom: 4px; }
+  .td-date { color: var(--gray-500); font-size: 13px; }
+
+  /* Status Pills */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  
+  .pill-diproses { background: #fff7ed; color: #c2410c; }
+  .pill-diproses::before { background: #ea580c; }
+  .pill-dibuka { background: #eff6ff; color: #1d4ed8; }
+  .pill-dibuka::before { background: #2563eb; }
+  .pill-selesai { background: #f0fdf4; color: #15803d; }
+  .pill-selesai::before { background: #16a34a; }
+  .pill-ditutup { background: #f1f5f9; color: #475569; }
+  .pill-ditutup::before { background: #64748b; }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
+    opacity: 0;
+    animation: fadeInModal 0.2s forwards;
   }
-  .profil-info-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-  }
-  .profil-info-val {
-    font-size: 13.5px;
-    color: #1e293b;
-    font-weight: 600;
-    word-break: break-all;
-  }
-  .profil-info-val.muted { color: #94a3b8; font-weight: 500; font-style: italic; }
+  @keyframes fadeInModal { to { opacity: 1; } }
 
-  /* ── Statistik tiket ── */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-  }
-  .stat-box {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 18px 16px;
-    text-align: center;
-    transition: transform 0.18s, box-shadow 0.18s;
-  }
-  .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-  .stat-box.total  { border-color: #bfdbfe; background: #eff6ff; }
-  .stat-box.proses { border-color: #fed7aa; background: #fff7ed; }
-  .stat-box.selesai{ border-color: #bbf7d0; background: #f0fdf4; }
-  .stat-box-num {
-    font-family: 'Fraunces', serif;
-    font-size: 36px;
-    font-weight: 900;
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-  .stat-box.total   .stat-box-num { color: #2563eb; }
-  .stat-box.proses  .stat-box-num { color: #c2410c; }
-  .stat-box.selesai .stat-box-num { color: #15803d; }
-  .stat-box-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: #64748b;
-  }
-
-  /* Tiket list ringkas */
-  .tiket-list-mini {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .tiket-mini-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    background: #f8fafc;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    text-decoration: none;
-    transition: background 0.18s;
-  }
-  .tiket-mini-item:hover { background: #eff6ff; border-color: #bfdbfe; }
-  .tiket-mini-id { font-size: 12px; font-weight: 700; color: #94a3b8; }
-  .tiket-mini-subj { font-size: 13px; font-weight: 600; color: #1e293b; flex: 1; margin: 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tiket-mini-pill { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 100px; white-space: nowrap; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
-  .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
-  .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
-  .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .tiket-mini-empty { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; }
-
-  /* ── Form edit ── */
-  .form-group { margin-bottom: 18px; }
-  .form-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 7px;
-  }
-  .form-input {
-    width: 100%;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 14px;
-    color: #1e293b;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    outline: none;
-    background: #f8fafc;
-    transition: border-color 0.18s, background 0.18s;
-    box-sizing: border-box;
-  }
-  .form-input:focus { border-color: #2563eb; background: #fff; }
-  .form-input:disabled { color: #94a3b8; cursor: not-allowed; }
-  .form-input.readonly { color: #64748b; background: #f8fafc; cursor: default; }
-  .form-hint { font-size: 11px; color: #94a3b8; margin-top: 5px; }
-
-  /* Tombol */
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn-primary-sm {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px;
-    background: #2563eb; color: #fff;
-    border: none; border-radius: 9px;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: background 0.18s;
-  }
-  .btn-primary-sm:hover { background: #1d4ed8; }
-  .btn-primary-sm:disabled { background: #93c5fd; cursor: not-allowed; }
-  .btn-outline-sm {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px;
-    background: #fff; color: #334155;
-    border: 1.5px solid #e2e8f0; border-radius: 9px;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: all 0.18s;
-  }
-  .btn-outline-sm:hover { background: #f8fafc; border-color: #cbd5e1; }
-  .btn-danger-sm {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px;
-    background: #fef2f2; color: #dc2626;
-    border: 1.5px solid #fecaca; border-radius: 9px;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: all 0.18s;
-  }
-  .btn-danger-sm:hover { background: #fee2e2; }
-
-  /* Alert */
-  .alert-success {
-    background: #f0fdf4; border: 1.5px solid #bbf7d0;
-    border-radius: 10px; padding: 12px 16px;
-    font-size: 13px; color: #15803d; font-weight: 600;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-  .alert-error {
-    background: #fef2f2; border: 1.5px solid #fecaca;
-    border-radius: 10px; padding: 12px 16px;
-    font-size: 13px; color: #dc2626; font-weight: 600;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-
-  /* Modal ganti password */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    z-index: 300;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .modal-box {
-    background: #fff;
+  .modal-content {
+    background: var(--white);
+    width: 600px;
+    max-width: 90vw;
     border-radius: 20px;
     padding: 32px;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.18);
-    animation: modalIn 0.22s ease;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    transform: translateY(20px);
+    animation: slideUpModal 0.3s ease forwards;
   }
-  @keyframes modalIn {
-    from { opacity: 0; transform: translateY(16px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .modal-title {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 6px;
-  }
-  .modal-sub {
-    font-size: 13px;
-    color: #64748b;
-    margin-bottom: 24px;
-    line-height: 1.5;
-  }
-  .modal-actions {
+  @keyframes slideUpModal { to { transform: translateY(0); } }
+
+  .modal-header {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 24px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-200);
   }
-
-  /* Loading skeleton */
-  .skeleton {
-    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 8px;
+  .modal-title-group h2 { font-size: 20px; color: var(--gray-900); margin-bottom: 8px; }
+  .modal-close {
+    background: var(--gray-100);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
   }
-  @keyframes shimmer { to { background-position: -200% 0; } }
+  .modal-close:hover { background: var(--gray-200); color: var(--gray-900); }
 
-  /* Responsive */
-  @media (max-width: 900px) {
-    .profil-main { padding: 20px 16px; }
-    .profil-grid { grid-template-columns: 1fr; }
-    .stat-row { grid-template-columns: repeat(3, 1fr); }
+  .detail-group { margin-bottom: 20px; }
+  .detail-label { font-size: 12px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; margin-bottom: 6px; }
+  .detail-value { font-size: 14px; color: var(--gray-800); line-height: 1.6; }
+  .detail-desc-box {
+    background: var(--gray-50);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    white-space: pre-wrap;
   }
 `;
 
-// ─────────────────────────── HELPERS ──────────────────────────────────────────
-function getInitials(nama = "") {
-  return nama.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?";
-}
-
-// ─────────────────────────── KOMPONEN UTAMA ───────────────────────────────────
-export default function ProfilPage() {
-  const { user, logout } = useAuth();
-
-  // ── State data tiket ──
+export default function TiketSayaPage() {
   const [tickets, setTickets] = useState([]);
-  const [loadingTiket, setLoadingTiket] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("Semua");
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
-  // ── State edit profil ──
-  const [editMode, setEditMode] = useState(false);
-  const [formNama, setFormNama] = useState(user?.nama || "");
-  const [savingNama, setSavingNama] = useState(false);
-  const [namaMsg, setNamaMsg] = useState({ type: "", text: "" });
+  // Perbaikan error warning: Cek token di awal sebelum render, lalu set nilai awal state loading
+  const hasToken = Boolean(localStorage.getItem("banto_token"));
+  const [loading, setLoading] = useState(hasToken);
 
-  // ── State modal ganti password ──
-  const [showPwModal, setShowPwModal] = useState(false);
-  const [pwForm, setPwForm] = useState({ lama: "", baru: "", konfirmasi: "" });
-  const [savingPw, setSavingPw] = useState(false);
-  const [pwMsg, setPwMsg] = useState({ type: "", text: "" });
-
-  // ── Fetch tiket ──
   useEffect(() => {
+    if (!hasToken) return;
+
     ticketService.getMyTickets()
-      .then(data => setTickets(Array.isArray(data) ? data : []))
+      .then(data => setTickets(data))
       .catch(() => setTickets([]))
-      .finally(() => setLoadingTiket(false));
-  }, []);
+      .finally(() => setLoading(false));
+  }, [hasToken]);
 
-  // ── Statistik ──
-  const total   = tickets.length;
-  const proses  = tickets.filter(t => ["DIKLAIM", "DIPROSES", "REVISI"].includes(t.status)).length;
-  const selesai = tickets.filter(t => t.status === "SELESAI").length;
-  const recent  = [...tickets].sort((a, b) => new Date(b.tanggal_dibuat) - new Date(a.tanggal_dibuat)).slice(0, 4);
-
-  // ── Simpan nama ──
-  const handleSaveNama = async () => {
-    if (!formNama.trim()) return;
-    try {
-      setSavingNama(true);
-      setNamaMsg({ type: "", text: "" });
-      await apiClient.patch("/auth/me", { nama: formNama.trim() });
-      setNamaMsg({ type: "success", text: "Nama berhasil diperbarui!" });
-      setEditMode(false);
-      // Update localStorage agar navbar langsung berubah
-      const stored = JSON.parse(localStorage.getItem("banto_user") || "{}");
-      localStorage.setItem("banto_user", JSON.stringify({ ...stored, nama: formNama.trim() }));
-      setTimeout(() => setNamaMsg({ type: "", text: "" }), 3000);
-    } catch {
-      setNamaMsg({ type: "error", text: "Gagal memperbarui nama. Coba lagi." });
-    } finally {
-      setSavingNama(false);
+  const getStatusClass = (status) => {
+    if (!status) return "pill-ditutup";
+    switch (status.toLowerCase()) {
+      case "diproses": return "pill-diproses";
+      case "dibuka": return "pill-dibuka";
+      case "selesai": return "pill-selesai";
+      case "ditutup": return "pill-ditutup";
+      default: return "pill-ditutup";
     }
   };
 
-  // ── Ganti password ──
-  const handleGantiPassword = async () => {
-    setPwMsg({ type: "", text: "" });
-    if (!pwForm.lama || !pwForm.baru || !pwForm.konfirmasi) {
-      setPwMsg({ type: "error", text: "Semua field wajib diisi." });
-      return;
-    }
-    if (pwForm.baru.length < 6) {
-      setPwMsg({ type: "error", text: "Password baru minimal 6 karakter." });
-      return;
-    }
-    if (pwForm.baru !== pwForm.konfirmasi) {
-      setPwMsg({ type: "error", text: "Konfirmasi password tidak cocok." });
-      return;
-    }
-    try {
-      setSavingPw(true);
-      await apiClient.patch("/auth/me/password", {
-        password_lama: pwForm.lama,
-        password_baru: pwForm.baru,
-      });
-      setPwMsg({ type: "success", text: "Password berhasil diubah!" });
-      setPwForm({ lama: "", baru: "", konfirmasi: "" });
-      setTimeout(() => { setShowPwModal(false); setPwMsg({ type: "", text: "" }); }, 1800);
-    } catch (err) {
-      setPwMsg({ type: "error", text: err?.response?.data?.detail || "Gagal mengubah password." });
-    } finally {
-      setSavingPw(false);
-    }
-  };
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(ticket => {
+      const matchSearch =
+        String(ticket.subjek || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(ticket.id).includes(searchTerm.replace("#", ""));
+      const matchTab = activeTab === "Semua" ||
+        String(ticket.status).toUpperCase() === activeTab.toUpperCase();
+      return matchSearch && matchTab;
+    });
+  }, [tickets, searchTerm, activeTab]);
 
-  // ─────────────────────────── RENDER ───────────────────────────────────────
   return (
     <>
       <style>{styles}</style>
+      
+      {/* KONTEN UTAMA - Tanpa Navbar/Footer/Sidebar */}
+      <main className="ts-main">
+        <div className="ts-breadcrumb">
+          <Link to="/dashboard">Dashboard</Link> <span>›</span> Tiket Saya
+        </div>
 
-      {/* Modal Ganti Password */}
-      {showPwModal && (
-        <div className="modal-overlay" onClick={() => setShowPwModal(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">🔑 Ganti Password</div>
-            <div className="modal-sub">
-              Masukkan password lama kamu untuk verifikasi, lalu buat password baru.
-            </div>
+        <div className="ts-header-row">
+          <div className="ts-header-text">
+            <h1>Tiket Saya</h1>
+            <p>Kelola dan pantau semua tiket yang pernah kamu buat.</p>
+          </div>
+          <Link to="/tiket/buat" className="btn-primary">
+            + Buat Tiket
+          </Link>
+        </div>
 
-            {pwMsg.text && (
-              <div className={pwMsg.type === "success" ? "alert-success" : "alert-error"}>
-                {pwMsg.type === "success" ? "✅" : "⚠️"} {pwMsg.text}
+        <div className="ts-alert">
+          <span>⚠️</span>
+          <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
+        </div>
+
+        <div className="ts-controls">
+          <div className="search-wrap">
+            <span className="search-icon">🔍</span>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Cari ID atau subjek tiket..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="tabs">
+            {["Semua", "Dibuka", "Diproses", "Selesai", "Ditutup"].map(tab => (
+              <button 
+                key={tab}
+                className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === "Semua" ? `Semua (${tickets.length})` : tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="table-container">
+          <div className="table-scroll-area">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Subjek</th>
+                  <th>Kategori</th>
+                  <th>Status</th>
+                  <th>Dibuat</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                      Memuat tiket...
+                    </td>
+                  </tr>
+                ) : filteredTickets.length > 0 ? (
+                  filteredTickets.map((ticket) => (
+                    <tr key={ticket.id} onClick={() => setSelectedTicket(ticket)}>
+                      <td className="td-id">#{ticket.id}</td>
+                      <td className="td-subjek">
+                        <p>{ticket.subjek}</p>
+                      </td>
+                      <td style={{ color: "var(--gray-500)", fontSize: 13 }}>
+                        {ticket.kategori_id || "—"}
+                      </td>
+                      <td>
+                        <span className={`status-pill ${getStatusClass(ticket.status)}`}>
+                          {ticket.status}
+                        </span>
+                      </td>
+                      <td className="td-date">
+                        {ticket.tanggal_dibuat ? new Date(ticket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                      </td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <Link
+                          to={`/tiket/${ticket.id}`}
+                          style={{
+                            display: "inline-block",
+                            padding: "5px 12px",
+                            background: "#eff6ff",
+                            color: "#2563eb",
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            textDecoration: "none",
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          Lihat Detail →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                      Tidak ada tiket ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      {/* MODAL DETAIL TIKET */}
+      {selectedTicket && (
+        <div className="modal-overlay" onClick={() => setSelectedTicket(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <h2>Detail Tiket #{selectedTicket.id}</h2>
+                <span className={`status-pill ${getStatusClass(selectedTicket.status)}`}>
+                  {selectedTicket.status}
+                </span>
               </div>
-            )}
-
-            <div className="form-group">
-              <label className="form-label">Password Lama</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="Masukkan password saat ini"
-                value={pwForm.lama}
-                onChange={e => setPwForm(p => ({ ...p, lama: e.target.value }))}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password Baru</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="Minimal 6 karakter"
-                value={pwForm.baru}
-                onChange={e => setPwForm(p => ({ ...p, baru: e.target.value }))}
-              />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Konfirmasi Password Baru</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="Ulangi password baru"
-                value={pwForm.konfirmasi}
-                onChange={e => setPwForm(p => ({ ...p, konfirmasi: e.target.value }))}
-              />
+              <button className="modal-close" onClick={() => setSelectedTicket(null)}>✕</button>
             </div>
 
-            <div className="modal-actions">
-              <button className="btn-outline-sm" onClick={() => { setShowPwModal(false); setPwMsg({ type: "", text: "" }); setPwForm({ lama: "", baru: "", konfirmasi: "" }); }}>
-                Batal
-              </button>
-              <button className="btn-primary-sm" disabled={savingPw} onClick={handleGantiPassword}>
-                {savingPw ? "Menyimpan..." : "Simpan Password"}
-              </button>
+            <div className="detail-group">
+              <div className="detail-label">Subjek</div>
+              <div className="detail-value" style={{ fontWeight: 600, fontSize: "16px" }}>
+                {selectedTicket.subjek}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div className="detail-group">
+                <div className="detail-label">Kategori</div>
+                <div className="detail-value">{selectedTicket.kategori_id || "—"}</div>
+              </div>
+              <div className="detail-group">
+                <div className="detail-label">Waktu Dibuat</div>
+                <div className="detail-value">
+                  {selectedTicket.tanggal_dibuat ? new Date(selectedTicket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-group">
+              <div className="detail-label">Deskripsi Masalah</div>
+              <div className="detail-desc-box">
+                {selectedTicket.deskripsi || "Tidak ada deskripsi yang dilampirkan."}
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      <main className="profil-main">
-        {/* Breadcrumb */}
-        <div className="profil-breadcrumb">
-          <Link to="/dashboard">Dashboard</Link>
-          <span>›</span>
-          <strong style={{ color: "#334155" }}>Profil Saya</strong>
-        </div>
-
-        <div className="profil-grid">
-
-          {/* ── KOLOM KIRI — Kartu identitas ── */}
-          <div>
-            <div className="profil-card">
-              <div className="profil-avatar-wrap">
-                <div className="profil-avatar">
-                  {getInitials(user?.nama || "MH")}
-                  <div className="profil-avatar-badge" />
-                </div>
-                <div className="profil-nama">{user?.nama || "—"}</div>
-                <div className="profil-role-badge">🎓 Mahasiswa</div>
-                <div className="profil-divider" />
-                <div className="profil-info-list">
-                  <div className="profil-info-item">
-                    <div className="profil-info-icon">✉️</div>
-                    <div>
-                      <div className="profil-info-label">Email</div>
-                      <div className="profil-info-val">{user?.email || "—"}</div>
-                    </div>
-                  </div>
-                  <div className="profil-info-item">
-                    <div className="profil-info-icon">🎫</div>
-                    <div>
-                      <div className="profil-info-label">NIM</div>
-                      <div className="profil-info-val">
-                        {user?.nim
-                          ? user.nim
-                          : <span className="muted">Belum tersedia</span>}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="profil-info-item">
-                    <div className="profil-info-icon">🏛️</div>
-                    <div>
-                      <div className="profil-info-label">Institusi</div>
-                      <div className="profil-info-val">IPB University</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Aksi akun */}
-            <div className="profil-card">
-              <div className="profil-card-header">
-                <span className="profil-card-title">Aksi Akun</span>
-              </div>
-              <div className="profil-card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <button className="btn-danger-sm" style={{ width: "100%", justifyContent: "center" }} onClick={logout}>
-                  🚪 Keluar dari Akun
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── KOLOM KANAN ── */}
-          <div>
-
-            {/* Statistik tiket */}
-            <div className="profil-card">
-              <div className="profil-card-header">
-                <span className="profil-card-title">Statistik Tiket</span>
-                <Link to="/tiket/saya" style={{ fontSize: 12, fontWeight: 700, color: "#2563eb", textDecoration: "none" }}>
-                  Lihat Semua →
-                </Link>
-              </div>
-              <div className="profil-card-body">
-                {loadingTiket ? (
-                  <div className="stat-row">
-                    {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 88, borderRadius: 14 }} />)}
-                  </div>
-                ) : (
-                  <div className="stat-row">
-                    <div className="stat-box total">
-                      <div className="stat-box-num">{total}</div>
-                      <div className="stat-box-label">Total Dibuat</div>
-                    </div>
-                    <div className="stat-box proses">
-                      <div className="stat-box-num">{proses}</div>
-                      <div className="stat-box-label">Sedang Diproses</div>
-                    </div>
-                    <div className="stat-box selesai">
-                      <div className="stat-box-num">{selesai}</div>
-                      <div className="stat-box-label">Selesai</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tiket terbaru */}
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
-                    Tiket Terbaru
-                  </div>
-                  {loadingTiket ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 44, borderRadius: 10 }} />)}
-                    </div>
-                  ) : recent.length > 0 ? (
-                    <div className="tiket-list-mini">
-                      {recent.map(t => (
-                        <Link key={t.id} to={`/tiket/${t.id}`} className="tiket-mini-item">
-                          <span className="tiket-mini-id">#{t.id}</span>
-                          <span className="tiket-mini-subj">{t.subjek}</span>
-                          <span className={`tiket-mini-pill pill-${t.status}`}>{t.status}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="tiket-mini-empty">📭 Belum ada tiket yang dibuat</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Edit profil */}
-            <div className="profil-card">
-              <div className="profil-card-header">
-                <span className="profil-card-title">Edit Profil</span>
-                {!editMode && (
-                  <button
-                    className="btn-outline-sm"
-                    style={{ padding: "5px 14px", fontSize: 12 }}
-                    onClick={() => { setEditMode(true); setFormNama(user?.nama || ""); }}
-                  >
-                    ✏️ Edit
-                  </button>
-                )}
-              </div>
-              <div className="profil-card-body">
-                {namaMsg.text && (
-                  <div className={namaMsg.type === "success" ? "alert-success" : "alert-error"}>
-                    {namaMsg.type === "success" ? "✅" : "⚠️"} {namaMsg.text}
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label className="form-label">Nama Lengkap</label>
-                  <input
-                    type="text"
-                    className={`form-input ${!editMode ? "readonly" : ""}`}
-                    value={editMode ? formNama : (user?.nama || "")}
-                    onChange={e => setFormNama(e.target.value)}
-                    readOnly={!editMode}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className="form-input readonly"
-                    value={user?.email || ""}
-                    readOnly
-                  />
-                  <div className="form-hint">Email tidak dapat diubah.</div>
-                </div>
-                <div className="form-group" style={{ marginBottom: editMode ? 18 : 0 }}>
-                  <label className="form-label">NIM</label>
-                  <input
-                    type="text"
-                    className="form-input readonly"
-                    value={user?.nim || "Belum tersedia"}
-                    readOnly
-                  />
-                  <div className="form-hint">NIM dikelola oleh sistem akademik.</div>
-                </div>
-
-                {editMode && (
-                  <div className="btn-row">
-                    <button className="btn-primary-sm" disabled={savingNama || !formNama.trim()} onClick={handleSaveNama}>
-                      {savingNama ? "Menyimpan..." : "💾 Simpan Perubahan"}
-                    </button>
-                    <button className="btn-outline-sm" onClick={() => { setEditMode(false); setNamaMsg({ type: "", text: "" }); }}>
-                      Batal
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Keamanan akun */}
-            <div className="profil-card">
-              <div className="profil-card-header">
-                <span className="profil-card-title">Keamanan Akun</span>
-              </div>
-              <div className="profil-card-body">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid #f1f5f9" }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Password</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Terakhir diubah: tidak diketahui</div>
-                  </div>
-                  <button className="btn-outline-sm" onClick={() => setShowPwModal(true)}>
-                    🔑 Ganti Password
-                  </button>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 0" }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Status Akun</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Akun aktif dan terverifikasi</div>
-                  </div>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", background: "#f0fdf4", color: "#15803d", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
-                    ● Aktif
-                  </span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </main>
     </>
   );
 }
