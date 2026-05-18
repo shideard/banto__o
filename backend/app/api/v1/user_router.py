@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.persistence.database import get_db
 from app.services.user_service import UserService
-from app.schemas.user_schema import UserResponse, UserCreate
+from app.schemas.user_schema import UserResponse, UserCreate, NotifikasiResponse
+from app.persistence.user_orm import UserORM, NotifikasiORM
+from typing import Annotated
+
 
 router = APIRouter()
 user_service = UserService()
@@ -45,6 +48,47 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         "token_type": "bearer",
         "role": user.role,
         "nama": user.nama,
-        "email": user.email,  
+        "email": user.email,
+        "id": user.id,          # ← TAMBAHKAN INI
+        "nim": user.nim,        # ← untuk mahasiswa
     }
 
+
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    payload = user_service.decode_access_token(token)
+
+    email = payload.get("sub")
+    user = db.query(UserORM).filter(UserORM.email == email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User tidak ditemukan.")
+    return user
+
+@router.get("/me", response_model=UserResponse)
+def get_profile(current_user: Annotated[UserORM, Depends(get_current_user)]):
+    return current_user
+
+@router.patch("/me", response_model=UserResponse)
+def update_profile(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: Annotated[UserORM, Depends(get_current_user)] = None
+):
+    if "nama" in payload:
+        current_user.nama = payload["nama"]
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@router.get("/notifikasi", response_model=list[NotifikasiResponse])
+def get_notifikasi(
+    db: Session = Depends(get_db),
+    current_user: Annotated[UserORM, Depends(get_current_user)] = None
+):
+    return db.query(NotifikasiORM).filter(
+        NotifikasiORM.user_id == current_user.id
+    ).order_by(NotifikasiORM.waktu.desc()).limit(20).all()

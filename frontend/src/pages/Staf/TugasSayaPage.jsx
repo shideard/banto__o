@@ -75,9 +75,10 @@ export default function TugasSayaPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.TicketService.listTiket();
+      // Menggunakan getAllTiket agar seragam dengan page lain
+      const res = await ticketService.getAllTiket(); 
+      const all = Array.isArray(res) ? res : (res.data || []);
       // Filter hanya tiket yang milik staf ini
-      const all = Array.isArray(res.data) ? res.data : [];
       const mine = all.filter(t => t.staf_id === user?.id);
       setTickets(mine);
     } catch {
@@ -114,7 +115,7 @@ export default function TugasSayaPage() {
       <style>{styles}</style>
       <main className="staf-main">
         <div className="staf-breadcrumb">
-          <a href="/staff/dashboard">Portal Bantuan</a><span>›</span>
+          <Link to="/staff/dashboard">Portal Bantuan</Link><span>›</span>
           <strong>Tugas Saya</strong>
         </div>
         <div className="staf-page-header">
