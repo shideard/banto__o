@@ -68,3 +68,29 @@ class TiketResponse(BaseModel):
     pengajuan: Optional[PengajuanResponse] = None
     komentar: List[KomentarResponse] = []
     model_config = ConfigDict(from_attributes=True)
+
+# ── Chat Session ──────────────────────────────────────────────────────────────
+
+class ChatMessageResponse(BaseModel):
+    id: int
+    session_id: int
+    type: str
+    text: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class ChatSessionResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    created_at: datetime
+    updated_at: datetime
+    messages: List["ChatMessageResponse"] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class ChatSessionCreate(BaseModel):
+    title: str = "Percakapan Baru"
+
+class ChatMessageCreate(BaseModel):
+    text: str
+    type: str = "user"

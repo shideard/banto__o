@@ -1,7 +1,8 @@
+// frontend/src/context/AuthContext.jsx
 import { useState } from "react";
 import { TOKEN_KEY, USER_KEY } from "../utils/constants";
 import { AuthContext } from "./AuthContextValue";
-import api from "../services/api";
+import apiClient from "../services/ApiClient";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -18,17 +19,16 @@ export function AuthProvider({ children }) {
       formData.append("username", identifier);
       formData.append("password", password);
 
-      const response = await api.post("/auth/login", formData, {
+      const response = await apiClient.post("/auth/login", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
       const data = {
         access_token: response.data.access_token,
-        role: response.data.role,  // dari backend
+        role: response.data.role,
         nama: response.data.nama,
-        identifier,
+        email: response.data.email,
       };
-
       localStorage.setItem(TOKEN_KEY, data.access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(data));
       setToken(data.access_token);
@@ -41,13 +41,12 @@ export function AuthProvider({ children }) {
 
   const register = async (userData) => {
     try {
-      await api.post("/auth/register", {
+      await apiClient.post("/auth/register", {
         nama: userData.nama,
         email: userData.email,
         password: userData.password,
         role: userData.role || "mahasiswa",
       });
-      // Tidak auto-login, kembalikan signal sukses saja
       return { success: true };
     } catch (error) {
       throw error.response?.data || error.message;

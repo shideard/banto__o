@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleApiClients.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -324,12 +324,7 @@ export default function LoginPage() {
           <div className="hero">
             <div className="hero-pill">⊙ Layanan Akademik Terpadu</div>
             <h1>Satu tempat<br />untuk semua<br /><em>bantuan</em> akademik.</h1>
-            <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB — kapan saja, di mana saja.</p>
-            <div className="stats">
-              <div className="stat"><div className="stat-num">98%</div><div className="stat-lbl">Resolved</div></div>
-              <div className="stat"><div className="stat-num">&lt;24j</div><div className="stat-lbl">Respons</div></div>
-              <div className="stat"><div className="stat-num">12+</div><div className="stat-lbl">Layanan</div></div>
-            </div>
+            <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB - kapan saja, di mana saja.</p>
           </div>
         </div>
 
@@ -364,7 +359,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     className={`fi ${errors.email ? "err" : ""}`}
-                    placeholder={role === "mahasiswa" ? "email@apps.ipb.ac.id" : "email@ipb.ac.id"}
+                    placeholder={role === "mahasiswa" ? "username@apps.ipb.ac.id" : "username@ipb.ac.id"}
                     value={email}
                     onChange={e => { setEmail(e.target.value); setErrors(p => ({...p, email: ""})); }}
                     autoComplete="email"
@@ -406,7 +401,6 @@ export default function LoginPage() {
 
             <div className="footer-note">
               Belum punya akun? <Link to="/register">Buat akun baru</Link><br />
-              Butuh bantuan? <a href="#">Hubungi administrator</a>
             </div>
           </div>
         </div>

@@ -21,7 +21,7 @@ const styles = `
 
   .app-nav { position: sticky; top: 0; z-index: 100; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--white); border-bottom: 1.5px solid var(--gray-200); box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
   
-  /* Diubah menjadi justify-content: space-between agar kiri dan kanan terpisah rapi */
+  /* Diubah menjadi justify-content: space-between agar kiri dan kanan terpisah rApiClient */
   .app-nav-inner { width: 100%; padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
 
   .nav-left-group { display: flex; align-items: center; gap: 16px; }
@@ -133,7 +133,7 @@ export default function AppNavbar({ onToggleSidebar }) {
 
   const role = user?.role || "mahasiswa";
   const unreadCount = notifs.filter(n => n.unread).length;
-  const initials = (user?.name || user?.nama || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = (user?.nama || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const handler = (e) => {
@@ -225,7 +225,7 @@ export default function AppNavbar({ onToggleSidebar }) {
                     <div className="user-dropdown-name">{user?.name || user?.nama}</div>
                     <div className="user-dropdown-role">
                       <span className="role-badge">{role}</span>
-                      {user?.nim || user?.identifier}
+                      {user?.email}
                     </div>
                   </div>
                   <div className="user-dropdown-menu">

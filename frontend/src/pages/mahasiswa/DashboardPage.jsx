@@ -1,10 +1,11 @@
+// frontend/src/pages/mahasiswa/DashboardPage.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { listTiket } from "../../services/ticketService";
+import { TOKEN_KEY } from "../../utils/constants";
+import ticketService from "../../services/TicketService";
 
 const styles = `
-  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA SAJA --- */
   .db-main {
     padding: 32px 40px;
     max-width: 1200px;
@@ -39,7 +40,6 @@ const styles = `
     color: var(--gray-500);
   }
 
-  /* Cards Grid */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -81,7 +81,6 @@ const styles = `
   .stat-desc.success { color: var(--success); }
   .stat-desc.warning { color: #d97706; }
 
-  /* Alert */
   .db-alert {
     background: var(--warning-bg);
     border: 1.5px solid var(--warning-border);
@@ -95,7 +94,6 @@ const styles = `
     margin-bottom: 32px;
   }
 
-  /* Table Container */
   .table-card {
     background: var(--white);
     border: 1.5px solid var(--gray-200);
@@ -166,13 +164,10 @@ const styles = `
   }
 
   .td-id { font-weight: 700; color: var(--ipb-blue-mid); }
-
   .td-subjek p { font-weight: 600; margin-bottom: 4px; }
   .td-subjek span { font-size: 12px; color: var(--gray-400); }
-
   .td-date { color: var(--gray-500); font-size: 13px; }
 
-  /* Status Pills */
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -192,13 +187,10 @@ const styles = `
 
   .pill-diproses { background: #fff7ed; color: #c2410c; }
   .pill-diproses::before { background: #ea580c; }
-
   .pill-dibuka { background: #eff6ff; color: #1d4ed8; }
   .pill-dibuka::before { background: #2563eb; }
-
   .pill-selesai { background: #f0fdf4; color: #15803d; }
   .pill-selesai::before { background: #16a34a; }
-
   .pill-ditutup { background: #f1f5f9; color: #475569; }
   .pill-ditutup::before { background: #64748b; }
 
@@ -214,57 +206,39 @@ export default function DashboardPage() {
   const getStatusClass = (status) => {
     const s = String(status || "").toLowerCase();
     switch (s) {
-      case "diproses":
-        return "pill-diproses";
-      case "dibuka":
-        return "pill-dibuka";
-      case "selesai":
-        return "pill-selesai";
-      case "ditutup":
-        return "pill-ditutup";
-      default:
-        return "pill-ditutup";
+      case "diproses": return "pill-diproses";
+      case "dibuka":   return "pill-dibuka";
+      case "selesai":  return "pill-selesai";
+      case "ditutup":  return "pill-ditutup";
+      default:         return "pill-ditutup";
     }
   };
 
   useEffect(() => {
-    let mounted = true;
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
 
-    (async () => {
-      try {
-        const res = await listTiket();
-        const data = res?.data;
-        if (!mounted) return;
-        setTickets(Array.isArray(data) ? data : []);
-      } catch {
-        if (!mounted) return;
-        setTickets([]);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
+    ticketService.getMyTickets()
+      .then(data => setTickets(data))
+      .catch(() => setTickets([]));
   }, []);
 
   const stats = {
-    total: tickets.length,
-    diproses: tickets.filter((t) => String(t?.status).toLowerCase() === "diproses").length,
-    selesai: tickets.filter((t) => String(t?.status).toLowerCase() === "selesai").length,
+    total:    tickets.length,
+    diproses: tickets.filter(t => String(t?.status).toLowerCase() === "diproses").length,
+    selesai:  tickets.filter(t => String(t?.status).toLowerCase() === "selesai").length,
   };
 
   return (
     <>
       <style>{styles}</style>
-      
-      {/* KONTEN UTAMA - TANPA NAVBAR DAN SIDEBAR */}
       <main className="db-main">
         <div className="db-breadcrumb">
           Beranda <span>›</span> Dashboard
         </div>
 
         <div className="db-header">
-          <h1>Halo, {user?.nama || "Mut"}!</h1>
+          <h1>Halo, {user?.nama || ""}!</h1>
           <p>Selamat datang kembali. Berikut ringkasan tiket kamu.</p>
         </div>
 
@@ -294,18 +268,14 @@ export default function DashboardPage() {
         <div className="db-alert">
           <span>⚠️</span>
           <span>
-staf.
-            tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.
+            Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.
           </span>
         </div>
 
         <div className="table-card">
           <div className="table-header">
             <h2>Tiket Terbaru</h2>
-            {/* Ubah button jadi Link agar berfungsi menuju Tiket Saya */}
-            <Link to="/tiket/saya" className="btn-outline">
-              Lihat Semua
-            </Link>
+            <Link to="/tiket/saya" className="btn-outline">Lihat Semua</Link>
           </div>
           <table>
             <thead>
@@ -324,13 +294,15 @@ staf.
                     <td className="td-id">{ticket.id}</td>
                     <td className="td-subjek">
                       <p>{ticket.subjek}</p>
-                      <span>{String(ticket.kategori || "").split(" & ")[0]}</span>
+                      <span>{String(ticket.kategori_id || "").split(" & ")[0]}</span>
                     </td>
-                    <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
+                    <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori_id || "—"}</td>
                     <td>
                       <span className={`status-pill ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
                     </td>
-                    <td className="td-date">{ticket.waktu}</td>
+                    <td className="td-date">
+                      {ticket.tanggal_dibuat ? new Date(ticket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                    </td>
                   </tr>
                 ))
               ) : (

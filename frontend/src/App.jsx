@@ -7,6 +7,7 @@ import { useState } from "react";
 // Layout
 import AppNavbar from "./components/layout/AppNavbar";
 import Sidebar from "./components/layout/Sidebar";
+import StafSidebar from "./components/layout/StafSidebar";
 import Footer from "./components/layout/Footer";
 
 // Halaman Auth
@@ -21,7 +22,10 @@ import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 
 // Halaman Staf
 import StafDashboardPage from "./pages/Staf/StafDashboardPage";
-
+import TugasSayaPage from "./pages/Staf/TugasSayaPage";
+import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
+import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
+import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
 
 // Halaman Admin
 import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
@@ -51,7 +55,7 @@ function MahasiswaLayout() {
   );
 }
 
-// ── Layout Staf & Admin ───────────────────────────────────────────────────────
+// ── Layout Staf ───────────────────────────────────────────────────────────────
 function StafLayout() {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -59,7 +63,25 @@ function StafLayout() {
     <div className="app-root">
       <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
       <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
-        <Sidebar isOpen={isSidebarOpen} />
+        <StafSidebar isOpen={isSidebarOpen} />
+        <main style={{ flex: 1, background: "#f8fafc", overflowY: "auto" }}>
+          <Outlet />
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+// ── Layout Admin (pakai StafSidebar atau buat AdminSidebar sendiri) ───────────
+function AdminLayout() {
+  const { user } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  return (
+    <div className="app-root">
+      <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
+      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
+        <StafSidebar isOpen={isSidebarOpen} />
         <main style={{ flex: 1, background: "#f8fafc", overflowY: "auto" }}>
           <Outlet />
         </main>
@@ -109,12 +131,17 @@ function AppRoutes() {
         </ProtectedRoute>
       }>
         <Route path="/staff/dashboard" element={<StafDashboardPage />} />
+        <Route path="/staff/tugas-saya" element={<TugasSayaPage />} />
+        <Route path="/staff/antrean-tiket" element={<AntreanTiketPage />} />
+        <Route path="/staff/buat-tiket" element={<BuatTiketStafPage />} />
+        <Route path="/staff/tiket/:id" element={<DetailTiketStafPage />} />
+        {/* Tambahkan route staf lain di sini */}
       </Route>
 
       {/* Admin */}
       <Route element={
         <ProtectedRoute allowedRole="admin">
-          <StafLayout />
+          <AdminLayout />
         </ProtectedRoute>
       }>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />

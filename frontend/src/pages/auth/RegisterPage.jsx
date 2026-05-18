@@ -1,3 +1,4 @@
+// frontend/src/pages/auth/RegisterPage.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -26,7 +27,6 @@ const styles = `
 
   .pg { min-height: 100vh; display: flex; font-family: var(--font); }
 
-  /* ── LEFT ── */
   .pg-left {
     width: 48%;
     position: relative; overflow: hidden;
@@ -89,7 +89,6 @@ const styles = `
     font-size: 13.5px; line-height: 1.75; max-width: 300px;
   }
 
-  /* ── RIGHT ── */
   .pg-right {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -106,7 +105,6 @@ const styles = `
   }
   .form-head p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
 
-  /* role tabs */
   .role-tabs {
     display: flex; background: var(--gray-100);
     border: 1.5px solid var(--gray-200);
@@ -126,7 +124,6 @@ const styles = `
     box-shadow: 0 1px 6px rgba(0,0,0,0.07), 0 0 0 1px rgba(37,99,235,0.15);
   }
 
-  /* fields */
   .field { margin-bottom: 14px; }
   .field-lbl { font-size: 12.5px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; display: block; }
 
@@ -162,7 +159,6 @@ const styles = `
     border-radius: 9px; font-size: 13px; margin-bottom: 16px;
   }
 
-  /* submit */
   .btn-submit {
     width: 100%; height: 48px; margin-top: 8px;
     border: none; border-radius: 10px;
@@ -213,28 +209,32 @@ const styles = `
 `;
 
 export default function RegisterPage() {
-  const navigate      = useNavigate();
-  const { register }  = useAuth();
+  const navigate     = useNavigate();
+  const { register } = useAuth();
 
-  const [role,        setRole]        = useState("mahasiswa");
-  const [nama,        setNama]        = useState("");
-  const [email,       setEmail]       = useState("");
-  const [telepon,     setTelepon]     = useState("");
-  const [password,    setPassword]    = useState("");
-  const [showPass,    setShowPass]    = useState(false);
-  const [loading,     setLoading]     = useState(false);
-  const [errors,      setErrors]      = useState({});
+  const [role,     setRole]     = useState("mahasiswa");
+  const [nama,     setNama]     = useState("");
+  const [email,    setEmail]    = useState("");
+  const [nim,      setNim]      = useState("");
+  const [telepon,  setTelepon]  = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [errors,   setErrors]   = useState({});
 
   const validate = () => {
     const e = {};
-    if (!nama.trim())          e.nama     = "Nama lengkap wajib diisi";
-    if (!email.trim())         e.email    = "E-mail wajib diisi";
+    if (!nama.trim())     e.nama     = "Nama lengkap wajib diisi";
+    if (!email.trim())    e.email    = "E-mail wajib diisi";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-                               e.email    = "Format e-mail tidak valid";
-    if (!telepon.trim())       e.telepon  = "Nomor telepon wajib diisi";
-    else if (!/^(\+62|08)\d{8,12}$/.test(telepon.replace(/\s/g,"")))
-                               e.telepon  = "Format tidak valid (08xx atau +62)";
-    if (!password)             e.password = "Kata sandi wajib diisi";
+                          e.email    = "Format e-mail tidak valid";
+    if (role === "mahasiswa") {
+      if (!nim.trim())    e.nim      = "NIM wajib diisi";
+    }
+    if (!telepon.trim())  e.telepon  = "Nomor telepon wajib diisi";
+    else if (!/^(\+62|08)\d{8,12}$/.test(telepon.replace(/\s/g, "")))
+                          e.telepon  = "Format tidak valid (08xx atau +62)";
+    if (!password)        e.password = "Kata sandi wajib diisi";
     else if (password.length < 6) e.password = "Minimal 6 karakter";
     return e;
   };
@@ -248,7 +248,7 @@ export default function RegisterPage() {
     setErrors({});
     setLoading(true);
     try {
-      await register({ nama, email, password, role });
+      await register({ nama, email, password, role, nim: role === "mahasiswa" ? nim : undefined });
       navigate("/login");
     } catch (err) {
       const msg = err?.detail || err?.message || "Registrasi gagal, silakan coba lagi.";
@@ -283,7 +283,7 @@ export default function RegisterPage() {
             <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB — kapan saja, di mana saja.</p>
           </div>
 
-          <div /> {/* spacer */}
+          <div />
         </div>
 
         {/* ── RIGHT ── */}
@@ -294,7 +294,6 @@ export default function RegisterPage() {
               <p>Daftarkan diri Anda untuk mengakses layanan bantuan IPB.</p>
             </div>
 
-            {/* Role selector */}
             <div className="role-tabs">
               <button type="button"
                 className={`role-tab ${role === "mahasiswa" ? "on" : ""}`}
@@ -311,6 +310,7 @@ export default function RegisterPage() {
             {errors.general && <div className="alert-err">⚠️ {errors.general}</div>}
 
             <form onSubmit={handleSubmit} noValidate>
+
               {/* Nama Lengkap */}
               <div className="field">
                 <label className="field-lbl">Nama Lengkap</label>
@@ -336,6 +336,21 @@ export default function RegisterPage() {
                 </div>
                 {errors.email && <div className="ferr">{errors.email}</div>}
               </div>
+
+              {/* NIM — hanya muncul jika role mahasiswa */}
+              {role === "mahasiswa" && (
+                <div className="field">
+                  <label className="field-lbl">NIM</label>
+                  <div className="input-wrap">
+                    <span className="input-icon">🎓</span>
+                    <input type="text" className={`fi ${errors.nim ? "err" : ""}`}
+                      placeholder="Contoh: G6401231001"
+                      value={nim}
+                      onChange={e => { setNim(e.target.value); clearErr("nim"); }} />
+                  </div>
+                  {errors.nim && <div className="ferr">{errors.nim}</div>}
+                </div>
+              )}
 
               {/* Nomor Telepon */}
               <div className="field">

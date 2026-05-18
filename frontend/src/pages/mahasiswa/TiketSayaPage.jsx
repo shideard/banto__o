@@ -1,5 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
+import ticketService from "../../services/TicketService";
+
+
 
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
@@ -266,24 +269,27 @@ const styles = `
   }
 `;
 
-const MOCK_TICKETS = [
-  { id: "#0028", subjek: "Kendala Login SSO", kategori: "Administrasi Umum", status: "Dibuka", waktu: "Baru saja", deskripsi: "Saya tidak bisa login menggunakan SSO IPB sejak pagi ini. Keterangannya selalu password salah padahal sudah direset." },
-  { id: "#0027", subjek: "Pengajuan Cuti Akademik", kategori: "Akademik & Kurikulum", status: "Diproses", waktu: "2 jam lalu", deskripsi: "Saya ingin mengajukan cuti akademik untuk semester depan karena alasan kesehatan. Dokumen medis sudah saya lampirkan." },
-  { id: "#0026", subjek: "Sertifikat Lomba Belum Keluar", kategori: "Kemahasiswaan", status: "Diproses", waktu: "Kemarin", deskripsi: "Sertifikat juara 1 lomba esai nasional bulan lalu belum saya terima di portal kemahasiswaan." },
-  { id: "#0025", subjek: "Permintaan Transkrip Nilai", kategori: "Administrasi Umum", status: "Selesai", waktu: "2 hari lalu", deskripsi: "Mohon diterbitkan transkrip nilai resmi untuk keperluan pendaftaran beasiswa." },
-  { id: "#0024", subjek: "Jadwal Ujian Bentrok", kategori: "Akademik & Kurikulum", status: "Selesai", waktu: "3 hari lalu", deskripsi: "Jadwal ujian mata kuliah A dan B di KRS saya bentrok pada hari Selasa jam 10 pagi." },
-  { id: "#0023", subjek: "Permohonan perbaikan nilai semester 5", kategori: "Akademik & Kurikulum", status: "Diproses", waktu: "4 hari lalu", deskripsi: "Mohon izin melakukan perbaikan nilai untuk mata kuliah Jaringan Komputer karena ada kesalahan rekap nilai tugas akhir." },
-  { id: "#0021", subjek: "Informasi beasiswa Peningkatan Prestasi", kategori: "Keuangan & Beasiswa", status: "Dibuka", waktu: "1 minggu lalu", deskripsi: "Saya ingin bertanya apakah beasiswa PPA tahun ini kuotanya ditambah?" },
-  { id: "#0019", subjek: "Hujan Gerimis", kategori: "Lainnya", status: "Selesai", waktu: "2 minggu lalu", deskripsi: "Tes fitur tiket saja." },
-  { id: "#0017", subjek: "Kicaw", kategori: "Lainnya", status: "Ditutup", waktu: "1 bulan lalu", deskripsi: "Sistem error saat upload Kicaw." },
-];
-
 export default function TiketSayaPage() {
+  const [tickets, setTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Semua");
   const [selectedTicket, setSelectedTicket] = useState(null);
 
+  // Perbaikan error warning: Cek token di awal sebelum render, lalu set nilai awal state loading
+  const hasToken = Boolean(localStorage.getItem("banto_token"));
+  const [loading, setLoading] = useState(hasToken);
+
+  useEffect(() => {
+    if (!hasToken) return;
+
+    ticketService.getMyTickets()
+      .then(data => setTickets(data))
+      .catch(() => setTickets([]))
+      .finally(() => setLoading(false));
+  }, [hasToken]);
+
   const getStatusClass = (status) => {
+    if (!status) return "pill-ditutup";
     switch (status.toLowerCase()) {
       case "diproses": return "pill-diproses";
       case "dibuka": return "pill-dibuka";
@@ -294,13 +300,15 @@ export default function TiketSayaPage() {
   };
 
   const filteredTickets = useMemo(() => {
-    return MOCK_TICKETS.filter(ticket => {
-      const matchSearch = ticket.subjek.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          ticket.id.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchTab = activeTab === "Semua" || ticket.status === activeTab;
+    return tickets.filter(ticket => {
+      const matchSearch =
+        String(ticket.subjek || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(ticket.id).includes(searchTerm.replace("#", ""));
+      const matchTab = activeTab === "Semua" ||
+        String(ticket.status).toUpperCase() === activeTab.toUpperCase();
       return matchSearch && matchTab;
     });
-  }, [searchTerm, activeTab]);
+  }, [tickets, searchTerm, activeTab]);
 
   return (
     <>
@@ -346,7 +354,7 @@ export default function TiketSayaPage() {
                 className={`tab-btn ${activeTab === tab ? "active" : ""}`}
                 onClick={() => setActiveTab(tab)}
               >
-                {tab === "Semua" ? `Semua (${MOCK_TICKETS.length})` : tab}
+                {tab === "Semua" ? `Semua (${tickets.length})` : tab}
               </button>
             ))}
           </div>
@@ -365,26 +373,36 @@ export default function TiketSayaPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTickets.length > 0 ? (
-                  filteredTickets.map((ticket, idx) => (
-                    <tr key={idx} onClick={() => setSelectedTicket(ticket)}>
-                      <td className="td-id">{ticket.id}</td>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                      Memuat tiket...
+                    </td>
+                  </tr>
+                ) : filteredTickets.length > 0 ? (
+                  filteredTickets.map((ticket) => (
+                    <tr key={ticket.id} onClick={() => setSelectedTicket(ticket)}>
+                      <td className="td-id">#{ticket.id}</td>
                       <td className="td-subjek">
                         <p>{ticket.subjek}</p>
                       </td>
-                      <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori}</td>
+                      <td style={{ color: "var(--gray-500)", fontSize: 13 }}>
+                        {ticket.kategori_id || "—"}
+                      </td>
                       <td>
                         <span className={`status-pill ${getStatusClass(ticket.status)}`}>
                           {ticket.status}
                         </span>
                       </td>
-                      <td className="td-date">{ticket.waktu}</td>
+                      <td className="td-date">
+                        {ticket.tanggal_dibuat ? new Date(ticket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "var(--gray-400)" }}>
-                      Tidak ada tiket yang ditemukan.
+                    <td colSpan="5" style={{ textAlign: "center", padding: 40, color: "var(--gray-400)" }}>
+                      Tidak ada tiket ditemukan.
                     </td>
                   </tr>
                 )}
@@ -400,7 +418,7 @@ export default function TiketSayaPage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-group">
-                <h2>Detail Tiket {selectedTicket.id}</h2>
+                <h2>Detail Tiket #{selectedTicket.id}</h2>
                 <span className={`status-pill ${getStatusClass(selectedTicket.status)}`}>
                   {selectedTicket.status}
                 </span>
@@ -418,18 +436,20 @@ export default function TiketSayaPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
               <div className="detail-group">
                 <div className="detail-label">Kategori</div>
-                <div className="detail-value">{selectedTicket.kategori}</div>
+                <div className="detail-value">{selectedTicket.kategori_id || "—"}</div>
               </div>
               <div className="detail-group">
                 <div className="detail-label">Waktu Dibuat</div>
-                <div className="detail-value">{selectedTicket.waktu}</div>
+                <div className="detail-value">
+                  {selectedTicket.tanggal_dibuat ? new Date(selectedTicket.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                </div>
               </div>
             </div>
 
             <div className="detail-group">
               <div className="detail-label">Deskripsi Masalah</div>
               <div className="detail-desc-box">
-                {selectedTicket.deskripsi}
+                {selectedTicket.deskripsi || "Tidak ada deskripsi yang dilampirkan."}
               </div>
             </div>
           </div>

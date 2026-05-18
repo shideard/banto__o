@@ -24,10 +24,10 @@ DATABASE_URL=postgresql://[user]:[password]@[host]:[port]/[database]
 ```
 
 #### 3. **Frontend Base URL Benar**
-Di `frontend/src/services/api.js`:
+Di `frontend/src/services/ApiClient.js`:
 ```javascript
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/v1",  // ✅ Harus begini
+const ApiClient = axios.create({
+  baseURL: "http://127.0.0.1:8000/ApiClient/v1",  // ✅ Harus begini
   headers: {
     "Content-Type": "application/json",
   },
@@ -42,7 +42,7 @@ Buka DevTools (F12) → Console tab:
 
 #### 5. **Check Network Tab**
 DevTools → Network tab → Create Account:
-- Lihat request ke `/api/v1/auth/register`
+- Lihat request ke `/ApiClient/v1/auth/register`
 - Check status code: 
   - ✅ 200/201 = Sukses
   - 🔴 400 = Data invalid
@@ -55,7 +55,7 @@ DevTools → Network tab → Create Account:
 ```bash
 # Test backend berjalan
 curl http://127.0.0.1:8000/
-# Harusnya return: {"message": "Banto__o API is online!"}
+# Harusnya return: {"message": "Banto__o ApiClient is online!"}
 ```
 
 **Step B: Database Connection**

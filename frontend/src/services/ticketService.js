@@ -1,32 +1,32 @@
-import api from "./api";
+// frontend/src/services/TicketService.js
+import apiClient from "./ApiClient";
 
-export async function listKategori() {
-  return api.get("/kategori");
+class TicketService {
+  async getKategori() {
+    const res = await apiClient.get("/kategori");
+    return res.data;
+  }
+
+  async getMyTickets() {
+    const res = await apiClient.get("/tiket");
+    return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getTicketById(tiketId) {
+    const res = await apiClient.get(`/tiket/${tiketId}`);
+    return res.data;
+  }
+
+  async createTicket(payload) {
+    const res = await apiClient.post("/tiket", payload);
+    return res.data;
+  }
+
+  async addKomentar(tiketId, isi) {
+    const res = await apiClient.post(`/tiket/${tiketId}/komentar`, { isi });
+    return res.data;
+  }
 }
 
-export async function listTiket() {
-  return api.get("/tiket");
-}
-
-export async function getTiketById(tiketId) {
-  return api.get(`/tiket/${tiketId}`);
-}
-
-// Buat tiket: backend mengharapkan tipe skema TiketCreate.
-// Jika backend belum support multipart upload, maka kirim hanya field JSON.
-export async function createTiket(payload) {
-  return api.post("/tiket", payload);
-}
-
-export async function claimTiket(tiketId, payload) {
-  return api.post(`/tiket/${tiketId}/klaim`, payload);
-}
-
-export async function updateTiketStatus(tiketId, payload) {
-  return api.patch(`/tiket/${tiketId}/status`, payload);
-}
-
-export async function addKomentar(tiketId, payload) {
-  return api.post(`/tiket/${tiketId}/komentar`, payload);
-}
-
+const ticketService = new TicketService();
+export default ticketService;

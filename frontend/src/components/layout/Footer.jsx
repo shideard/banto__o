@@ -180,8 +180,6 @@ const layananLinks = [
   { icon: "🎫", label: "Buka Tiket Baru" },
   { icon: "🔍", label: "Cek Status Tiket" },
   { icon: "🤖", label: "Chatbot BantO__O" },
-  { icon: "📚", label: "Panduan Layanan" },
-  { icon: "❓", label: "FAQ" },
 ];
 
 const akademikLinks = [
@@ -213,12 +211,6 @@ export default function Footer() {
             <p className="footer-brand-desc">
               Platform layanan administrasi akademik terpadu Institut Pertanian Bogor. Sampaikan kebutuhanmu, kami siap membantu.
             </p>
-            <div className="footer-socials">
-              <a className="social-btn" href="#" title="Instagram">📸</a>
-              <a className="social-btn" href="#" title="Twitter/X">🐦</a>
-              <a className="social-btn" href="#" title="YouTube">▶️</a>
-              <a className="social-btn" href="#" title="Email">✉️</a>
-            </div>
           </div>
 
           {/* Layanan */}
@@ -258,16 +250,11 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div className="footer-copyright">
-            © {year} <strong>IPB University</strong> — Help Center. All rights reserved.
+            © {year} <strong>IPB University</strong> 
           </div>
           <div className="footer-status">
             <div className="status-dot" />
             Semua sistem berjalan normal
-          </div>
-          <div className="footer-bottom-links">
-            <a className="footer-bottom-link" href="#">Kebijakan Privasi</a>
-            <a className="footer-bottom-link" href="#">Syarat Layanan</a>
-            <a className="footer-bottom-link" href="#">Aksesibilitas</a>
           </div>
         </div>
       </footer>

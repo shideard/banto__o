@@ -175,12 +175,7 @@ export default function Sidebar({ isOpen = true }) {
               </div>
             </Link>
 
-            <Link to="/pengaturan" className={`sidebar-link ${isActive("/pengaturan") ? "active" : ""}`}>
-              <div className="sidebar-link-left">
-                <span className="sidebar-icon">⚙️</span>
-                Pengaturan
-              </div>
-            </Link>
+          
           </div>
 
         </div>
