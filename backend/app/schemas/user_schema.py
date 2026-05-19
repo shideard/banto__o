@@ -50,3 +50,7 @@ class NotifikasiResponse(BaseModel):
     dibaca: bool
     tiket_id: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
+
+class PasswordUpdate(BaseModel):
+    password_lama: str
+    password_baru: str
