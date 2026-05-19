@@ -121,6 +121,8 @@ function AppRoutes() {
       <Route path="/register" element={
         user ? <Navigate to={getDashboard(user.role)} replace /> : <RegisterPage />
       } />
+      {/* ── Preview Chatbot (tanpa login) ── */}
+      <Route path="/chatbot-preview" element={<ChatbotPage />} />
 
       {/* ── Mahasiswa ── */}
       <Route element={
