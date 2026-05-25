@@ -1,14 +1,12 @@
 import './index.css';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
-import { useState } from "react";
 
 // ── Komponen Layout ───────────────────────────────────────────────────────────
-import AppNavbar from "./components/layout/AppNavbar";
-import Sidebar from "./components/layout/Sidebar";
-import StafSidebar from "./components/layout/StafSidebar";
-import Footer from "./components/layout/Footer";
+import MahasiswaLayout from "./components/layout/MahasiswaLayout";
+import StafLayout from "./components/layout/StafLayout";
+import AdminLayout from "./components/layout/AdminLayout";
 
 // ── Halaman Auth ──────────────────────────────────────────────────────────────
 import LoginPage from "./pages/auth/LoginPage";
@@ -23,15 +21,15 @@ import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 import ProfilPage from "./pages/mahasiswa/ProfilPage";
 
 // ── Halaman Staf ──────────────────────────────────────────────────────────────
-import StafDashboardPage from "./pages/Staf/StafDashboardPage";
-import TugasSayaPage from "./pages/Staf/TugasSayaPage";
-import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
-import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
-import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
-import ProfilStafPage from "./pages/Staf/ProfilStafPage";
+import StafDashboardPage from "./pages/staf/StafDashboardPage";
+import TugasSayaPage from "./pages/staf/TugasSayaPage";
+import AntreanTiketPage from "./pages/staf/AntreanTiketPage";
+import DetailTiketStafPage from "./pages/staf/DetailTiketStafPage";
+import BuatTiketStafPage from "./pages/staf/BuatTiketStafPage";
+import ProfilStafPage from "./pages/staf/ProfilStafPage";
 
 // ── Halaman Admin ─────────────────────────────────────────────────────────────
-import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
 
 // ── Helper redirect berdasarkan role ─────────────────────────────────────────
@@ -41,77 +39,20 @@ function getDashboard(role) {
   return "/dashboard";
 }
 
-// ── Layout Mahasiswa ──────────────────────────────────────────────────────────
-function MahasiswaLayout() {
-  const { user } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
-  return (
-    <div className="app-root">
-      <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
-      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
-        <Sidebar isOpen={isSidebarOpen} />
-        <main style={{ flex: 1, background: "#f8fafc", overflowY: "auto" }}>
-          <Outlet />
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
-}
-
-// ── Layout Staf ───────────────────────────────────────────────────────────────
-function StafLayout() {
-  const { user } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
-  return (
-    <div className="app-root">
-      <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
-      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
-        <StafSidebar isOpen={isSidebarOpen} />
-        <main style={{ flex: 1, background: "#f8fafc", overflowY: "auto" }}>
-          <Outlet />
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
-}
-
-// ── Layout Admin ──────────────────────────────────────────────────────────────
-function AdminLayout() {
-  const { user } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
-  return (
-    <div className="app-root">
-      <AppNavbar user={user} onToggleSidebar={() => setIsSidebarOpen(p => !p)} />
-      <div style={{ display: "flex", minHeight: "calc(100vh - 70px)" }}>
-        <StafSidebar isOpen={isSidebarOpen} />
-        <main style={{ flex: 1, background: "#f8fafc", overflowY: "auto" }}>
-          <Outlet />
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
-}
-
 // ── Protected Route ───────────────────────────────────────────────────────────
 function ProtectedRoute({ children, allowedRole }) {
   const { user } = useAuth();
-  
+
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRole && user.role !== allowedRole) return <Navigate to="/login" replace />;
-  
+
   return children;
 }
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 function AppRoutes() {
   const { user } = useAuth();
-  
+
   return (
     <Routes>
       {/* ── Publik ── */}

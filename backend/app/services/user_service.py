@@ -1,5 +1,4 @@
 import os
-from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -7,6 +6,7 @@ from passlib.context import CryptContext
 
 from app.persistence.user_orm import UserORM, DivisiStafORM, NotifikasiORM
 from app.schemas.user_schema import MahasiswaCreate, StafCreate, DivisiStafCreate, UserCreate
+from app.persistence.repositories.user_repository import UserRepository
 
 
 # Konfigurasi Keamanan
@@ -17,6 +17,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserService:
+    def __init__(self, repo: UserRepository):
+        self.repo = repo
 
     # Logika Hashing
     def verify_password(self, plain_password, hashed_password):
@@ -41,8 +43,8 @@ class UserService:
         return payload
 
     # Registrasi & Database Integration
-    def create_user(self, db: Session, user: UserCreate):
-        existing_user = db.query(UserORM).filter(UserORM.email == user.email).first()
+    def create_user(self, user: UserCreate):
+        existing_user = self.repo.get_user_by_email(user.email)
         if existing_user:
             raise ValueError(f"Email {user.email} sudah terdaftar")
 
@@ -50,9 +52,8 @@ class UserService:
         if user.role not in ("mahasiswa", "staf", "admin"):
             raise ValueError("Role tidak valid")
 
-        # PERBAIKAN: cek NIM duplikat jika mahasiswa
         if user.role == "mahasiswa" and user.nim:
-            if db.query(UserORM).filter(UserORM.nim == user.nim).first():
+            if self.repo.get_user_by_nim(user.nim):
                 raise ValueError(f"NIM {user.nim} sudah terdaftar")
 
         hashed_password = self.get_password_hash(user.password)
@@ -61,32 +62,26 @@ class UserService:
             nama=user.nama,
             password=hashed_password,
             role=user.role,
-            nim=user.nim if user.role == "mahasiswa" else None,           # PERBAIKAN
-            divisi_id=user.divisi_id if user.role == "staf" else None,   # PERBAIKAN
+            nim=user.nim if user.role == "mahasiswa" else None,
+            divisi_id=user.divisi_id if user.role == "staf" else None,
         )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
+        return self.repo.create_user(db_user)
 
     # ── Divisi ────────────────────────────────────────────────────────────────
 
-    def create_divisi(self, db: Session, data: DivisiStafCreate) -> DivisiStafORM:
+    def create_divisi(self, data: DivisiStafCreate) -> DivisiStafORM:
         orm = DivisiStafORM(nama_divisi=data.nama_divisi)
-        db.add(orm)
-        db.commit()
-        db.refresh(orm)
-        return orm
+        return self.repo.create_divisi(orm)
 
-    def get_all_divisi(self, db: Session) -> List[DivisiStafORM]:
-        return db.query(DivisiStafORM).all()
+    def get_all_divisi(self) -> List[DivisiStafORM]:
+        return self.repo.get_all_divisi()
 
     # ── User ──────────────────────────────────────────────────────────────────
 
-    def register_mahasiswa(self, db: Session, data: MahasiswaCreate) -> UserORM:
-        if db.query(UserORM).filter(UserORM.email == data.email).first():
+    def register_mahasiswa(self, data: MahasiswaCreate) -> UserORM:
+        if self.repo.get_user_by_email(data.email):
             raise ValueError("Email sudah terdaftar.")
-        if db.query(UserORM).filter(UserORM.nim == data.nim).first():
+        if self.repo.get_user_by_nim(data.nim):
             raise ValueError("NIM sudah terdaftar.")
 
         hashed_password = self.get_password_hash(data.password)
@@ -97,13 +92,10 @@ class UserService:
             role="mahasiswa",
             nim=data.nim,
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
+        return self.repo.create_user(user)
 
-    def register_staf(self, db: Session, data: StafCreate) -> UserORM:
-        if db.query(UserORM).filter(UserORM.email == data.email).first():
+    def register_staf(self, data: StafCreate) -> UserORM:
+        if self.repo.get_user_by_email(data.email):
             raise ValueError("Email sudah terdaftar.")
 
         hashed_password = self.get_password_hash(data.password)
@@ -114,32 +106,22 @@ class UserService:
             role="staf",
             divisi_id=data.divisi_id,
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
+        return self.repo.create_user(user)
 
-    def get_user(self, db: Session, user_id: int) -> UserORM:
-        user = db.query(UserORM).filter(UserORM.id == user_id).first()
+    def get_user(self, user_id: int) -> UserORM:
+        user = self.repo.get_user_by_id(user_id)
         if not user:
             raise ValueError("User tidak ditemukan.")
         return user
 
     # ── Notifikasi ────────────────────────────────────────────────────────────
 
-    def get_notifikasi(self, db: Session, user_id: int) -> List[NotifikasiORM]:
-        return (
-            db.query(NotifikasiORM)
-            .filter(NotifikasiORM.user_id == user_id)
-            .order_by(NotifikasiORM.waktu.desc())
-            .all()
-        )
+    def get_notifikasi(self, user_id: int) -> List[NotifikasiORM]:
+        return self.repo.get_notifikasi_by_user_id(user_id)
 
-    def tandai_dibaca(self, db: Session, notifikasi_id: int) -> NotifikasiORM:
-        notif = db.query(NotifikasiORM).filter(NotifikasiORM.id == notifikasi_id).first()
+    def tandai_dibaca(self, notifikasi_id: int) -> NotifikasiORM:
+        notif = self.repo.get_notifikasi_by_id(notifikasi_id)
         if not notif:
             raise ValueError("Notifikasi tidak ditemukan.")
         notif.dibaca = True
-        db.commit()
-        db.refresh(notif)
-        return notif
+        return self.repo.update_notifikasi(notif)

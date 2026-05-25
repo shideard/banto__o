@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from typing import Annotated, List
 from pydantic import BaseModel
 from datetime import datetime
 
-from app.persistence.database import SessionLocal
+from app.persistence.database import SessionLocal, get_db
 from app.persistence.ticket_orm import ChatSessionORM, ChatMessageORM
 from app.schemas.ticket_schema import (
     TiketCreate, TiketResponse, TiketUpdateStatus, TiketAssignStaf,
@@ -15,65 +14,35 @@ from app.schemas.ticket_schema import (
     ChatMessageCreate, ChatMessageResponse,
 )
 from app.services.ticket_service import TicketService
+from app.persistence.repositories.ticket_repository import TicketRepository
 from app.services.chatbot_service import ChatbotService
-from app.services.user_service import UserService
 from app.persistence.user_orm import UserORM
+
+# Import get_current_user from user_router
+from app.api.v1.user_router import get_current_user
 
 router = APIRouter()
 
+db_dep = Annotated[Session, Depends(get_db)]
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_ticket_service(db: db_dep) -> TicketService:
+    repo = TicketRepository(db)
+    return TicketService(repo)
 
-
-db_dep        = Annotated[Session, Depends(get_db)]
-svc           = TicketService()
-chatbot       = ChatbotService()
-user_svc      = UserService()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-
-
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: db_dep) -> UserORM:
-    try:
-        payload = user_svc.decode_access_token(token)
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    email = payload.get("sub")
-    if not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token tidak valid.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user = db.query(UserORM).filter(UserORM.email == email).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User tidak ditemukan.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
-
+chatbot = ChatbotService()
 
 # ── Kategori ──────────────────────────────────────────────────────────────────
 
 @router.get("/kategori", response_model=List[KategoriResponse], tags=["Kategori"])
-def list_kategori(db: db_dep):
-    return svc.get_all_kategori(db)
+def list_kategori(svc: TicketService = Depends(get_ticket_service)):
+    return svc.get_all_kategori()
 
 @router.post("/kategori", response_model=KategoriResponse, status_code=201, tags=["Kategori"])
-def create_kategori(payload: KategoriCreate, db: db_dep):
-    return svc.create_kategori(db, payload)
+def create_kategori(
+    payload: KategoriCreate,
+    svc: TicketService = Depends(get_ticket_service)
+):
+    return svc.create_kategori(payload)
 
 
 # ── Tiket ─────────────────────────────────────────────────────────────────────
@@ -81,31 +50,31 @@ def create_kategori(payload: KategoriCreate, db: db_dep):
 @router.post("/tiket", response_model=TiketResponse, status_code=201, tags=["Tiket"])
 def buat_tiket(
     payload: TiketCreate,
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
     if current_user.role != "mahasiswa":
         raise HTTPException(status_code=403, detail="Hanya mahasiswa yang dapat membuat tiket.")
     payload.mahasiswa_id = current_user.id
-    return svc.buat_tiket(db, payload)
+    return svc.buat_tiket(payload)
 
 
 @router.get("/tiket", response_model=List[TiketResponse], tags=["Tiket"])
 def list_tiket(
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
-    return svc.get_all_tiket_for_user(db, current_user.id, current_user.role)
+    return svc.get_all_tiket_for_user(current_user.id, current_user.role)
 
 
 @router.get("/tiket/{tiket_id}", response_model=TiketResponse, tags=["Tiket"])
 def get_tiket(
     tiket_id: int,
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
     try:
-        return svc.get_tiket_for_user(db, tiket_id, current_user.id, current_user.role)
+        return svc.get_tiket_for_user(tiket_id, current_user.id, current_user.role)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -114,15 +83,15 @@ def get_tiket(
 def klaim_tiket(
     tiket_id: int,
     payload: TiketAssignStaf,
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
     if current_user.role != "staf":
         raise HTTPException(status_code=403, detail="Hanya staf yang dapat mengklaim tiket.")
     if payload.staf_id != current_user.id:
         raise HTTPException(status_code=400, detail="staf_id harus sesuai user login.")
     try:
-        return svc.klaim_tiket(db, tiket_id, payload)
+        return svc.klaim_tiket(tiket_id, payload)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -131,13 +100,13 @@ def klaim_tiket(
 def update_status(
     tiket_id: int,
     payload: TiketUpdateStatus,
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
     if current_user.role != "staf":
         raise HTTPException(status_code=403, detail="Hanya staf yang dapat mengubah status tiket.")
     try:
-        return svc.update_status(db, tiket_id, payload, staf_id=current_user.id)
+        return svc.update_status(tiket_id, payload, staf_id=current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -153,13 +122,13 @@ def update_status(
 def tambah_komentar(
     tiket_id: int,
     payload: KomentarCreate,
-    db: db_dep,
     current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service)
 ):
     payload.penulis_id = current_user.id
     payload.role = "Staff Administrasi" if current_user.role == "staf" else "Mahasiswa"
     try:
-        return svc.tambah_komentar(db, tiket_id, payload)
+        return svc.tambah_komentar(tiket_id, payload)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -177,7 +146,7 @@ def tanya_chatbot(payload: ChatbotQuery):
     }
 
 
-# ── Chat Session ──────────────────────────────────────────────────────────────
+# ── Chat Session (Not yet refactored to Repo, but using DB dep) ──────────────
 
 @router.get("/chat/sessions", response_model=List[ChatSessionResponse], tags=["Chatbot"])
 def get_chat_sessions(
