@@ -9,6 +9,7 @@ from app.persistence.user_orm import UserORM, NotifikasiORM
 from typing import Annotated
 
 
+
 router = APIRouter()
 
 
@@ -96,33 +97,44 @@ def update_profile(
 
 @router.get("/notifikasi", response_model=list[NotifikasiResponse])
 def get_notifikasi(
+    db: Session = Depends(get_db),
     user_service: UserService = Depends(get_user_service),
+
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
+
     return db.query(NotifikasiORM).filter(
         NotifikasiORM.user_id == current_user.id
     ).order_by(NotifikasiORM.waktu.desc()).limit(20).all()
+
+
 
 @router.patch("/notifikasi/{notif_id}/baca", response_model=NotifikasiResponse)
 def mark_notifikasi_read(
     notif_id: int,
     db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
     try:
         return user_service.tandai_dibaca(db, notif_id)
+
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.patch("/me/password")
 def update_password(
     payload: PasswordUpdate,
     db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
     if not user_service.verify_password(payload.password_lama, current_user.password):
+
         raise HTTPException(status_code=400, detail="Password lama tidak sesuai")
     current_user.password = user_service.get_password_hash(payload.password_baru)
     db.commit()
     return {"message": "Password berhasil diubah"}
-    return user_service.get_notifikasi(current_user.id)
+
+
