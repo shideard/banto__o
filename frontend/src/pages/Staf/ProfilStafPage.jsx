@@ -1,4 +1,4 @@
-// frontend/src/pages/Staf/ProfilStafPage.jsx
+// frontend/src/pages/staf/ProfilStafPage.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
