@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -124,15 +125,21 @@ export default function AntreanTiketPage() {
         <div className="antrean-stats">
           <div className="antrean-stat">
             <div><div className="label">Total Tiket</div><div className="value">{loading ? "—" : tickets.length}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#eff6ff" }}>📬</div>
+            <div className="antrean-stat-icon" style={{ background: "#eff6ff", color: "var(--color-brand)" }}>
+              <AppIcon name="Inbox" variant="lg" />
+            </div>
           </div>
           <div className="antrean-stat">
             <div><div className="label">Tiket Saya</div><div className="value">{loading ? "—" : tugasSaya}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#f1f5f9" }}>🎫</div>
+            <div className="antrean-stat-icon" style={{ background: "#f1f5f9", color: "var(--color-gray-500)" }}>
+              <AppIcon name="Ticket" variant="lg" />
+            </div>
           </div>
           <div className="antrean-stat">
             <div><div className="label">Belum Diklaim</div><div className="value" style={{ color: "#ea580c" }}>{loading ? "—" : belumDiklaim}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#fff7ed" }}>⏳</div>
+            <div className="antrean-stat-icon" style={{ background: "#fff7ed", color: "#f97316" }}>
+              <AppIcon name="Hourglass" variant="lg" />
+            </div>
           </div>
         </div>
 

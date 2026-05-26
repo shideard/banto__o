@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
+import AppIcon from "../../components/ui/AppIcon";
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
   .bt-main {
@@ -59,7 +60,7 @@ const styles = `
   .bt-upload { border: 2px dashed var(--gray-200); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
   .bt-upload:hover, .bt-upload.drag-over { border-color: var(--ipb-blue-lite); background: rgba(59,130,246,0.03); }
   .bt-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .bt-upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .bt-upload-icon { display: flex; justify-content: center; margin-bottom: 8px; }
   .bt-upload-text { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
   .bt-upload-sub { font-size: 11.5px; color: var(--gray-400); }
   .bt-file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
@@ -77,7 +78,7 @@ const styles = `
   /* Chatbot UI di Halaman Buat Tiket */
   .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
-  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
   .chatbot-header-name { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 3px; }
   .chatbot-header-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255,255,255,0.65); }
   .chatbot-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.6); animation: pulse 2s infinite; }
@@ -264,7 +265,7 @@ export default function BuatTiketPage() {
 
         <div className="bt-alert">
           <div className="bt-alert-inner">
-            <span>⚠️</span>
+            <span><AppIcon name="AlertTriangle" variant="sm" /></span>
             <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
           </div>
         </div>
@@ -272,7 +273,9 @@ export default function BuatTiketPage() {
         <div className="bt-content">
           <div className="bt-form-card">
             <div className="bt-form-card-header">
-              <div className="bt-form-card-icon">📝</div>
+              <div className="bt-form-card-icon">
+                <AppIcon name="FileText" size={16} color="white" />
+              </div>
               <div className="bt-form-card-title">Formulir Tiket</div>
             </div>
             <div className="bt-form-card-body">
@@ -294,7 +297,7 @@ export default function BuatTiketPage() {
                     onChange={(e) => { setTopik(e.target.value); setErrors(p => ({...p, topik: ""})); }}>
                     {TOPIK_LIST.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
-                  {errors.topik && <div className="bt-field-error">⚠ {errors.topik}</div>}
+                  {errors.topik && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.topik}</div>}
                   {topik && TOPIK_GUIDE[topik] && <div className="bt-topik-guide">{TOPIK_GUIDE[topik]}</div>}
                 </div>
 
@@ -303,7 +306,7 @@ export default function BuatTiketPage() {
                   <input type="text" className={`bt-input ${errors.subjek ? "has-error" : ""}`}
                     placeholder="Tuliskan judul singkat masalahmu" value={subjek}
                     onChange={(e) => { setSubjek(e.target.value); setErrors(p => ({...p, subjek: ""})); }} />
-                  {errors.subjek && <div className="bt-field-error">⚠ {errors.subjek}</div>}
+                  {errors.subjek && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.subjek}</div>}
                 </div>
 
                 <div className="bt-field">
@@ -312,7 +315,7 @@ export default function BuatTiketPage() {
                     placeholder="Jelaskan masalahmu secara detail..." value={deskripsi}
                     onChange={(e) => { setDeskripsi(e.target.value); setErrors(p => ({...p, deskripsi: ""})); }} rows={5} />
                   <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px", textAlign: "right" }}>{deskripsi.length} karakter</div>
-                  {errors.deskripsi && <div className="bt-field-error">⚠ {errors.deskripsi}</div>}
+                  {errors.deskripsi && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.deskripsi}</div>}
                 </div>
 
                 <div className="bt-field">
@@ -322,7 +325,9 @@ export default function BuatTiketPage() {
                     onDragLeave={() => setDragOver(false)}
                     onDrop={(e) => { e.preventDefault(); setDragOver(false); setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)].slice(0, 5)); }}>
                     <input type="file" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
-                    <div className="bt-upload-icon">📎</div>
+                    <div className="bt-upload-icon">
+                      <AppIcon name="Paperclip" size={26} color="#94a3b8" />
+                    </div>
                     <div className="bt-upload-text">Drag & drop atau klik untuk upload</div>
                     <div className="bt-upload-sub">PDF, DOC, JPG, PNG — Maks. 10MB per file</div>
                   </div>
@@ -341,7 +346,7 @@ export default function BuatTiketPage() {
                 <div className="bt-actions">
                   <button type="button" className="bt-btn-cancel" onClick={() => window.history.back()}>Batal</button>
                   <button type="submit" className="bt-btn-submit" disabled={submitting}>
-                    {submitting ? <><div className="spinner" /> Mengirim...</> : <>🎫 Buat Tiket</>}
+                    {submitting ? <><div className="spinner" /> Mengirim...</> : <><AppIcon name="Ticket" variant="sm" /> Buat Tiket</>}
                   </button>
                 </div>
               </form>
@@ -351,7 +356,9 @@ export default function BuatTiketPage() {
           {/* Chatbot Bantuan di Samping Kanan */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
-              <div className="chatbot-avatar">🤖</div>
+              <div className="chatbot-avatar">
+                <AppIcon name="Bot" size={18} color="white" />
+              </div>
               <div className="chatbot-header-info">
                 <div className="chatbot-header-name">BantO__O Assistant</div>
                 <div className="chatbot-header-status">
@@ -364,7 +371,11 @@ export default function BuatTiketPage() {
             <div className="bt-chatbot-messages">
               {messages.map(msg => (
                 <div key={msg.id} className={`chat-msg ${msg.type}`}>
-                  <div className="chat-msg-avatar">{msg.type === "bot" ? "🤖" : "👤"}</div>
+                  <div className="chat-msg-avatar">
+                    {msg.type === "bot"
+                      ? <AppIcon name="Bot"  variant="sm" />
+                      : <AppIcon name="User" variant="sm" />}
+                  </div>
                   <div>
                     <div className="chat-msg-bubble">{msg.text}</div>
                     {msg.quickReplies && (
@@ -380,7 +391,9 @@ export default function BuatTiketPage() {
               ))}
               {botTyping && (
                 <div className="chat-msg bot">
-                  <div className="chat-msg-avatar">🤖</div>
+                  <div className="chat-msg-avatar">
+                    <AppIcon name="Bot" variant="sm" />
+                  </div>
                   <div className="chat-typing"><span /><span /><span /></div>
                 </div>
               )}

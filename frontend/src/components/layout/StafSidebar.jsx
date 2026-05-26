@@ -1,205 +1,126 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+// ============================================================
+// StafSidebar.jsx — REFACTORED
+// Taruh di: frontend/src/components/layout/StafSidebar.jsx
+// ============================================================
 
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import AppIcon from '../ui/AppIcon';
+
+// Sekarang pakai CSS variables yang sama dengan Sidebar.jsx
+// — tidak ada lagi duplikasi class .staf-* vs .db-*
 const styles = `
   .staf-sidebar {
-    background: #ffffff;
-    border-right: 1.5px solid #e2e8f0;
+    background: var(--color-white);
+    border-right: 1.5px solid var(--color-gray-200);
     display: flex;
     flex-direction: column;
-    gap: 32px;
     height: calc(100vh - 70px);
     position: sticky;
     top: 70px;
     flex-shrink: 0;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.2s ease;
+    transition:
+      width   0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.2s ease;
     overflow: hidden;
   }
 
-  .staf-sidebar.open {
-    width: 260px;
-    padding: 24px 16px;
-    opacity: 1;
-  }
+  .staf-sidebar.open  { width: 260px; padding: 24px 16px; opacity: 1; }
+  .staf-sidebar.closed { width: 0;    padding: 24px 0;    opacity: 0; border-right: none; }
 
-  .staf-sidebar.closed {
-    width: 0;
-    padding: 24px 0;
-    opacity: 0;
-    border-right: none;
-  }
+  /* Re-use class yang SAMA dengan Sidebar.jsx — tidak perlu duplikat */
+  .staf-sidebar .sidebar-inner,
+  .staf-sidebar .sidebar-section,
+  .staf-sidebar .sidebar-title,
+  .staf-sidebar .sidebar-link,
+  .staf-sidebar .sidebar-link-left,
+  .staf-sidebar .sidebar-icon,
+  .staf-sidebar .sidebar-badge { /* sudah didefinisikan di Sidebar.jsx */ }
 
-  .staf-sidebar-inner {
-    width: 228px;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-  }
-
-  .staf-sidebar-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .staf-sidebar-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding-left: 12px;
-    margin-bottom: 4px;
-    white-space: nowrap;
-  }
-
-  .staf-sidebar-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #334155;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.2s;
-    white-space: nowrap;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-
-  .staf-sidebar-link:hover {
-    background: #f1f5f9;
-    color: #2563eb;
-  }
-
-  .staf-sidebar-link.active {
-    background: rgba(37, 99, 235, 0.08);
-    color: #2563eb;
-  }
-
-  .staf-sidebar-link-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .staf-sidebar-icon {
-    font-size: 18px;
-    color: #64748b;
-    transition: color 0.2s;
-  }
-
-  .staf-sidebar-link.active .staf-sidebar-icon,
-  .staf-sidebar-link:hover .staf-sidebar-icon {
-    color: #2563eb;
-  }
-
-  .staf-badge {
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 100px;
-  }
-
-  .staf-badge.warning {
+  /* Badge warna orange untuk "Tiket Belum Diklaim" */
+  .staf-sidebar .sidebar-badge.orange {
     background: #f97316;
   }
 
-  .staf-sidebar-btn {
+  /* Tombol Keluar */
+  .sidebar-btn-danger {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
     border: none;
     background: none;
-    color: #334155;
-    font-size: 14px;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
     font-weight: 600;
+    color: var(--color-danger);
     cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background 0.15s;
     width: 100%;
     text-align: left;
+    white-space: nowrap;
   }
-
-  .staf-sidebar-btn:hover {
-    background: #fef2f2;
-    color: #dc2626;
-  }
+  .sidebar-btn-danger:hover { background: var(--color-danger-bg); }
 `;
 
+const STAF_MENU = [
+  { to: '/staff/dashboard',     icon: 'LayoutDashboard', label: 'Dashboard' },
+  { to: '/staff/tugas-saya',    icon: 'Ticket',          label: 'Tiket Saya',           badge: 1 },
+  { to: '/staff/buat-tiket',    icon: 'PlusCircle',      label: 'Buat Tiket' },
+  { to: '/staff/antrean-tiket', icon: 'ClipboardList',   label: 'Tiket Belum Diklaim',  badge: null, badgeClass: 'orange' },
+];
+
+const STAF_AKUN = [
+  { to: '/staff/profil', icon: 'UserCircle', label: 'Profil Saya' },
+];
+
 export default function StafSidebar({ isOpen = true }) {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const isActive = (path) => location.pathname === path;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
     <>
       <style>{styles}</style>
-      <aside className={`staf-sidebar ${isOpen ? "open" : "closed"}`}>
-        <div className="staf-sidebar-inner">
+      <aside className={`staf-sidebar ${isOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-inner">
 
-          {/* MENU */}
-          <div className="staf-sidebar-section">
-            <div className="staf-sidebar-title">Menu</div>
-
-            <Link to="/staff/dashboard" className={`staf-sidebar-link ${isActive("/staff/dashboard") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">🏠</span>
-                Dashboard
-              </div>
-            </Link>
-
-            <Link to="/staff/tugas-saya" className={`staf-sidebar-link ${isActive("/staff/tugas-saya") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">🎫</span>
-                Tiket Saya
-              </div>
-              <span className="staf-badge">1</span>
-            </Link>
-
-            <Link to="/staff/buat-tiket" className={`staf-sidebar-link ${isActive("/staff/buat-tiket") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">➕</span>
-                Buat Tiket
-              </div>
-            </Link>
-
-            <Link to="/staff/antrean-tiket" className={`staf-sidebar-link ${isActive("/staff/antrean-tiket") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">📋</span>
-                Tiket Belum Diklaim
-              </div>
-            </Link>
+          <div className="sidebar-section">
+            <div className="sidebar-title">Menu</div>
+            {STAF_MENU.map(({ to, icon, label, badge, badgeClass }) => (
+              <Link key={to} to={to} className={`sidebar-link ${pathname === to ? 'active' : ''}`}>
+                <div className="sidebar-link-left">
+                  <span className="sidebar-icon">
+                    <AppIcon name={icon} variant="md" />
+                  </span>
+                  {label}
+                </div>
+                {badge != null && (
+                  <span className={`sidebar-badge ${badgeClass ?? ''}`}>{badge}</span>
+                )}
+              </Link>
+            ))}
           </div>
 
-          {/* AKUN */}
-          <div className="staf-sidebar-section">
-            <div className="staf-sidebar-title">Akun</div>
+          <div className="sidebar-section">
+            <div className="sidebar-title">Akun</div>
+            {STAF_AKUN.map(({ to, icon, label }) => (
+              <Link key={to} to={to} className={`sidebar-link ${pathname === to ? 'active' : ''}`}>
+                <div className="sidebar-link-left">
+                  <span className="sidebar-icon">
+                    <AppIcon name={icon} variant="md" />
+                  </span>
+                  {label}
+                </div>
+              </Link>
+            ))}
 
-            <Link to="/staff/profil" className={`staf-sidebar-link ${isActive("/staff/profil") ? "active" : ""}`}>
-              <div className="staf-sidebar-link-left">
-                <span className="staf-sidebar-icon">👤</span>
-                Profil Saya
-              </div>
-            </Link>
-
-            <button className="staf-sidebar-btn" onClick={handleLogout}>
-              <span className="staf-sidebar-icon">🚪</span>
+            <button className="sidebar-btn-danger" onClick={handleLogout}>
+              <AppIcon name="LogOut" variant="md" />
               Keluar
             </button>
           </div>

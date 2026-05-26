@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { TOKEN_KEY } from "../../utils/constants";
 import ticketService from "../../services/TicketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
   .db-main {
@@ -81,18 +82,8 @@ const styles = `
   .stat-desc.success { color: var(--success); }
   .stat-desc.warning { color: #d97706; }
 
-  .db-alert {
-    background: var(--warning-bg);
-    border: 1.5px solid var(--warning-border);
-    border-radius: 12px;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--warning-text);
-    margin-bottom: 32px;
-  }
+  .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 40px; position: relative; z-index: 2; }
+  .bt-alert-inner { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #92400e; line-height: 1.6; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
 
   .table-card {
     background: var(--white);
@@ -265,11 +256,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="db-alert">
-          <span>⚠️</span>
-          <span>
-            Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.
-          </span>
+        <div className="bt-alert">
+          <div className="bt-alert-inner">
+            <span><AppIcon name="AlertTriangle" variant="sm" /></span>
+            <span>Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
+          </div>
         </div>
 
         <div className="table-card">

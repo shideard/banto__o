@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -23,9 +24,9 @@ const styles = `
   .staf-stat-value.warning-value { color: #ea580c; }
   .staf-stat-sub { font-size: 12px; color: #64748b; font-weight: 500; }
   .staf-stat-sub a { color: #2563eb; font-weight: 700; text-decoration: none; font-size: 12px; }
-  .staf-stat-icon { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .staf-stat-icon.blue { background: #eff6ff; }
-  .staf-stat-icon.orange { background: #fff7ed; }
+  .staf-stat-icon { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .staf-stat-icon.blue { background: #eff6ff; color: var(--color-brand); }
+  .staf-stat-icon.orange { background: #fff7ed; color: #f97316; }
   .staf-table-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
   .staf-table-header { padding: 20px 24px; border-bottom: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-start; }
   .staf-table-header h2 { font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
@@ -120,19 +121,25 @@ export default function StafDashboardPage() {
 
         <div className="staf-stats-grid">
           <div className="staf-stat-card">
-            <div className="staf-stat-icon blue">📋</div>
+            <div className="staf-stat-icon blue">
+              <AppIcon name="ClipboardList" variant="xl" />
+            </div>
             <div className="staf-stat-title">Tiket Masuk</div>
             <div className="staf-stat-value">{loading ? "—" : tickets.length}</div>
             <div className="staf-stat-sub">Total semua tiket</div>
           </div>
           <div className="staf-stat-card">
-            <div className="staf-stat-icon blue">🎫</div>
+            <div className="staf-stat-icon blue">
+              <AppIcon name="Ticket" variant="xl" />
+            </div>
             <div className="staf-stat-title">Tugas Saya</div>
             <div className="staf-stat-value">{loading ? "—" : tugasSaya}</div>
             <div className="staf-stat-sub">Sedang diproses</div>
           </div>
           <div className="staf-stat-card warning">
-            <div className="staf-stat-icon orange">⏰</div>
+            <div className="staf-stat-icon orange">
+              <AppIcon name="Clock" variant="xl" />
+            </div>
             <div className="staf-stat-title warning-title">⚠ Belum Diklaim</div>
             <div className="staf-stat-value warning-value">{loading ? "—" : belumDiklaim}</div>
             <div className="staf-stat-sub"><Link to="/staff/antrean-tiket">Lihat Antrean →</Link></div>

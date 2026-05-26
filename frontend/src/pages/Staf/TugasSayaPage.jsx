@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -142,15 +143,21 @@ export default function TugasSayaPage() {
         <div className="tugas-stats">
           <div className="tugas-stat-mini">
             <div><div className="label">Tiket Aktif</div><div className="value" style={{ color: "#2563eb" }}>{aktif.length}</div></div>
-            <div className="tugas-stat-mini-icon" style={{ background: "#eff6ff" }}>📋</div>
+            <div className="tugas-stat-mini-icon" style={{ background: "#eff6ff", color: "var(--color-brand)" }}>
+              <AppIcon name="ClipboardList" variant="lg" />
+            </div>
           </div>
           <div className="tugas-stat-mini">
             <div><div className="label">Perlu Perhatian</div><div className="value" style={{ color: "#ea580c" }}>{tickets.filter(t => t.status === "REVISI").length}</div></div>
-            <div className="tugas-stat-mini-icon" style={{ background: "#fef2f2" }}>⚠️</div>
+            <div className="tugas-stat-mini-icon" style={{ background: "#fef2f2", color: "var(--color-danger)" }}>
+              <AppIcon name="AlertTriangle" variant="lg" />
+            </div>
           </div>
           <div className="tugas-stat-mini">
             <div><div className="label">Selesai</div><div className="value" style={{ color: "#16a34a" }}>{selesai.length}</div></div>
-            <div className="tugas-stat-mini-icon" style={{ background: "#f0fdf4" }}>✅</div>
+            <div className="tugas-stat-mini-icon" style={{ background: "#f0fdf4", color: "var(--color-success)" }}>
+              <AppIcon name="CheckCircle" variant="lg" />
+            </div>
           </div>
         </div>
 
@@ -180,7 +187,9 @@ export default function TugasSayaPage() {
 
                 <div className="tugas-card-footer">
                   <div className="tugas-card-meta">
-                    <span>🎫 Tiket #{t.id}</span>
+                    <span style={{ display:"flex", alignItems:"center", gap:5 }}>
+                      <AppIcon name="Ticket" variant="xs" /> Tiket #{t.id}
+                    </span>
                   </div>
                   <Link
                     to={`/staff/tiket/${t.id}`}
