@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/TicketService";
 import AppIcon from "../../components/ui/AppIcon";
+
 const styles = `
-  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
   .bt-main {
     width: 100%;
     display: flex;
@@ -55,7 +55,6 @@ const styles = `
   .bt-select:focus, .bt-input:focus, .bt-textarea:focus { border-color: var(--ipb-blue-lite); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
   .bt-select.has-error, .bt-input.has-error, .bt-textarea.has-error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
   .bt-field-error { margin-top: 5px; font-size: 12px; color: var(--error); }
-  .bt-topik-guide { margin-top: 10px; padding: 12px 14px; background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.15); border-radius: 8px; font-size: 12.5px; color: var(--ipb-blue); line-height: 1.6; animation: fadeIn 0.2s ease both; }
 
   .bt-upload { border: 2px dashed var(--gray-200); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
   .bt-upload:hover, .bt-upload.drag-over { border-color: var(--ipb-blue-lite); background: rgba(59,130,246,0.03); }
@@ -75,7 +74,6 @@ const styles = `
   .bt-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.38); }
   .bt-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
-  /* Chatbot UI di Halaman Buat Tiket */
   .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
   .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
@@ -126,26 +124,6 @@ const styles = `
   }
 `;
 
-const TOPIK_LIST = [
-  { value: "", label: "— Pilih Topik Bantuan —" },
-  { value: "akademik", label: "Akademik & Kurikulum" },
-  { value: "keuangan", label: "Keuangan & Beasiswa" },
-  { value: "kemahasiswaan", label: "Kemahasiswaan" },
-  { value: "administrasi", label: "Administrasi Umum" },
-  { value: "penelitian", label: "Penelitian & PKM" },
-  { value: "lainnya", label: "Lainnya" },
-];
-
-const TOPIK_GUIDE = {
-  akademik: "💡 Untuk topik Akademik, sertakan: nama mata kuliah, semester, dan deskripsi kendala secara detail.",
-  keuangan: "💡 Untuk topik Keuangan, sertakan: nomor tagihan/beasiswa, periode, dan lampirkan bukti pembayaran jika ada.",
-  kemahasiswaan: "💡 Untuk topik Kemahasiswaan, sertakan: nama organisasi/kegiatan dan nomor surat jika ada.",
-  administrasi: "💡 Untuk topik Administrasi, sertakan: jenis dokumen yang dibutuhkan dan keperluan penggunaannya.",
-  penelitian: "💡 Untuk topik Penelitian, sertakan: judul penelitian, nama dosen pembimbing, dan status pengajuan.",
-  lainnya: "💡 Deskripsikan kebutuhanmu sedetail mungkin agar staf dapat membantu dengan tepat.",
-};
-
-
 const INITIAL_MESSAGES = [
   {
     id: 1, type: "bot",
@@ -157,11 +135,10 @@ const INITIAL_MESSAGES = [
 
 const BOT_RESPONSES = {
   "cara mengisi tiket": "Untuk mengisi tiket: 1️⃣ Pilih topik bantuan yang sesuai, 2️⃣ Isi deskripsi masalah secara detail, 3️⃣ Lampirkan dokumen pendukung jika ada, 4️⃣ Klik Buat Tiket. Staf kami akan segera memproses!",
-  "topik apa yang tersedia?": "Tersedia 6 topik: 📚 Akademik & Kurikulum, 💰 Keuangan & Beasiswa, 🎓 Kemahasiswaan, 📋 Administrasi Umum, 🔬 Penelitian & PKM, dan ❓ Lainnya.",
+  "topik apa yang tersedia?": "Topik bantuan tersedia sesuai kategori yang sudah disiapkan admin. Pilih yang paling sesuai dengan kebutuhanmu dari dropdown di formulir.",
   "berapa lama proses tiket?": "Tiket biasanya diproses dalam 1-3 hari kerja. Kamu bisa memantau status tiket di menu Tiket Saya. Kami akan notifikasi kamu setiap ada update! 📬",
   default: "Terima kasih sudah bertanya! Untuk pertanyaan lebih lanjut, silakan buat tiket dan staf kami akan membantu kamu secara langsung. 😊",
 };
-
 
 function getNow() {
   return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
@@ -170,21 +147,26 @@ function getNow() {
 export default function BuatTiketPage() {
   const { user } = useAuth();
 
-  const [topik, setTopik] = useState("");
-  const [subjek, setSubjek] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [files, setFiles] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [topik, setTopik]           = useState("");
+  const [subjek, setSubjek]         = useState("");
+  const [deskripsi, setDeskripsi]   = useState("");
+  const [files, setFiles]           = useState([]);
+  const [errors, setErrors]         = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [chatInput, setChatInput] = useState("");
-  const [botTyping, setBotTyping] = useState(false);
+  const [dragOver, setDragOver]     = useState(false);
+  const [messages, setMessages]     = useState(INITIAL_MESSAGES);
+  const [chatInput, setChatInput]   = useState("");
+  const [botTyping, setBotTyping]   = useState(false);
+  const [kategoriList, setKategoriList] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, botTyping]);
+
+  useEffect(() => {
+    ticketService.getKategori().then(setKategoriList).catch(() => {});
+  }, []);
 
   const sendMessage = useCallback((text) => {
     if (!text.trim()) return;
@@ -218,38 +200,36 @@ export default function BuatTiketPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const errs = validate();
-  if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-  setErrors({});
-  setSubmitting(true);
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
+    setSubmitting(true);
 
-  try {
-    await ticketService.createTicket({
-      subjek,
-      deskripsi,
-      kategori_id: topik ? parseInt(topik) : null,
-    });
-    alert("Tiket berhasil dibuat!");
-    window.location.href = "/tiket/saya";
-  } catch (error) {
-    // ✅ ambil pesan error yang benar dari backend
-    const msg =
-      error?.response?.data?.detail ||
-      error?.response?.data?.message ||
-      error?.message ||
-      "Gagal membuat tiket.";
-    alert("Error: " + msg);
-  } finally {
-    setSubmitting(false);
-  }
-};
+    try {
+      await ticketService.createTicket({
+        subjek,
+        deskripsi,
+        kategori_id: topik ? parseInt(topik) : null,
+      });
+      alert("Tiket berhasil dibuat!");
+      window.location.href = "/tiket/saya";
+    } catch (error) {
+      const msg =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Gagal membuat tiket.";
+      alert("Error: " + msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
       <style>{styles}</style>
-      
-      {/* KONTEN UTAMA - TANPA NAVBAR DAN SIDEBAR */}
+
       <main className="bt-main">
         <div className="bt-header">
           <div className="bt-header-inner">
@@ -293,37 +273,52 @@ export default function BuatTiketPage() {
               <form onSubmit={handleSubmit} noValidate>
                 <div className="bt-field">
                   <label className="bt-label">Topik Bantuan <span className="required">*</span></label>
-                  <select className={`bt-select ${errors.topik ? "has-error" : ""}`} value={topik}
-                    onChange={(e) => { setTopik(e.target.value); setErrors(p => ({...p, topik: ""})); }}>
-                    {TOPIK_LIST.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  <select
+                    className={`bt-select ${errors.topik ? "has-error" : ""}`}
+                    value={topik}
+                    onChange={(e) => { setTopik(e.target.value); setErrors(p => ({...p, topik: ""})); }}
+                  >
+                    <option value="">— Pilih Topik Bantuan —</option>
+                    {kategoriList.map(k => (
+                      <option key={k.id} value={k.id}>{k.nama_kategori}</option>
+                    ))}
                   </select>
                   {errors.topik && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.topik}</div>}
-                  {topik && TOPIK_GUIDE[topik] && <div className="bt-topik-guide">{TOPIK_GUIDE[topik]}</div>}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Subjek <span className="required">*</span></label>
-                  <input type="text" className={`bt-input ${errors.subjek ? "has-error" : ""}`}
-                    placeholder="Tuliskan judul singkat masalahmu" value={subjek}
-                    onChange={(e) => { setSubjek(e.target.value); setErrors(p => ({...p, subjek: ""})); }} />
+                  <input
+                    type="text"
+                    className={`bt-input ${errors.subjek ? "has-error" : ""}`}
+                    placeholder="Tuliskan judul singkat masalahmu"
+                    value={subjek}
+                    onChange={(e) => { setSubjek(e.target.value); setErrors(p => ({...p, subjek: ""})); }}
+                  />
                   {errors.subjek && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.subjek}</div>}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Deskripsi Masalah <span className="required">*</span></label>
-                  <textarea className={`bt-textarea ${errors.deskripsi ? "has-error" : ""}`}
-                    placeholder="Jelaskan masalahmu secara detail..." value={deskripsi}
-                    onChange={(e) => { setDeskripsi(e.target.value); setErrors(p => ({...p, deskripsi: ""})); }} rows={5} />
+                  <textarea
+                    className={`bt-textarea ${errors.deskripsi ? "has-error" : ""}`}
+                    placeholder="Jelaskan masalahmu secara detail..."
+                    value={deskripsi}
+                    onChange={(e) => { setDeskripsi(e.target.value); setErrors(p => ({...p, deskripsi: ""})); }}
+                    rows={5}
+                  />
                   <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px", textAlign: "right" }}>{deskripsi.length} karakter</div>
                   {errors.deskripsi && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.deskripsi}</div>}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Lampiran <span style={{ color: "var(--gray-400)", fontWeight: 500 }}>(opsional, maks. 5 file)</span></label>
-                  <div className={`bt-upload ${dragOver ? "drag-over" : ""}`}
+                  <div
+                    className={`bt-upload ${dragOver ? "drag-over" : ""}`}
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
-                    onDrop={(e) => { e.preventDefault(); setDragOver(false); setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)].slice(0, 5)); }}>
+                    onDrop={(e) => { e.preventDefault(); setDragOver(false); setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)].slice(0, 5)); }}
+                  >
                     <input type="file" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                     <div className="bt-upload-icon">
                       <AppIcon name="Paperclip" size={26} color="#94a3b8" />
@@ -353,7 +348,7 @@ export default function BuatTiketPage() {
             </div>
           </div>
 
-          {/* Chatbot Bantuan di Samping Kanan */}
+          {/* Chatbot */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
               <div className="chatbot-avatar">
@@ -401,10 +396,14 @@ export default function BuatTiketPage() {
             </div>
 
             <div className="bt-chatbot-input">
-              <textarea className="chatbot-input-field" placeholder="Tanya sesuatu..." value={chatInput}
+              <textarea
+                className="chatbot-input-field"
+                placeholder="Tanya sesuatu..."
+                value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput); } }}
-                rows={1} />
+                rows={1}
+              />
               <button className="chatbot-send-btn" onClick={() => sendMessage(chatInput)} disabled={!chatInput.trim() || botTyping}>➤</button>
             </div>
           </div>

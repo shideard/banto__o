@@ -54,3 +54,7 @@ class NotifikasiResponse(BaseModel):
 class PasswordUpdate(BaseModel):
     password_lama: str
     password_baru: str
+
+class UserUpdate(BaseModel):
+    nama: Optional[str] = None
+    divisi_id: Optional[int] = None

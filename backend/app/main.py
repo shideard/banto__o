@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from app.persistence.database import engine, Base, SessionLocal
 from app.persistence import ticket_orm
 from app.api.v1.user_router import router as user_router
-from app.persistence.user_orm import Base
 from app.api.v1.ticket_router import router as ticket_router
 
 app = FastAPI(title="Banto__o API - IPB Help Center")

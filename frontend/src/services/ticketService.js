@@ -1,4 +1,3 @@
-// frontend/src/services/TicketService.js
 import apiClient from "./ApiClient";
 
 class TicketService {
@@ -13,9 +12,14 @@ class TicketService {
   }
 
   async getAllTiket() {
-    // Backend otomatis return semua tiket jika role = staf/admin
     const res = await apiClient.get("/tiket");
     return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getUnclaimedTickets() {
+    const res = await apiClient.get("/tiket");
+    const all = Array.isArray(res.data) ? res.data : [];
+    return all.filter(t => !t.staf_id);
   }
 
   async getTiketById(tiketId) {
@@ -28,7 +32,6 @@ class TicketService {
     return res.data;
   }
 
-  // Staf membuat tiket (sama endpoint, backend akan handle role staf)
   async createTicketByStaf(payload) {
     const res = await apiClient.post("/tiket", payload);
     return res.data;
@@ -44,8 +47,32 @@ class TicketService {
     return res.data;
   }
 
+  async mulaiProses(tiketId) {
+    const res = await apiClient.post(`/tiket/${tiketId}/proses`);
+    return res.data;
+  }
+
+  async tolakTiket(tiketId, alasan) {
+    const res = await apiClient.post(`/tiket/${tiketId}/tolak`, { alasan });
+    return res.data;
+  }
+
   async updateStatus(tiketId, payload) {
     const res = await apiClient.patch(`/tiket/${tiketId}/status`, payload);
+    return res.data;
+  }
+
+   async updateKategori(tiketId, kategoriId) {
+    const res = await apiClient.patch(`/tiket/${tiketId}/kategori`, { kategori_id: kategoriId });
+    return res.data;
+  }
+
+  async uploadFile(tiketId, file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await apiClient.post(`/tiket/${tiketId}/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   }
 }

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.persistence.database import get_db
 from app.services.user_service import UserService
 from app.persistence.repositories.user_repository import UserRepository
-from app.schemas.user_schema import UserResponse, UserCreate, NotifikasiResponse, PasswordUpdate
+from app.schemas.user_schema import UserResponse, UserCreate, NotifikasiResponse, PasswordUpdate, UserUpdate
 from app.persistence.user_orm import UserORM, NotifikasiORM
 from typing import Annotated
 
@@ -67,7 +67,14 @@ def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     user_service: UserService = Depends(get_user_service)
 ):
-    payload = user_service.decode_access_token(token)
+    try:
+        payload = user_service.decode_access_token(token)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     email = payload.get("sub")
     user = user_service.repo.get_user_by_email(email)
     if not user:
@@ -82,14 +89,14 @@ def get_profile(current_user: Annotated[UserORM, Depends(get_current_user)]):
 
 @router.patch("/me", response_model=UserResponse)
 def update_profile(
-    payload: dict,
+    payload: UserUpdate,
     db: Session = Depends(get_db),
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
-    if "nama" in payload:
-        current_user.nama = payload["nama"]
-    if "divisi_id" in payload and current_user.role == "staf":
-        current_user.divisi_id = payload["divisi_id"]
+    if payload.nama:
+        current_user.nama = payload.nama
+    if payload.divisi_id and current_user.role == "staf":
+        current_user.divisi_id = payload.divisi_id
     db.commit()
     db.refresh(current_user)
     return current_user
@@ -117,7 +124,7 @@ def mark_notifikasi_read(
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
     try:
-        return user_service.tandai_dibaca(db, notif_id)
+        return user_service.tandai_dibaca(notif_id)
 
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

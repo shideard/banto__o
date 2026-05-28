@@ -20,8 +20,8 @@ class KategoriResponse(BaseModel):
 
 class KomentarCreate(BaseModel):
     isi: str
-    penulis_id: Optional[int] = None  # TODO: akan otomatis dari JWT auth
-    role: str = "Mahasiswa"           # TODO: akan otomatis dari JWT auth
+    penulis_id: Optional[int] = None
+    role: str = "Mahasiswa"
 
 class KomentarResponse(BaseModel):
     id: int
@@ -46,16 +46,19 @@ class PengajuanResponse(BaseModel):
 
 class TiketCreate(BaseModel):
     subjek: str
-    deskripsi: str                     # Tersimpan di PengajuanORM
+    deskripsi: str
     kategori_id: Optional[int] = None
-    mahasiswa_id: Optional[int] = None  # TODO: akan dari JWT auth
+    mahasiswa_id: Optional[int] = None
 
 class TiketUpdateStatus(BaseModel):
     new_status: StatusPengajuan
-    catatan: Optional[str] = None      # Wajib diisi jika new_status == REVISI
+    catatan: Optional[str] = None
 
 class TiketAssignStaf(BaseModel):
     staf_id: int
+
+class TiketUpdateKategori(BaseModel):
+    kategori_id: Optional[int] = None
 
 class TiketResponse(BaseModel):
     id: int
@@ -63,11 +66,15 @@ class TiketResponse(BaseModel):
     tanggal_dibuat: datetime
     status: str
     kategori_id: Optional[int] = None
+    kategori_nama: Optional[str] = None
     mahasiswa_id: Optional[int] = None
+    mahasiswa_nama: Optional[str] = None
     staf_id: Optional[int] = None
+    staf_nama: Optional[str] = None
     pengajuan: Optional[PengajuanResponse] = None
     komentar: List[KomentarResponse] = []
     model_config = ConfigDict(from_attributes=True)
+
 
 # ── Chat Session ──────────────────────────────────────────────────────────────
 
