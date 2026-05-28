@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.persistence.ticket_orm import TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM
-from app.persistence.user_orm import NotifikasiORM
+from app.persistence.user_orm import NotifikasiORM, UserORM
 
 class TicketRepository:
     def __init__(self, db: Session):
@@ -54,3 +54,7 @@ class TicketRepository:
     def create_notifikasi(self, notifikasi: NotifikasiORM):
         self.db.add(notifikasi)
         self.db.commit()
+
+    def get_all_staf(self) -> List[UserORM]:
+        """Ambil semua user dengan role 'staf' untuk broadcast notifikasi."""
+        return self.db.query(UserORM).filter(UserORM.role == "staf").all()

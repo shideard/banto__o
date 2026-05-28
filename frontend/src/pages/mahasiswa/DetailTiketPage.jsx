@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
+import { useToast } from "../../components/ui/Toast";
 
 const styles = `
   .dt-main { padding: 32px 40px; max-width: 1100px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -112,6 +113,7 @@ function formatDateTime(str) {
 export default function DetailTiketPage() {
   const { id }   = useParams();
   const { user } = useAuth();
+  const toast    = useToast();
 
   const [tiket,   setTiket]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -141,8 +143,9 @@ export default function DetailTiketPage() {
       await ticketService.addKomentar(id, reply);
       setReply("");
       await fetchTiket();
+      toast.success('Balasan terkirim 📨', 'Staf akan segera merespons.');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal mengirim balasan.");
+      toast.error('Gagal mengirim balasan', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setSending(false);
     }

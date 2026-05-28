@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 import apiClient from "../../services/ApiClient";
 
 // ─────────────────────────── STYLES ───────────────────────────────────────────

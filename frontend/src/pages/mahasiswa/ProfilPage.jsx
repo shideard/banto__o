@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 import apiClient from "../../services/ApiClient";
+import AppIcon from "../../components/ui/AppIcon";
 
 // ─────────────────────────── STYLES ───────────────────────────────────────────
 const styles = `
@@ -368,7 +369,7 @@ function getInitials(nama = "") {
 
 // ─────────────────────────── KOMPONEN UTAMA ───────────────────────────────────
 export default function ProfilPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
   // ── State data tiket ──
   const [tickets, setTickets] = useState([]);
@@ -377,6 +378,7 @@ export default function ProfilPage() {
   // ── State edit profil ──
   const [editMode, setEditMode] = useState(false);
   const [formNama, setFormNama] = useState(user?.nama || "");
+  const [formNim, setFormNim]   = useState(user?.nim  || "");
   const [savingNama, setSavingNama] = useState(false);
   const [namaMsg, setNamaMsg] = useState({ type: "", text: "" });
 
@@ -400,21 +402,25 @@ export default function ProfilPage() {
   const selesai = tickets.filter(t => t.status === "SELESAI").length;
   const recent  = [...tickets].sort((a, b) => new Date(b.tanggal_dibuat) - new Date(a.tanggal_dibuat)).slice(0, 4);
 
-  // ── Simpan nama ──
+  // ── Simpan profil (nama + nim) ──
   const handleSaveNama = async () => {
-    if (!formNama.trim()) return;
+    if (!formNama.trim()) {
+      setNamaMsg({ type: "error", text: "Nama tidak boleh kosong." });
+      return;
+    }
     try {
       setSavingNama(true);
       setNamaMsg({ type: "", text: "" });
-      await apiClient.patch("/auth/me", { nama: formNama.trim() });
-      setNamaMsg({ type: "success", text: "Nama berhasil diperbarui!" });
+      const payload = { nama: formNama.trim() };
+      if (formNim.trim()) payload.nim = formNim.trim();
+      const res = await apiClient.patch("/auth/me", payload);
+      // Perbarui context → semua halaman langsung dapat data terbaru
+      updateUser({ nama: res.data.nama, nim: res.data.nim ?? formNim.trim() });
+      setNamaMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
-      // Update localStorage agar navbar langsung berubah
-      const stored = JSON.parse(localStorage.getItem("banto_user") || "{}");
-      localStorage.setItem("banto_user", JSON.stringify({ ...stored, nama: formNama.trim() }));
       setTimeout(() => setNamaMsg({ type: "", text: "" }), 3000);
     } catch {
-      setNamaMsg({ type: "error", text: "Gagal memperbarui nama. Coba lagi." });
+      setNamaMsg({ type: "error", text: "Gagal memperbarui profil. Coba lagi." });
     } finally {
       setSavingNama(false);
     }
@@ -460,14 +466,17 @@ export default function ProfilPage() {
       {showPwModal && (
         <div className="modal-overlay" onClick={() => setShowPwModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">🔑 Ganti Password</div>
+            <div className="modal-title" style={{ display: "flex", alignItems: "center", gap: 10 }}><AppIcon name="KeyRound" size={22} color="#2563eb" /> Ganti Password</div>
             <div className="modal-sub">
               Masukkan password lama kamu untuk verifikasi, lalu buat password baru.
             </div>
 
             {pwMsg.text && (
               <div className={pwMsg.type === "success" ? "alert-success" : "alert-error"}>
-                {pwMsg.type === "success" ? "✅" : "⚠️"} {pwMsg.text}
+                {pwMsg.type === "success"
+                  ? <AppIcon name="CheckCircle" variant="sm" />
+                  : <AppIcon name="AlertTriangle" variant="sm" />}
+                {pwMsg.text}
               </div>
             )}
 
@@ -507,7 +516,7 @@ export default function ProfilPage() {
                 Batal
               </button>
               <button className="btn-primary-sm" disabled={savingPw} onClick={handleGantiPassword}>
-                {savingPw ? "Menyimpan..." : "Simpan Password"}
+                {savingPw ? "Menyimpan..." : <><AppIcon name="Save" variant="sm" /> Simpan Password</>}
               </button>
             </div>
           </div>
@@ -533,18 +542,18 @@ export default function ProfilPage() {
                   <div className="profil-avatar-badge" />
                 </div>
                 <div className="profil-nama">{user?.nama || "—"}</div>
-                <div className="profil-role-badge">🎓 Mahasiswa</div>
+                <div className="profil-role-badge"><AppIcon name="GraduationCap" variant="sm" /> Mahasiswa</div>
                 <div className="profil-divider" />
                 <div className="profil-info-list">
                   <div className="profil-info-item">
-                    <div className="profil-info-icon">✉️</div>
+                    <div className="profil-info-icon"><AppIcon name="Mail" size={16} color="#64748b" /></div>
                     <div>
                       <div className="profil-info-label">Email</div>
                       <div className="profil-info-val">{user?.email || "—"}</div>
                     </div>
                   </div>
                   <div className="profil-info-item">
-                    <div className="profil-info-icon">🎫</div>
+                    <div className="profil-info-icon"><AppIcon name="IdCard" size={16} color="#64748b" /></div>
                     <div>
                       <div className="profil-info-label">NIM</div>
                       <div className="profil-info-val">
@@ -555,7 +564,7 @@ export default function ProfilPage() {
                     </div>
                   </div>
                   <div className="profil-info-item">
-                    <div className="profil-info-icon">🏛️</div>
+                    <div className="profil-info-icon"><AppIcon name="Building2" size={16} color="#64748b" /></div>
                     <div>
                       <div className="profil-info-label">Institusi</div>
                       <div className="profil-info-val">IPB University</div>
@@ -572,7 +581,7 @@ export default function ProfilPage() {
               </div>
               <div className="profil-card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <button className="btn-danger-sm" style={{ width: "100%", justifyContent: "center" }} onClick={logout}>
-                  🚪 Keluar dari Akun
+                  <AppIcon name="LogOut" variant="sm" /> Keluar dari Akun
                 </button>
               </div>
             </div>
@@ -631,7 +640,10 @@ export default function ProfilPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="tiket-mini-empty">📭 Belum ada tiket yang dibuat</div>
+                    <div className="tiket-mini-empty" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                      <AppIcon name="Inbox" size={28} color="#cbd5e1" />
+                      Belum ada tiket yang dibuat
+                    </div>
                   )}
                 </div>
               </div>
@@ -645,16 +657,23 @@ export default function ProfilPage() {
                   <button
                     className="btn-outline-sm"
                     style={{ padding: "5px 14px", fontSize: 12 }}
-                    onClick={() => { setEditMode(true); setFormNama(user?.nama || ""); }}
+                    onClick={() => {
+                      setEditMode(true);
+                      setFormNama(user?.nama || "");
+                      setFormNim(user?.nim  || "");
+                    }}
                   >
-                    ✏️ Edit
+                    <AppIcon name="Pencil" variant="sm" /> Edit
                   </button>
                 )}
               </div>
               <div className="profil-card-body">
                 {namaMsg.text && (
                   <div className={namaMsg.type === "success" ? "alert-success" : "alert-error"}>
-                    {namaMsg.type === "success" ? "✅" : "⚠️"} {namaMsg.text}
+                    {namaMsg.type === "success"
+                      ? <AppIcon name="CheckCircle" variant="sm" />
+                      : <AppIcon name="AlertTriangle" variant="sm" />}
+                    {namaMsg.text}
                   </div>
                 )}
 
@@ -666,6 +685,7 @@ export default function ProfilPage() {
                     value={editMode ? formNama : (user?.nama || "")}
                     onChange={e => setFormNama(e.target.value)}
                     readOnly={!editMode}
+                    placeholder="Masukkan nama lengkap"
                   />
                 </div>
                 <div className="form-group">
@@ -682,17 +702,21 @@ export default function ProfilPage() {
                   <label className="form-label">NIM</label>
                   <input
                     type="text"
-                    className="form-input readonly"
-                    value={user?.nim || "Belum tersedia"}
-                    readOnly
+                    className={`form-input ${!editMode ? "readonly" : ""}`}
+                    value={editMode ? formNim : (user?.nim || "")}
+                    onChange={e => setFormNim(e.target.value)}
+                    readOnly={!editMode}
+                    placeholder={editMode ? "Masukkan NIM kamu" : "Belum tersedia"}
                   />
-                  <div className="form-hint">NIM dikelola oleh sistem akademik.</div>
+                  {!editMode && !user?.nim && (
+                    <div className="form-hint">NIM belum diisi. Klik Edit untuk mengisi.</div>
+                  )}
                 </div>
 
                 {editMode && (
                   <div className="btn-row">
                     <button className="btn-primary-sm" disabled={savingNama || !formNama.trim()} onClick={handleSaveNama}>
-                      {savingNama ? "Menyimpan..." : "💾 Simpan Perubahan"}
+                      {savingNama ? "Menyimpan..." : <><AppIcon name="Save" variant="sm" /> Simpan Perubahan</>}
                     </button>
                     <button className="btn-outline-sm" onClick={() => { setEditMode(false); setNamaMsg({ type: "", text: "" }); }}>
                       Batal
@@ -714,7 +738,7 @@ export default function ProfilPage() {
                     <div style={{ fontSize: 12, color: "#94a3b8" }}>Terakhir diubah: tidak diketahui</div>
                   </div>
                   <button className="btn-outline-sm" onClick={() => setShowPwModal(true)}>
-                    🔑 Ganti Password
+                    <AppIcon name="KeyRound" variant="sm" /> Ganti Password
                   </button>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 0" }}>

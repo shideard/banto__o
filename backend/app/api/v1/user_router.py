@@ -93,9 +93,11 @@ def update_profile(
     db: Session = Depends(get_db),
     current_user: Annotated[UserORM, Depends(get_current_user)] = None
 ):
-    if payload.nama:
+    if payload.nama is not None:
         current_user.nama = payload.nama
-    if payload.divisi_id and current_user.role == "staf":
+    if payload.nim is not None and current_user.role == "mahasiswa":
+        current_user.nim = payload.nim
+    if payload.divisi_id is not None and current_user.role == "staf":
         current_user.divisi_id = payload.divisi_id
     db.commit()
     db.refresh(current_user)

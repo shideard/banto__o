@@ -1,6 +1,8 @@
 import './index.css';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import { ToastProvider } from "./components/ui/Toast";
 import { useAuth } from "./hooks/useAuth";
 
 // ── Komponen Layout ───────────────────────────────────────────────────────────
@@ -111,7 +113,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <NotificationProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   );

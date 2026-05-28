@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import AppIcon from '../ui/AppIcon';
+import Notification from './Notification';
 
 // Semua warna → CSS variables dari design-tokens.css
 const styles = `
@@ -64,46 +65,7 @@ const styles = `
   }
   .app-btn-new-ticket:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.38); }
 
-  .app-notif-btn {
-    position: relative; width: 38px; height: 38px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1.5px solid var(--color-gray-200); border-radius: 9px;
-    background: var(--color-white); cursor: pointer; transition: all 0.18s;
-    color: var(--color-gray-500);
-  }
-  .app-notif-btn:hover { background: var(--color-gray-50); border-color: var(--color-brand-light); color: var(--color-brand); }
-  .notif-badge {
-    position: absolute; top: -4px; right: -4px;
-    min-width: 18px; height: 18px;
-    background: #ef4444; border: 2px solid var(--color-white);
-    border-radius: var(--radius-full);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; color: var(--color-white); padding: 0 4px;
-  }
 
-  .notif-dropdown {
-    position: absolute; top: calc(100% + 10px); right: 0; width: 340px;
-    background: var(--color-white); border: 1.5px solid var(--color-gray-200);
-    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-    overflow: hidden; animation: dropIn 0.18s ease both;
-  }
-  .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; border-bottom: 1px solid var(--color-gray-200); }
-  .notif-header h4 { font-size: 13px; font-weight: 700; color: var(--color-gray-900); margin: 0; }
-  .notif-mark-all { font-size: 11px; font-weight: 600; color: var(--color-brand); background: none; border: none; cursor: pointer; font-family: var(--font-sans); }
-  .notif-list { max-height: 280px; overflow-y: auto; }
-  .notif-list::-webkit-scrollbar { width: 4px; }
-  .notif-list::-webkit-scrollbar-thumb { background: var(--color-gray-200); border-radius: 4px; }
-  .notif-item { display: flex; gap: 10px; padding: 12px 16px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid var(--color-gray-200); }
-  .notif-item:last-child { border-bottom: none; }
-  .notif-item:hover { background: var(--color-gray-50); }
-  .notif-item.unread { background: rgba(37,99,235,0.04); }
-  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-brand); flex-shrink: 0; margin-top: 5px; }
-  .notif-dot.read { background: transparent; }
-  .notif-item-title { font-size: 12.5px; font-weight: 600; color: var(--color-gray-900); margin-bottom: 2px; }
-  .notif-item-desc  { font-size: 11.5px; color: var(--color-gray-500); line-height: 1.4; }
-  .notif-item-time  { font-size: 10.5px; color: var(--color-gray-400); margin-top: 4px; font-weight: 500; }
-  .notif-footer { padding: 10px 16px; border-top: 1px solid var(--color-gray-200); text-align: center; }
-  .notif-footer-btn { font-size: 12px; font-weight: 600; color: var(--color-brand); background: none; border: none; cursor: pointer; font-family: var(--font-sans); }
 
   .app-user-btn {
     display: flex; align-items: center; gap: 8px;
@@ -154,35 +116,25 @@ const styles = `
   }
 `;
 
-const sampleNotifs = [
-  { id: 1, title: 'Tiket #0023 Diperbarui', desc: 'Staff admin telah mengubah status tiket kamu menjadi Diproses.', time: '5 menit lalu', unread: true },
-  { id: 2, title: 'Komentar Baru', desc: 'Ada balasan baru pada tiket #0021 dari Staf Akademik.', time: '1 jam lalu', unread: true },
-  { id: 3, title: 'Tiket #0019 Selesai', desc: 'Tiket kamu telah diselesaikan. Beri penilaian layanan.', time: 'Kemarin', unread: false },
-];
+
 
 export default function AppNavbar({ onToggleSidebar }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [userOpen,  setUserOpen]  = useState(false);
-  const [notifs, setNotifs] = useState(sampleNotifs);
-  const notifRef = useRef(null);
+  const [userOpen, setUserOpen] = useState(false);
   const userRef  = useRef(null);
 
-  const role        = user?.role || 'mahasiswa';
-  const unreadCount = notifs.filter(n => n.unread).length;
-  const initials    = (user?.nama || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const role     = user?.role || 'mahasiswa';
+  const initials = (user?.nama || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const handler = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
-      if (userRef.current  && !userRef.current.contains(e.target))  setUserOpen(false);
+      if (userRef.current && !userRef.current.contains(e.target)) setUserOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const markAllRead  = () => setNotifs(notifs.map(n => ({ ...n, unread: false })));
   const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
@@ -217,41 +169,12 @@ export default function AppNavbar({ onToggleSidebar }) {
               </Link>
             )}
 
-            {/* Notifikasi */}
-            <div className="dropdown-wrap" ref={notifRef}>
-              <button className="app-notif-btn" onClick={() => { setNotifOpen(!notifOpen); setUserOpen(false); }} aria-label="Notifikasi">
-                <AppIcon name="Bell" variant="lg" />
-                {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-              </button>
-              {notifOpen && (
-                <div className="notif-dropdown">
-                  <div className="notif-header">
-                    <h4>Notifikasi {unreadCount > 0 && `(${unreadCount})`}</h4>
-                    {unreadCount > 0 && <button className="notif-mark-all" onClick={markAllRead}>Tandai semua dibaca</button>}
-                  </div>
-                  <div className="notif-list">
-                    {notifs.map(n => (
-                      <div key={n.id} className={`notif-item ${n.unread ? 'unread' : ''}`}
-                        onClick={() => setNotifs(notifs.map(x => x.id === n.id ? { ...x, unread: false } : x))}>
-                        <div className={`notif-dot ${n.unread ? '' : 'read'}`} />
-                        <div>
-                          <div className="notif-item-title">{n.title}</div>
-                          <div className="notif-item-desc">{n.desc}</div>
-                          <div className="notif-item-time">{n.time}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="notif-footer">
-                    <button className="notif-footer-btn">Lihat semua notifikasi →</button>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Notifikasi — gunakan komponen Notification.jsx */}
+            <Notification />
 
             {/* User */}
             <div className="dropdown-wrap" ref={userRef}>
-              <button className="app-user-btn" onClick={() => { setUserOpen(!userOpen); setNotifOpen(false); }}>
+              <button className="app-user-btn" onClick={() => { setUserOpen(!userOpen); }}>
                 <div className="user-avatar">{initials}</div>
                 <span className="user-name">{(user?.name || user?.nama || 'User').split(' ')[0]}</span>
                 <span className="user-chevron"><AppIcon name="ChevronDown" variant="xs" /></span>

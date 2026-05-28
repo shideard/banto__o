@@ -36,7 +36,18 @@ class TicketService:
             status=StatusPengajuan.DIBUAT.value,
         )
         pengajuan = PengajuanORM(deskripsi=payload.deskripsi)
-        return self.repo.create_tiket(tiket, pengajuan)
+        tiket = self.repo.create_tiket(tiket, pengajuan)
+
+        # Kirim notifikasi ke semua staf bahwa ada tiket baru masuk
+        semua_staf = self.repo.get_all_staf()
+        for staf in semua_staf:
+            self.repo.create_notifikasi(NotifikasiORM(
+                user_id=staf.id,
+                tiket_id=tiket.id,
+                pesan=f"Tiket baru masuk: '{tiket.subjek}'. Segera tinjau di antrian.",
+            ))
+
+        return tiket
 
     def get_all_tiket_for_user(self, user_id: int, role: str) -> List[TiketORM]:
         if role == "mahasiswa":

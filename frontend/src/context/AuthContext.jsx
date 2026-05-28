@@ -63,8 +63,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Perbarui data user di context + localStorage setelah edit profil
+  const updateUser = (data) => {
+    const updated = { ...user, ...data };
+    localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, register }}>
+    <AuthContext.Provider value={{ user, token, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

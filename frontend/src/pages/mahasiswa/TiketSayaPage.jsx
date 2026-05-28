@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `

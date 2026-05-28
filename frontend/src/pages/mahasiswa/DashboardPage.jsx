@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { TOKEN_KEY } from "../../utils/constants";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `

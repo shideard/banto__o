@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
+import { useToast } from "../../components/ui/Toast";
+import { faqCategories } from "../../data/faqData";
 
 const styles = `
   .bt-main {
@@ -118,34 +120,46 @@ const styles = `
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
 
+  .chat-cb-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chat-cb-link-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(59,130,246,0.07); color: #1d4ed8;
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
+    text-decoration: none; transition: background .15s;
+  }
+  .chat-cb-link-btn:hover { background: #dbeafe; }
+
   @media (max-width: 900px) {
     .bt-content { grid-template-columns: 1fr; }
     .bt-chatbot { position: static; height: 420px; }
   }
 `;
 
-const INITIAL_MESSAGES = [
-  {
-    id: 1, type: "bot",
-    text: "Halo! Aku BantO__O 🤖 Asisten virtualmu. Ada yang bisa aku bantu sebelum kamu buat tiket?",
-    time: "Sekarang",
-    quickReplies: ["Cara mengisi tiket", "Topik apa yang tersedia?", "Berapa lama proses tiket?"],
-  },
-];
-
-const BOT_RESPONSES = {
-  "cara mengisi tiket": "Untuk mengisi tiket: 1️⃣ Pilih topik bantuan yang sesuai, 2️⃣ Isi deskripsi masalah secara detail, 3️⃣ Lampirkan dokumen pendukung jika ada, 4️⃣ Klik Buat Tiket. Staf kami akan segera memproses!",
-  "topik apa yang tersedia?": "Topik bantuan tersedia sesuai kategori yang sudah disiapkan admin. Pilih yang paling sesuai dengan kebutuhanmu dari dropdown di formulir.",
-  "berapa lama proses tiket?": "Tiket biasanya diproses dalam 1-3 hari kerja. Kamu bisa memantau status tiket di menu Tiket Saya. Kami akan notifikasi kamu setiap ada update! 📬",
-  default: "Terima kasih sudah bertanya! Untuk pertanyaan lebih lanjut, silakan buat tiket dan staf kami akan membantu kamu secara langsung. 😊",
-};
-
-function getNow() {
-  return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+/* ── helper: render **bold** dalam teks ────────────────────── */
+function parseText(text) {
+  const parts = text.split(/(\*\*(.*?)\*\*)/g);
+  return parts.map((part, i) => {
+    if (i % 3 === 2) return <strong key={i}>{part}</strong>;
+    if (i % 3 === 1) return null;
+    return part;
+  });
 }
+
+const GREETING =
+  "Halo! Aku **BantO__O** 🤖 — Asisten virtualmu.\nAda yang bisa aku bantu sebelum kamu buat tiket? Silakan pilih kategori:";
+
+const CATEGORY_ITEMS = faqCategories.map((c) => ({
+  id: c.id,
+  label: c.label,
+  icon: c.icon,
+}));
 
 export default function BuatTiketPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
 
   const [topik, setTopik]           = useState("");
   const [subjek, setSubjek]         = useState("");
@@ -154,36 +168,106 @@ export default function BuatTiketPage() {
   const [errors, setErrors]         = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [dragOver, setDragOver]     = useState(false);
-  const [messages, setMessages]     = useState(INITIAL_MESSAGES);
-  const [chatInput, setChatInput]   = useState("");
-  const [botTyping, setBotTyping]   = useState(false);
   const [kategoriList, setKategoriList] = useState([]);
+
+  // ── Chatbot state (FAQ-based, sama seperti ChatbotPage) ────
+  const [cbMessages, setCbMessages] = useState([
+    { id: "greeting", from: "bot", text: GREETING },
+  ]);
+  const [cbButtons, setCbButtons]   = useState({ type: "category", items: CATEGORY_ITEMS });
+  const [cbTyping, setCbTyping]     = useState(false);
+  const [cbCategory, setCbCategory] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, botTyping]);
+  }, [cbMessages, cbButtons, cbTyping]);
 
   useEffect(() => {
     ticketService.getKategori().then(setKategoriList).catch(() => {});
   }, []);
 
-  const sendMessage = useCallback((text) => {
-    if (!text.trim()) return;
-    const trimmed = text.trim();
-    const now = getNow();
-    setMessages(prev => [...prev, { id: prev.length + 1, type: "user", text: trimmed, time: now }]);
-    setChatInput("");
-    setBotTyping(true);
-
+  function botReply(text, nextButtons, delay = 600) {
+    setCbTyping(true);
+    setCbButtons(null);
     setTimeout(() => {
-      const key = trimmed.toLowerCase();
-      const reply = BOT_RESPONSES[key] || BOT_RESPONSES.default;
-      const replyTime = getNow();
-      setBotTyping(false);
-      setMessages(prev => [...prev, { id: prev.length + 2, type: "bot", text: reply, time: replyTime }]);
-    }, 1200);
-  }, []);
+      setCbTyping(false);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "bot", text }]);
+      if (nextButtons) setCbButtons(nextButtons);
+    }, delay);
+  }
+
+  function handleCbCategory(item) {
+    const category = faqCategories.find(c => c.id === item.id);
+    if (!category) return;
+    setCbCategory(category);
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: `${item.icon} ${item.label}` }]);
+    const qItems = category.questions.map(q => ({ id: q.id, label: q.q }));
+    botReply(
+      `Baik! Berikut pertanyaan seputar **${category.label}**.\nSilakan pilih yang paling sesuai:`,
+      { type: "question", items: qItems }
+    );
+  }
+
+  function handleCbQuestion(item) {
+    if (!cbCategory) return;
+    const qData = cbCategory.questions.find(q => q.id === item.id);
+    if (!qData) return;
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: qData.q }]);
+    const answerNode = (
+      <div>
+        <p style={{ margin: "0 0 10px 0", lineHeight: 1.7 }}>{parseText(qData.a)}</p>
+        {qData.links?.length > 0 && (
+          <div className="chat-cb-links">
+            {qData.links.map((lk, i) => (
+              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="chat-cb-link-btn">
+                <AppIcon name="ExternalLink" variant="xs" /> {lk.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+    const followUpBtns = {
+      type: "followup",
+      items: [
+        { id: "more-same",     label: "Pertanyaan lain di kategori ini" },
+        { id: "back-category", label: "Kembali ke menu utama" },
+      ],
+    };
+    setCbTyping(true);
+    setCbButtons(null);
+    setTimeout(() => {
+      setCbTyping(false);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "bot", node: answerNode }]);
+      setCbButtons(followUpBtns);
+    }, 700);
+  }
+
+  function handleCbFollowUp(item) {
+    if (item.id === "more-same" && cbCategory) {
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Pertanyaan lain di kategori ini" }]);
+      const qItems = cbCategory.questions.map(q => ({ id: q.id, label: q.q }));
+      botReply(
+        `Silakan pilih pertanyaan lain seputar **${cbCategory.label}**:`,
+        { type: "question", items: qItems }
+      );
+    } else {
+      setCbCategory(null);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Kembali ke menu utama" }]);
+      botReply(
+        "Tentu! Ada hal lain yang bisa aku bantu? Silakan pilih kategori:",
+        { type: "category", items: CATEGORY_ITEMS }
+      );
+    }
+  }
+
+  function handleCbPick(item) {
+    if (!cbButtons || cbTyping) return;
+    if (cbButtons.type === "category") handleCbCategory(item);
+    else if (cbButtons.type === "question") handleCbQuestion(item);
+    else if (cbButtons.type === "followup") handleCbFollowUp(item);
+  }
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
@@ -212,15 +296,19 @@ export default function BuatTiketPage() {
         deskripsi,
         kategori_id: topik ? parseInt(topik) : null,
       });
-      alert("Tiket berhasil dibuat!");
-      window.location.href = "/tiket/saya";
+      toast.success(
+        '🎫 Tiket berhasil dibuat!',
+        'Staf kami akan segera meninjau dan memproses tiket kamu.',
+        5000
+      );
+      setTimeout(() => navigate('/tiket/saya'), 1200);
     } catch (error) {
       const msg =
         error?.response?.data?.detail ||
         error?.response?.data?.message ||
         error?.message ||
-        "Gagal membuat tiket.";
-      alert("Error: " + msg);
+        'Gagal membuat tiket.';
+      toast.error('Gagal membuat tiket', msg);
     } finally {
       setSubmitting(false);
     }
@@ -262,11 +350,11 @@ export default function BuatTiketPage() {
               <div className="bt-user-info">
                 <div className="bt-user-info-item">
                   <div className="bt-user-info-label">Email</div>
-                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"}@apps.ipb.ac.id</div>
+                  <div className="bt-user-info-value">{user?.email || "—"}</div>
                 </div>
                 <div className="bt-user-info-item">
                   <div className="bt-user-info-label">Klien</div>
-                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"} — {user?.nama || "Mut"}</div>
+                  <div className="bt-user-info-value">{user?.nim || user?.id || "—"} — {user?.nama || "—"}</div>
                 </div>
               </div>
 
@@ -348,7 +436,7 @@ export default function BuatTiketPage() {
             </div>
           </div>
 
-          {/* Chatbot */}
+          {/* Chatbot — FAQ-based (sama seperti ChatbotPage) */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
               <div className="chatbot-avatar">
@@ -364,47 +452,61 @@ export default function BuatTiketPage() {
             </div>
 
             <div className="bt-chatbot-messages">
-              {messages.map(msg => (
-                <div key={msg.id} className={`chat-msg ${msg.type}`}>
-                  <div className="chat-msg-avatar">
-                    {msg.type === "bot"
-                      ? <AppIcon name="Bot"  variant="sm" />
-                      : <AppIcon name="User" variant="sm" />}
+              {cbMessages.map(msg =>
+                msg.from === "bot" ? (
+                  <div key={msg.id} className="chat-msg bot">
+                    <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                    <div className="chat-msg-bubble" style={{ whiteSpace: "pre-wrap" }}>
+                      {msg.node
+                        ? msg.node
+                        : <p style={{ margin: 0, lineHeight: 1.7 }}>{parseText(msg.text)}</p>
+                      }
+                    </div>
                   </div>
-                  <div>
+                ) : (
+                  <div key={msg.id} className="chat-msg user">
+                    <div className="chat-msg-avatar"><AppIcon name="User" variant="sm" /></div>
                     <div className="chat-msg-bubble">{msg.text}</div>
-                    {msg.quickReplies && (
-                      <div className="chat-quick-replies">
-                        {msg.quickReplies.map((qr, i) => (
-                          <button key={i} className="chat-quick-btn" onClick={() => sendMessage(qr)}>{qr}</button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="chat-msg-time">{msg.time}</div>
                   </div>
-                </div>
-              ))}
-              {botTyping && (
+                )
+              )}
+
+              {/* typing indicator */}
+              {cbTyping && (
                 <div className="chat-msg bot">
-                  <div className="chat-msg-avatar">
-                    <AppIcon name="Bot" variant="sm" />
-                  </div>
+                  <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
                   <div className="chat-typing"><span /><span /><span /></div>
                 </div>
               )}
+
+              {/* quick buttons */}
+              {!cbTyping && cbButtons && (
+                <div className="chat-msg bot">
+                  <div className="chat-msg-avatar" style={{ opacity: 0 }} aria-hidden>
+                    <AppIcon name="Bot" variant="sm" />
+                  </div>
+                  <div className="chat-quick-replies">
+                    {cbButtons.items.map(item => (
+                      <button
+                        key={item.id}
+                        className="chat-quick-btn"
+                        onClick={() => handleCbPick(item)}
+                        disabled={cbTyping}
+                      >
+                        {item.icon && <span>{item.icon}</span>} {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="bt-chatbot-input">
-              <textarea
-                className="chatbot-input-field"
-                placeholder="Tanya sesuatu..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput); } }}
-                rows={1}
-              />
-              <button className="chatbot-send-btn" onClick={() => sendMessage(chatInput)} disabled={!chatInput.trim() || botTyping}>➤</button>
+            <div className="bt-chatbot-input" style={{ justifyContent: "center", padding: "10px 14px" }}>
+              <span style={{ fontSize: "12px", color: "var(--gray-400)" }}>
+                Pilih tombol di atas untuk mendapatkan jawaban
+              </span>
             </div>
           </div>
         </div>

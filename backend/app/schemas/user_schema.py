@@ -57,4 +57,5 @@ class PasswordUpdate(BaseModel):
 
 class UserUpdate(BaseModel):
     nama: Optional[str] = None
+    nim: Optional[str] = None
     divisi_id: Optional[int] = None

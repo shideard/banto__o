@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
+import { useToast } from "../../components/ui/Toast";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -142,6 +143,7 @@ function getFileName(isi = "") {
 export default function DetailTiketStafPage() {
   const { id }   = useParams();
   const { user } = useAuth();
+  const toast    = useToast();
 
   const [tiket, setTiket]                 = useState(null);
   const [loading, setLoading]             = useState(true);
@@ -176,8 +178,9 @@ export default function DetailTiketStafPage() {
       setUpdating(true);
       await ticketService.mulaiProses(id);
       await fetchTiket();
+      toast.success('Tiket sedang diproses', 'Status berhasil diubah ke DIPROSES.');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal memproses tiket.");
+      toast.error('Gagal memproses tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setUpdating(false);
     }
@@ -191,8 +194,9 @@ export default function DetailTiketStafPage() {
       setShowTolak(false);
       setAlasanTolak("");
       await fetchTiket();
+      toast.warning('Tiket ditolak', 'Mahasiswa akan menerima notifikasi penolakan.');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal menolak tiket.");
+      toast.error('Gagal menolak tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setUpdating(false);
     }
@@ -205,8 +209,9 @@ export default function DetailTiketStafPage() {
       await ticketService.addKomentar(id, reply);
       setReply("");
       await fetchTiket();
+      toast.success('Balasan terkirim', 'Mahasiswa akan mendapat notifikasi.');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal mengirim balasan.");
+      toast.error('Gagal mengirim balasan', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setSending(false);
     }
@@ -219,8 +224,10 @@ export default function DetailTiketStafPage() {
       setShowRevisi(false);
       setCatatanRevisi("");
       await fetchTiket();
+      if (newStatus === 'SELESAI') toast.success('Tiket selesai! ✅', 'Mahasiswa telah diberitahu.');
+      else toast.info(`Status diubah ke ${newStatus}`, 'Mahasiswa akan mendapat notifikasi.');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal mengubah status.");
+      toast.error('Gagal mengubah status', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setUpdating(false);
     }
@@ -233,8 +240,9 @@ export default function DetailTiketStafPage() {
       await ticketService.uploadFile(id, fileUpload);
       setFileUpload(null);
       await fetchTiket();
+      toast.success('File berhasil diupload');
     } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal upload file.");
+      toast.error('Gagal upload file', err?.response?.data?.detail || 'Terjadi kesalahan.');
     } finally {
       setUploading(false);
     }
@@ -548,8 +556,9 @@ export default function DetailTiketStafPage() {
                         setUpdating(true);
                         await ticketService.claimTiket(id, { staf_id: user?.id });
                         await fetchTiket();
+                        toast.success('Tiket berhasil diklaim! 🙋', 'Silakan proses tiket ini sekarang.');
                       } catch (err) {
-                        alert(err?.response?.data?.detail || "Gagal mengklaim.");
+                        toast.error('Gagal mengklaim tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
                       } finally {
                         setUpdating(false);
                       }
