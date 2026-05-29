@@ -42,7 +42,7 @@ const styles = `
   .bt-form-card-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
   .bt-form-card-body { padding: 24px; }
 
-  .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
+  .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
   .bt-user-info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 3px; }
   .bt-user-info-value { font-size: 13px; font-weight: 600; color: var(--gray-700); }
 
@@ -349,12 +349,20 @@ export default function BuatTiketPage() {
             <div className="bt-form-card-body">
               <div className="bt-user-info">
                 <div className="bt-user-info-item">
+                  <div className="bt-user-info-label">Nama</div>
+                  <div className="bt-user-info-value">{user?.nama || "—"}</div>
+                </div>
+                <div className="bt-user-info-item">
+                  <div className="bt-user-info-label">NIM</div>
+                  <div className="bt-user-info-value">{user?.nim || "—"}</div>
+                </div>
+                <div className="bt-user-info-item">
                   <div className="bt-user-info-label">Email</div>
                   <div className="bt-user-info-value">{user?.email || "—"}</div>
                 </div>
                 <div className="bt-user-info-item">
-                  <div className="bt-user-info-label">Klien</div>
-                  <div className="bt-user-info-value">{user?.nim || user?.id || "—"} — {user?.nama || "—"}</div>
+                  <div className="bt-user-info-label">Fakultas</div>
+                  <div className="bt-user-info-value">{user?.fakultas || "—"}</div>
                 </div>
               </div>
 

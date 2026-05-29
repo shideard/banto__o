@@ -1,582 +1,1190 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+// frontend/src/pages/staf/StafDetailTiketPage.jsx
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
-import { useToast } from "../../components/ui/Toast";
+import AppIcon from "../../components/ui/AppIcon";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 const styles = `
-  .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .staf-breadcrumb { font-size: 13px; color: #64748b; margin-bottom: 16px; }
-  .staf-breadcrumb span { margin: 0 6px; }
-  .staf-breadcrumb a { color: #64748b; text-decoration: none; }
-  .staf-breadcrumb a:hover { color: #2563eb; }
-  .staf-breadcrumb strong { color: #334155; }
+  /* ─── Layout utama ─── */
+  .dt-main {
+    padding: 32px 40px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
 
-  .detail-top-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-  .detail-top-row h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 800; color: #0f172a; }
-  .detail-actions { display: flex; align-items: center; gap: 10px; }
+  /* ─── Breadcrumb ─── */
+  .dt-breadcrumb {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dt-breadcrumb a {
+    color: var(--gray-500);
+    text-decoration: none;
+  }
+  .dt-breadcrumb a:hover { color: #2563eb; }
+  .dt-breadcrumb strong { color: var(--gray-700); }
+  .dt-breadcrumb span { color: var(--gray-400); }
 
-  .btn-tolak { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: 1.5px solid #fecaca; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 700; color: #dc2626; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .btn-tolak:hover { background: #fef2f2; }
-  .btn-tolak:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-revisi { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 700; color: #334155; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .btn-revisi:hover { background: #f1f5f9; }
-  .btn-revisi:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-proses { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 8px; background: #2563eb; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .btn-proses:hover { background: #1d4ed8; }
-  .btn-proses:disabled { background: #93c5fd; cursor: not-allowed; }
-  .btn-selesai { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 8px; background: #16a34a; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .btn-selesai:hover { background: #15803d; }
-  .btn-selesai:disabled { background: #86efac; cursor: not-allowed; }
+  /* ─── Page header ─── */
+  .dt-page-header {
+    margin-bottom: 24px;
+  }
+  .dt-page-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin: 0;
+  }
 
-  .detail-progress { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 24px 28px; margin-bottom: 24px; display: flex; align-items: center; }
-  .progress-step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; position: relative; }
-  .progress-step:not(:last-child)::after { content: ''; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: #e2e8f0; z-index: 0; }
-  .progress-step.done:not(:last-child)::after { background: #2563eb; }
-  .progress-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #94a3b8; z-index: 1; position: relative; }
-  .progress-circle.done { background: #2563eb; border-color: #2563eb; color: #fff; }
-  .progress-circle.active { border-color: #2563eb; color: #2563eb; background: #fff; }
-  .progress-circle.rejected { background: #dc2626; border-color: #dc2626; color: #fff; }
-  .progress-label { font-size: 12px; font-weight: 600; color: #94a3b8; }
-  .progress-label.done, .progress-label.active { color: #2563eb; }
-  .progress-label.rejected { color: #dc2626; }
+  /* ─── Body: dua kolom ─── */
+  .dt-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
 
-  .ditolak-banner { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-size: 14px; color: #dc2626; font-weight: 600; }
+  /* ─── Kolom kiri ─── */
+  .dt-left { display: flex; flex-direction: column; gap: 20px; }
 
-  .detail-layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+  /* ─── Stepper ─── */
+  .dt-stepper-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 20px 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  .dt-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .dt-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+  .dt-step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-400);
+    transition: all 0.2s;
+  }
+  .dt-step-circle.done {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+  }
+  .dt-step-circle.active {
+    background: white;
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 4px #dbeafe;
+  }
+  .dt-step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-align: center;
+  }
+  .dt-step-label.done { color: #2563eb; }
+  .dt-step-label.active { color: #2563eb; font-weight: 700; }
 
-  .detail-message-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-  .detail-msg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .detail-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a4fad, #0ea5e9); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
-  .detail-msg-name { font-size: 14px; font-weight: 700; color: #0f172a; }
-  .detail-msg-meta { font-size: 12px; color: #94a3b8; }
-  .detail-msg-body { font-size: 14px; color: #334155; line-height: 1.7; }
+  /* Garis penghubung */
+  .dt-step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--gray-200);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 0;
+  }
+  .dt-step-line.done { background: #2563eb; }
 
-  .detail-history-title { font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
-  .history-system { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #f8fafc; border-radius: 10px; margin-bottom: 16px; font-size: 13px; color: #64748b; }
-  .history-item { display: flex; gap: 12px; margin-bottom: 16px; }
-  .history-item-content { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; flex: 1; }
-  .history-item-content.file-item { background: #f8fafc; border-style: dashed; }
-  .history-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .history-item-name { font-size: 14px; font-weight: 700; color: #0f172a; }
-  .history-item-time { font-size: 12px; color: #94a3b8; }
-  .history-item-body { font-size: 13.5px; color: #334155; line-height: 1.6; }
+  /* ─── Pesan awal tiket ─── */
+  .dt-ticket-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  .dt-ticket-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .dt-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dt-avatar.staf { background: #0a1f5c; }
+  .dt-avatar.sistem {
+    background: var(--gray-100);
+    color: var(--gray-500);
+    border: 1.5px solid var(--gray-200);
+  }
+  .dt-ticket-author {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .dt-ticket-time {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+  .dt-ticket-body {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
 
-  .pending-action-banner { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
-  .pending-action-banner h3 { font-size: 15px; font-weight: 700; color: #92400e; margin-bottom: 6px; }
-  .pending-action-banner p { font-size: 13px; color: #a16207; margin-bottom: 16px; line-height: 1.5; }
-  .pending-action-btns { display: flex; gap: 10px; }
+  /* Lampiran */
+  .dt-lampiran-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dt-lampiran-thumb {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1.5px solid var(--gray-200);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .dt-lampiran-thumb:hover { opacity: 0.85; }
 
-  .reply-box { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-top: 8px; }
-  .reply-box-title { padding: 14px 18px; font-size: 14px; font-weight: 700; color: #0f172a; border-bottom: 1.5px solid #e2e8f0; }
-  .reply-textarea { width: 100%; min-height: 100px; border: none; padding: 14px 18px; font-size: 14px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; resize: none; outline: none; background: #fff; box-sizing: border-box; }
-  .reply-textarea::placeholder { color: #94a3b8; }
-  .reply-file-row { padding: 8px 18px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; }
-  .reply-file-label { font-size: 13px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px dashed #e2e8f0; border-radius: 8px; transition: all 0.15s; }
-  .reply-file-label:hover { border-color: #2563eb; color: #2563eb; }
-  .reply-file-name { font-size: 12px; color: #2563eb; font-weight: 600; }
-  .btn-upload { padding: 6px 14px; border: none; border-radius: 8px; background: #f1f5f9; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .btn-upload:hover { background: #e2e8f0; }
-  .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
-  .reply-footer { padding: 10px 18px; border-top: 1.5px solid #f1f5f9; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-  .reply-status-note { font-size: 12px; color: #94a3b8; flex: 1; }
-  .btn-batal { padding: 8px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .btn-batal:hover { background: #f1f5f9; }
-  .btn-kirim { display: flex; align-items: center; gap: 6px; padding: 8px 18px; border: none; border-radius: 8px; background: #2563eb; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .btn-kirim:hover { background: #1d4ed8; }
-  .btn-kirim:disabled { background: #93c5fd; cursor: not-allowed; }
+  /* ─── Riwayat & Tanggapan ─── */
+  .dt-riwayat-section { display: flex; flex-direction: column; gap: 12px; }
+  .dt-riwayat-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+  }
 
-  .detail-info-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
-  .detail-info-title { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; padding: 14px 18px 10px; border-bottom: 1px solid #f1f5f9; }
-  .detail-info-body { padding: 16px 18px; }
-  .detail-info-row { margin-bottom: 10px; }
-  .detail-info-row .info-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .detail-info-row .info-val { font-size: 13px; color: #334155; font-weight: 500; }
+  /* Baris sistem */
+  .dt-sistem-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+  }
+  .dt-sistem-row .dt-avatar { width: 28px; height: 28px; font-size: 11px; }
+  .dt-sistem-text {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+  .dt-sistem-text strong { color: var(--gray-700); }
+  .dt-sistem-time {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
 
-  .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
-  .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
-  .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
-  .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #fef2f2; color: #991b1b; }
+  /* Kartu balasan */
+  .dt-reply-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.02);
+  }
+  .dt-reply-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .dt-reply-author-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dt-reply-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .dt-reply-time {
+    font-size: 12px;
+    color: var(--gray-400);
+  }
+  .dt-reply-body {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+  .dt-reply-img {
+    margin-top: 12px;
+    width: 160px;
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-200);
+    display: block;
+  }
 
-  .state-center { text-align: center; padding: 60px; color: #94a3b8; font-size: 14px; }
-  .state-center.error { color: #dc2626; }
+  /* ─── Form tanggapan ─── */
+  .dt-form-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  .dt-form-title {
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--gray-200);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    background: var(--gray-50);
+  }
+  .dt-form-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 16px;
+    border-bottom: 1.5px solid var(--gray-200);
+    background: var(--white);
+  }
+  .dt-toolbar-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-500);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .dt-toolbar-btn:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+  }
+  .dt-toolbar-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--gray-200);
+    margin: 0 4px;
+  }
+  .dt-form-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px 20px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    box-sizing: border-box;
+  }
+  .dt-form-textarea::placeholder { color: var(--gray-400); }
+  .dt-form-upload-row {
+    padding: 10px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .dt-form-upload-row:hover { background: var(--gray-50); }
+  .dt-form-upload-link { color: #2563eb; font-weight: 600; text-decoration: none; }
+  .dt-form-footer {
+    padding: 14px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--gray-50);
+  }
+  .dt-status-note {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  .dt-status-note em { font-style: normal; font-weight: 600; color: var(--gray-700); }
+  .dt-form-actions { display: flex; align-items: center; gap: 10px; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; }
-  .modal-box { background: #fff; border-radius: 16px; padding: 28px; width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
-  .modal-box h3 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-  .modal-box p { font-size: 13px; color: #64748b; margin-bottom: 16px; }
-  .modal-box textarea { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; resize: none; min-height: 100px; outline: none; box-sizing: border-box; }
-  .modal-box textarea:focus { border-color: #2563eb; }
-  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+  .dt-btn-batal {
+    background: transparent;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+  .dt-btn-batal:hover { color: var(--gray-700); background: var(--gray-100); }
+
+  .dt-btn-kirim {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s;
+  }
+  .dt-btn-kirim:hover { background: #1d4ed8; }
+  .dt-btn-kirim:disabled { background: #93c5fd; cursor: not-allowed; }
+
+  /* ─── Kolom kanan (sidebar) ─── */
+  .dt-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  .dt-sidebar-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  .dt-sidebar-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--gray-400);
+    margin-bottom: 14px;
+  }
+
+  /* Informasi Pelapor */
+  .dt-pelapor-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .dt-pelapor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dt-pelapor-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+  .dt-pelapor-nim {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+  .dt-sidebar-meta { display: flex; flex-direction: column; gap: 10px; }
+  .dt-meta-row {}
+  .dt-meta-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray-400);
+    margin-bottom: 3px;
+  }
+  .dt-meta-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+  }
+  .dt-meta-divider {
+    height: 1px;
+    background: var(--gray-100);
+    margin: 4px 0;
+  }
+
+  /* Detail Tiket sidebar */
+  .dt-detail-rows { display: flex; flex-direction: column; }
+  .dt-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 13px;
+  }
+  .dt-detail-row:last-child { border-bottom: none; }
+  .dt-detail-key { color: var(--gray-500); font-weight: 500; }
+  .dt-detail-val { font-weight: 600; color: var(--gray-900); text-align: right; }
+
+  /* Badge kategori */
+  .dt-badge-kategori {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Badge prioritas */
+  .dt-badge-tinggi {
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dt-badge-normal { color: #16a34a; font-weight: 700; font-size: 13px; }
+
+  /* Petugas */
+  .dt-petugas-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .dt-petugas-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--gray-700);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dt-petugas-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+  .dt-petugas-role {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+
+  /* ─── Loading & error state ─── */
+  .dt-loading {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--gray-400);
+    font-size: 14px;
+  }
+
+
+  /* ── Lampiran chip ── */
+  .dt-lampiran-wrap { margin-top: 12px; }
+  .dt-lampiran-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .dt-lampiran-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 10px;
+    border: 1.5px solid var(--gray-200); background: var(--gray-50);
+    cursor: pointer; transition: all 0.18s; max-width: 240px;
+  }
+  .dt-lampiran-chip:hover { border-color: #93c5fd; background: #eff6ff; }
+  .dt-lampiran-chip-icon {
+    width: 32px; height: 32px; border-radius: 7px;
+    background: #dbeafe; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .dt-lampiran-chip-img-icon { background: #dcfce7; }
+  .dt-lampiran-chip-info { flex: 1; min-width: 0; }
+  .dt-lampiran-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--gray-500); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dt-lampiran-chip-name {
+    font-size: 12px; font-weight: 600; color: var(--gray-800);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dt-lampiran-chip-type { font-size: 11px; color: var(--gray-400); }
+  .dt-lampiran-chip-dl {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: #2563eb; color: white;
+    border: none; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .dt-lampiran-chip-dl:hover { background: #1d4ed8; }
+
+  /* ── Preview modal ── */
+  .dt-preview-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .dt-preview-box {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    max-width: 90vw; max-height: 90vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    animation: dtPreviewIn 0.2s ease;
+  }
+  @keyframes dtPreviewIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .dt-preview-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1.5px solid var(--gray-200); gap: 12px;
+  }
+  .dt-preview-filename {
+    font-size: 13px; font-weight: 700; color: var(--gray-900);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dt-preview-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .dt-preview-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--gray-200);
+    background: var(--white); font-size: 12px; font-weight: 700;
+    color: var(--gray-700); cursor: pointer; transition: all 0.15s; text-decoration: none;
+  }
+  .dt-preview-btn:hover { background: var(--gray-50); }
+  .dt-preview-btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .dt-preview-btn.primary:hover { background: #1d4ed8; }
+  .dt-preview-btn.close { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+  .dt-preview-btn.close:hover { background: #fee2e2; }
+  .dt-preview-body {
+    flex: 1; overflow: auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: #f8fafc; min-height: 200px;
+  }
+  .dt-preview-body img {
+    max-width: 100%; max-height: 70vh;
+    border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  }
+  .dt-preview-file-icon {
+    display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--gray-400);
+  }
+  .dt-preview-file-icon p { font-size: 13px; font-weight: 600; color: var(--gray-500); }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .dt-body { grid-template-columns: 1fr; }
+    .dt-sidebar { order: -1; }
+    .dt-main { padding: 24px 20px; }
+  }
 `;
 
-const STATUS_STEPS = ["DIBUAT", "DIKLAIM", "DIPROSES", "SELESAI"];
+// ─── Helper: inisial nama ─────────────────────────────────────
+function getInitials(nama = "") {
+  return nama
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() || "")
+    .join("");
+}
 
-function getStepStatus(tiketStatus, stepStatus) {
-  if (tiketStatus === "DITOLAK") {
-    if (stepStatus === "DIBUAT" || stepStatus === "DIKLAIM") return "done";
-    return "";
+// ─── Helper: format tanggal ───────────────────────────────────
+function formatTanggal(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }) + ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
+}
+
+function formatTanggalPendek(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }) + "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ─── Parse lampiran dari isi komentar ──────────────────────────────
+function parseLampiran(isi) {
+  if (!isi || !isi.startsWith("[FILE]")) return null;
+  const rest = isi.replace(/^\[FILE\]\s*/, "");
+  const dashIdx = rest.lastIndexOf(" — ");
+  if (dashIdx === -1) {
+    const nama = rest.trim();
+    return { nama, url: `${BACKEND_URL}/uploads/${nama}` };
   }
-  const tiketIdx = STATUS_STEPS.indexOf(tiketStatus === "REVISI" ? "DIPROSES" : tiketStatus);
-  const stepIdx  = STATUS_STEPS.indexOf(stepStatus);
-  if (stepIdx < tiketIdx) return "done";
-  if (stepIdx === tiketIdx) return "active";
-  return "";
+  const nama = rest.slice(0, dashIdx).trim();
+  const path = rest.slice(dashIdx + 3).trim();
+  const url = `${BACKEND_URL}/${path.replace(/\\/g, "/")}`;
+  return { nama, url };
 }
 
-function formatDateTime(str) {
-  if (!str) return "—";
-  return new Date(str).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+const IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"];
+function isImage(nama = "") {
+  return IMAGE_EXTS.some(ext => nama.toLowerCase().endsWith(ext));
+}
+function getFileExt(nama = "") {
+  const dot = nama.lastIndexOf(".");
+  return dot !== -1 ? nama.slice(dot + 1).toUpperCase() : "FILE";
 }
 
-function isFileKomentar(isi = "") {
-  return isi.startsWith("[FILE]");
+// ─── Urutan step ──────────────────────────────────────────────
+const STEPS = ["DIBUAT", "DIKLAIM", "DIPROSES", "SELESAI"];
+
+function getStepIndex(status) {
+  const s = String(status || "").toUpperCase();
+  const idx = STEPS.indexOf(s);
+  return idx === -1 ? 0 : idx;
 }
 
-function getFileName(isi = "") {
-  return isi.replace("[FILE]", "").split("—")[0].trim();
+// ─── Lampiran chip ─────────────────────────────────────────────────
+function LampiranChip({ nama, url, onPreview }) {
+  const img = isImage(nama);
+  const ext = getFileExt(nama);
+  const handleDownload = (e) => {
+    e.stopPropagation();
+    const a = document.createElement("a");
+    a.href = url; a.download = nama;
+    a.target = "_blank"; a.rel = "noreferrer";
+    a.click();
+  };
+  return (
+    <div className="dt-lampiran-chip" onClick={() => onPreview({ nama, url })} title={`Preview: ${nama}`}>
+      <div className={`dt-lampiran-chip-icon ${img ? "dt-lampiran-chip-img-icon" : ""}`}>
+        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "#2563eb"} />
+      </div>
+      <div className="dt-lampiran-chip-info">
+        <div className="dt-lampiran-chip-name">{nama}</div>
+        <div className="dt-lampiran-chip-type">{ext} • Klik untuk lihat</div>
+      </div>
+      <button className="dt-lampiran-chip-dl" onClick={handleDownload} title="Download">
+        <AppIcon name="Download" size={13} />
+      </button>
+    </div>
+  );
 }
 
-export default function DetailTiketStafPage() {
-  const { id }   = useParams();
-  const { user } = useAuth();
-  const toast    = useToast();
+// ─── Preview Modal ────────────────────────────────────────────────
+function PreviewModal({ file, onClose }) {
+  if (!file) return null;
+  const img = isImage(file.nama);
+  return (
+    <div className="dt-preview-overlay" onClick={onClose}>
+      <div className="dt-preview-box" onClick={e => e.stopPropagation()}>
+        <div className="dt-preview-header">
+          <div className="dt-preview-filename">{file.nama}</div>
+          <div className="dt-preview-actions">
+            <a className="dt-preview-btn primary" href={file.url} download={file.nama} target="_blank" rel="noreferrer">
+              <AppIcon name="Download" size={13} /> Download
+            </a>
+            <button className="dt-preview-btn close" onClick={onClose}>
+              <AppIcon name="X" size={13} /> Tutup
+            </button>
+          </div>
+        </div>
+        <div className="dt-preview-body">
+          {img ? (
+            <img src={file.url} alt={file.nama} />
+          ) : (
+            <div className="dt-preview-file-icon">
+              <AppIcon name="FileText" size={56} color="#cbd5e1" />
+              <p>{file.nama}</p>
+              <a className="dt-preview-btn primary" href={file.url} target="_blank" rel="noreferrer">
+                <AppIcon name="ExternalLink" size={13} /> Buka di Tab Baru
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  const [tiket, setTiket]                 = useState(null);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState(null);
-  const [reply, setReply]                 = useState("");
-  const [sending, setSending]             = useState(false);
-  const [updating, setUpdating]           = useState(false);
-  const [showRevisi, setShowRevisi]       = useState(false);
-  const [showTolak, setShowTolak]         = useState(false);
-  const [catatanRevisi, setCatatanRevisi] = useState("");
-  const [alasanTolak, setAlasanTolak]     = useState("");
-  const [fileUpload, setFileUpload]       = useState(null);
-  const [uploading, setUploading]         = useState(false);
+// ─── Stepper ─────────────────────────────────────────────────
+function Stepper({ status }) {
+  const current = getStepIndex(status);
+  const labels = ["Dibuat", "Diklaim", "Diproses", "Selesai"];
 
-  const fetchTiket = useCallback(async () => {
+  return (
+    <div className="dt-stepper-card">
+      <div className="dt-stepper">
+        {labels.map((label, i) => {
+          const isDone = i < current;
+          const isActive = i === current;
+          return (
+            <>
+              <div className="dt-step" key={label}>
+                <div className={`dt-step-circle ${isDone ? "done" : isActive ? "active" : ""}`}>
+                  {isDone ? <AppIcon name="Check" variant="sm" /> : i + 1}
+                </div>
+                <span className={`dt-step-label ${isDone ? "done" : isActive ? "active" : ""}`}>
+                  {label}
+                </span>
+              </div>
+              {i < labels.length - 1 && (
+                <div className={`dt-step-line ${i < current ? "done" : ""}`} key={`line-${i}`} />
+              )}
+            </>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Satu item riwayat ────────────────────────────────────────
+function RiwayatItem({ item, onPreview }) {
+  // item.tipe: "sistem" | "staf" | "mahasiswa"
+  if (item.tipe === "sistem") {
+    return (
+      <div className="dt-sistem-row">
+        <div className="dt-avatar sistem">
+          <AppIcon name="ClipboardCheck" variant="sm" />
+        </div>
+        <div>
+          <div className="dt-sistem-text" dangerouslySetInnerHTML={{ __html: item.teks }} />
+          <div className="dt-sistem-time">{formatTanggal(item.waktu)}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const isStaf = item.tipe === "staf";
+  const lampiran = parseLampiran(item.isi);
+
+  if (lampiran) {
+    return (
+      <div className="dt-reply-card">
+        <div className="dt-reply-header">
+          <div className="dt-reply-author-row">
+            <div className={`dt-avatar ${isStaf ? "staf" : ""}`}>{getInitials(item.nama)}</div>
+            <div><div className="dt-reply-name">{item.nama}</div></div>
+          </div>
+          <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
+        </div>
+        <div className="dt-lampiran-wrap">
+          <div className="dt-lampiran-label">
+            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
+          </div>
+          <div className="dt-lampiran-list">
+            <LampiranChip nama={lampiran.nama} url={lampiran.url} onPreview={onPreview} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="dt-reply-card">
+      <div className="dt-reply-header">
+        <div className="dt-reply-author-row">
+          <div className={`dt-avatar ${isStaf ? "staf" : ""}`}>
+            {getInitials(item.nama)}
+          </div>
+          <div>
+            <div className="dt-reply-name">{item.nama}</div>
+          </div>
+        </div>
+        <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
+      </div>
+      <div className="dt-reply-body">{item.isi}</div>
+    </div>
+  );
+}
+
+// ─── Komponen utama ───────────────────────────────────────────
+export default function StafDetailTiketPage() {
+  const { id } = useParams();
+  // const navigate = useNavigate();
+  // const { user } = useAuth();
+
+
+  const fileInputRef = useRef(null);
+
+  const [tiket, setTiket] = useState(null);
+  const [riwayat, setRiwayat] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [balasan, setBalasan] = useState("");
+  const [file, setFile] = useState(null);
+  const [mengirim, setMengirim] = useState(false);
+  const [errKirim, setErrKirim] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
+
+  // Fetch data tiket + riwayat
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.getTiketById(id);
-      setTiket(res);
+      const [dataTiket, dataRiwayat] = await Promise.all([
+        ticketService.getTiketById(id),
+        ticketService.getRiwayat(id),
+      ]);
+      setTiket(dataTiket);
+      setRiwayat(Array.isArray(dataRiwayat) ? dataRiwayat : []);
     } catch {
-      setError("Tiket tidak ditemukan atau Anda tidak memiliki akses.");
+      setError("Gagal memuat data tiket. Coba muat ulang halaman.");
     } finally {
       setLoading(false);
     }
   }, [id]);
 
-  useEffect(() => { fetchTiket(); }, [fetchTiket]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleMulaiProses = async () => {
+  // Kirim balasan
+  const handleKirim = async () => {
+    if (!balasan.trim() && !file) return;
     try {
-      setUpdating(true);
-      await ticketService.mulaiProses(id);
-      await fetchTiket();
-      toast.success('Tiket sedang diproses', 'Status berhasil diubah ke DIPROSES.');
-    } catch (err) {
-      toast.error('Gagal memproses tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
+      setMengirim(true);
+      setErrKirim(null);
+      
+      // Kirim balasan teks jika ada
+      if (balasan.trim()) {
+        await ticketService.kirimBalasan(id, { 
+          isi: balasan,
+          role: "Staf"
+        });
+      }
+      
+      // Jika ada file, upload sebagai komentar lampiran
+      if (file) {
+        await ticketService.uploadFile(id, file);
+      }
+      
+      setBalasan("");
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      await fetchData();
+    } catch {
+      setErrKirim("Gagal mengirim balasan. Coba lagi.");
     } finally {
-      setUpdating(false);
+      setMengirim(false);
     }
   };
 
-  const handleTolak = async () => {
-    if (!alasanTolak.trim()) return;
-    try {
-      setUpdating(true);
-      await ticketService.tolakTiket(id, alasanTolak);
-      setShowTolak(false);
-      setAlasanTolak("");
-      await fetchTiket();
-      toast.warning('Tiket ditolak', 'Mahasiswa akan menerima notifikasi penolakan.');
-    } catch (err) {
-      toast.error('Gagal menolak tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
-    } finally {
-      setUpdating(false);
-    }
+  const handleFileChange = (e) => {
+    if (e.target.files?.[0]) setFile(e.target.files[0]);
   };
 
-  const handleKirimBalasan = async () => {
-    if (!reply.trim()) return;
-    try {
-      setSending(true);
-      await ticketService.addKomentar(id, reply);
-      setReply("");
-      await fetchTiket();
-      toast.success('Balasan terkirim', 'Mahasiswa akan mendapat notifikasi.');
-    } catch (err) {
-      toast.error('Gagal mengirim balasan', err?.response?.data?.detail || 'Terjadi kesalahan.');
-    } finally {
-      setSending(false);
-    }
-  };
+  if (loading) {
+    return (
+      <>
+        <style>{styles}</style>
+        <main className="dt-main">
+          <div className="dt-loading">⏳ Memuat tiket...</div>
+        </main>
+      </>
+    );
+  }
 
-  const handleUpdateStatus = async (newStatus, catatan = null) => {
-    try {
-      setUpdating(true);
-      await ticketService.updateStatus(id, { new_status: newStatus, catatan });
-      setShowRevisi(false);
-      setCatatanRevisi("");
-      await fetchTiket();
-      if (newStatus === 'SELESAI') toast.success('Tiket selesai! ✅', 'Mahasiswa telah diberitahu.');
-      else toast.info(`Status diubah ke ${newStatus}`, 'Mahasiswa akan mendapat notifikasi.');
-    } catch (err) {
-      toast.error('Gagal mengubah status', err?.response?.data?.detail || 'Terjadi kesalahan.');
-    } finally {
-      setUpdating(false);
-    }
-  };
+  if (error || !tiket) {
+    return (
+      <>
+        <style>{styles}</style>
+        <main className="dt-main">
+          <div className="dt-loading" style={{ color: "#dc2626" }}>
+            {error || "Tiket tidak ditemukan."}
+          </div>
+        </main>
+      </>
+    );
+  }
 
-  const handleUploadFile = async () => {
-    if (!fileUpload) return;
-    try {
-      setUploading(true);
-      await ticketService.uploadFile(id, fileUpload);
-      setFileUpload(null);
-      await fetchTiket();
-      toast.success('File berhasil diupload');
-    } catch (err) {
-      toast.error('Gagal upload file', err?.response?.data?.detail || 'Terjadi kesalahan.');
-    } finally {
-      setUploading(false);
-    }
-  };
+  // const stepIndex = getStepIndex(tiket.status);
 
-  if (loading) return <main className="staf-main"><div className="state-center">⏳ Memuat tiket...</div></main>;
-  if (error)   return <main className="staf-main"><div className="state-center error">{error}</div></main>;
-  if (!tiket)  return null;
-
-  const isMyTicket = tiket.staf_id === user?.id;
-  const isSelesai  = tiket.status === "SELESAI";
-  const isDitolak  = tiket.status === "DITOLAK";
-  const isDiklaim  = tiket.status === "DIKLAIM";
-  const isDiproses = tiket.status === "DIPROSES" || tiket.status === "REVISI";
-  const canComment = isMyTicket && isDiproses;
+  const statusLabel = tiket.status || "—";
+  const isPrioritas = String(tiket.prioritas || "").toLowerCase() === "tinggi";
 
   return (
     <>
       <style>{styles}</style>
+      <PreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
+      <main className="dt-main">
 
-      {/* Modal Revisi */}
-      {showRevisi && (
-        <div className="modal-overlay" onClick={() => setShowRevisi(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <h3>Minta Revisi</h3>
-            <p>Tulis catatan revisi untuk mahasiswa. Catatan ini wajib diisi.</p>
-            <textarea
-              placeholder="Jelaskan apa yang perlu direvisi oleh mahasiswa..."
-              value={catatanRevisi}
-              onChange={e => setCatatanRevisi(e.target.value)}
-            />
-            <div className="modal-actions">
-              <button className="btn-batal" onClick={() => setShowRevisi(false)}>Batal</button>
-              <button
-                className="btn-kirim"
-                disabled={!catatanRevisi.trim() || updating}
-                onClick={() => handleUpdateStatus("REVISI", catatanRevisi)}
-              >
-                {updating ? "Menyimpan..." : "Kirim Revisi"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Tolak */}
-      {showTolak && (
-        <div className="modal-overlay" onClick={() => setShowTolak(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <h3>Tolak Tiket</h3>
-            <p>Tulis alasan penolakan. Mahasiswa akan menerima notifikasi beserta alasan ini.</p>
-            <textarea
-              placeholder="Jelaskan alasan penolakan tiket ini..."
-              value={alasanTolak}
-              onChange={e => setAlasanTolak(e.target.value)}
-            />
-            <div className="modal-actions">
-              <button className="btn-batal" onClick={() => setShowTolak(false)}>Batal</button>
-              <button
-                className="btn-kirim"
-                style={{ background: "#dc2626" }}
-                disabled={!alasanTolak.trim() || updating}
-                onClick={handleTolak}
-              >
-                {updating ? "Menolak..." : "Tolak Tiket"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="staf-main">
-        <div className="staf-breadcrumb">
-          <Link to="/staff/dashboard">Dashboard</Link><span>›</span>
-          <Link to="/staff/antrean-tiket">Antrean Tiket</Link><span>›</span>
-          <strong>Tiket #{id}</strong>
+        {/* Breadcrumb */}
+        <div className="dt-breadcrumb">
+          <Link to="/staff/dashboard">Dashboard</Link>
+          <span>›</span>
+          <Link to="/staff/antrean-tiket">Antrean Tiket</Link>
+          <span>›</span>
+          <strong>{tiket.id}</strong>
         </div>
 
-        {/* Header */}
-        <div className="detail-top-row">
-          <h1>{tiket.subjek}</h1>
-          {isMyTicket && !isSelesai && !isDitolak && (
-            <div className="detail-actions">
-              {isDiklaim && (
-                <>
-                  <button className="btn-tolak" disabled={updating} onClick={() => setShowTolak(true)}>
-                    ✕ Tolak Tiket
-                  </button>
-                  <button className="btn-proses" disabled={updating} onClick={handleMulaiProses}>
-                    {updating ? "Memproses..." : "▷ Proses Tiket"}
-                  </button>
-                </>
-              )}
-              {isDiproses && (
-                <>
-                  <button className="btn-revisi" disabled={updating} onClick={() => setShowRevisi(true)}>
-                    ⎋ Minta Revisi
-                  </button>
-                  <button className="btn-selesai" disabled={updating} onClick={() => handleUpdateStatus("SELESAI")}>
-                    {updating ? "Menyimpan..." : "✓ Tandai Selesai"}
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+        {/* Page header */}
+        <div className="dt-page-header">
+          <h1>{tiket.subjek || "Detail Tiket"}</h1>
         </div>
 
-        {/* Banner ditolak */}
-        {isDitolak && (
-          <div className="ditolak-banner">
-            ✕ Tiket ini telah ditolak oleh staf. Lihat riwayat komentar untuk alasan penolakan.
-          </div>
-        )}
+        {/* Body */}
+        <div className="dt-body">
 
-        {/* Progress */}
-        <div className="detail-progress">
-          {STATUS_STEPS.map((step, i) => {
-            const s = getStepStatus(tiket.status, step);
-            const isRejectedStep = isDitolak && step === "DIKLAIM";
-            return (
-              <div key={i} className={`progress-step ${s}`}>
-                <div className={`progress-circle ${isRejectedStep ? "rejected" : s}`}>
-                  {isRejectedStep ? "✕" : s === "done" ? "✓" : i + 1}
-                </div>
-                <div className={`progress-label ${isRejectedStep ? "rejected" : s}`}>
-                  {step.charAt(0) + step.slice(1).toLowerCase()}
+          {/* ── Kolom Kiri ── */}
+          <div className="dt-left">
+
+            {/* Stepper */}
+            <Stepper status={tiket.status} />
+
+            {/* Pesan awal dari mahasiswa */}
+            <div className="dt-ticket-card">
+              <div className="dt-ticket-meta">
+                <div className="dt-avatar">{getInitials(tiket.nama_pelapor || "")}</div>
+                <div>
+                  <div className="dt-ticket-author">{tiket.nama_pelapor || "Mahasiswa"}</div>
+                  <div className="dt-ticket-time">
+                    {tiket.nim || "—"} &bull; {formatTanggal(tiket.tanggal_dibuat)}
+                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Banner pending action */}
-        {isMyTicket && isDiklaim && (
-          <div className="pending-action-banner">
-            <h3>⏳ Menunggu Keputusan Anda</h3>
-            <p>
-              Tinjau detail tiket ini. Jika siap ditangani, klik <strong>Proses Tiket</strong>.
-              Jika tidak bisa ditangani, klik <strong>Tolak Tiket</strong> dan berikan alasan.
-            </p>
-            <div className="pending-action-btns">
-              <button className="btn-tolak" disabled={updating} onClick={() => setShowTolak(true)}>
-                ✕ Tolak Tiket
-              </button>
-              <button className="btn-proses" disabled={updating} onClick={handleMulaiProses}>
-                {updating ? "Memproses..." : "▷ Proses Tiket"}
-              </button>
+              <div className="dt-ticket-body">{tiket.deskripsi || "—"}</div>
+
+              {tiket.lampiran_url && (
+                <>
+                  <div className="dt-lampiran-label">
+                    <AppIcon name="Paperclip" variant="sm" />
+                    LAMPIRAN (1)
+                  </div>
+                  <img
+                    src={tiket.lampiran_url}
+                    alt="lampiran"
+                    className="dt-lampiran-thumb"
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Riwayat & Tanggapan */}
+            <div className="dt-riwayat-section">
+              <div className="dt-riwayat-title">Riwayat &amp; Tanggapan</div>
+
+              {riwayat.length === 0 ? (
+                <div style={{ color: "var(--gray-400)", fontSize: 13, padding: "8px 0" }}>
+                  Belum ada tanggapan.
+                </div>
+              ) : (
+                riwayat.map((item, idx) => (
+                  <RiwayatItem key={idx} item={item} onPreview={setPreviewFile} />
+                ))
+              )}
+            </div>
+
+            {/* Form Tulis Tanggapan */}
+            <div className="dt-form-card">
+              <div className="dt-form-title">Tulis Tanggapan</div>
+
+              {/* Toolbar rich text (visual only — implementasi rich text bisa dikembangkan) */}
+              <div className="dt-form-toolbar">
+                <button className="dt-toolbar-btn" title="Bold"><strong>B</strong></button>
+                <button className="dt-toolbar-btn" title="Italic"><em>I</em></button>
+                <button className="dt-toolbar-btn" title="Underline"><u>U</u></button>
+                <div className="dt-toolbar-divider" />
+                <button className="dt-toolbar-btn" title="Bullet list">
+                  <AppIcon name="List" variant="sm" />
+                </button>
+                <button className="dt-toolbar-btn" title="Link">
+                  <AppIcon name="Link" variant="sm" />
+                </button>
+                <button className="dt-toolbar-btn" title="Gambar">
+                  <AppIcon name="Image" variant="sm" />
+                </button>
+              </div>
+
+              <textarea
+                className="dt-form-textarea"
+                placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
+                value={balasan}
+                onChange={(e) => setBalasan(e.target.value)}
+              />
+
+              {/* Upload */}
+              <div className="dt-form-upload-row" onClick={() => fileInputRef.current?.click()}>
+                <AppIcon name="Paperclip" variant="sm" />
+                <span>
+                  Lampirkan file atau{" "}
+                  <span className="dt-form-upload-link">pilih berkas</span>
+                </span>
+                {file && (
+                  <span style={{ marginLeft: "auto", fontSize: 12, color: "#2563eb", fontWeight: 600 }}>
+                    {file.name}
+                  </span>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+
+              {errKirim && (
+                <div style={{ padding: "8px 20px", fontSize: 13, color: "#dc2626" }}>
+                  {errKirim}
+                </div>
+              )}
+
+              <div className="dt-form-footer">
+                <div className="dt-status-note">
+                  Tiket akan tetap dalam status <em>'{statusLabel}'</em>
+                </div>
+                <div className="dt-form-actions">
+                  <button
+                    className="dt-btn-batal"
+                    onClick={() => { setBalasan(""); setFile(null); }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    className="dt-btn-kirim"
+                    onClick={handleKirim}
+                    disabled={(!balasan.trim() && !file) || mengirim}
+                  >
+                    {mengirim ? "Mengirim..." : "Kirim Tanggapan ›"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        <div className="detail-layout">
-          {/* LEFT */}
-          <div>
-            {/* Pesan awal mahasiswa */}
-            <div className="detail-message-card">
-              <div className="detail-msg-header">
-                <div className="detail-avatar">
-                  {tiket.mahasiswa_nama ? tiket.mahasiswa_nama.slice(0, 2).toUpperCase() : "MH"}
+          {/* ── Kolom Kanan (Sidebar) ── */}
+          <div className="dt-sidebar">
+
+            {/* Informasi Pelapor */}
+            <div className="dt-sidebar-card">
+              <div className="dt-sidebar-section-title">Informasi Pelapor</div>
+              <div className="dt-pelapor-top">
+                <div className="dt-pelapor-avatar">
+                  {getInitials(tiket.nama_pelapor || "")}
                 </div>
                 <div>
-                  <div className="detail-msg-name">{tiket.mahasiswa_nama || "Pelapor (Mahasiswa)"}</div>
-                  <div className="detail-msg-meta">{formatDateTime(tiket.tanggal_dibuat)}</div>
+                  <div className="dt-pelapor-name">{tiket.nama_pelapor || "—"}</div>
+                  <div className="dt-pelapor-nim">{tiket.nim || "—"}</div>
                 </div>
               </div>
-              <div className="detail-msg-body">
-                {tiket.pengajuan?.deskripsi || "Tidak ada deskripsi."}
+              <div className="dt-sidebar-meta">
+                <div className="dt-meta-row">
+                  <div className="dt-meta-label">Fakultas / Departemen</div>
+                  <div className="dt-meta-value">{tiket.fakultas || "—"}</div>
+                </div>
+                <div className="dt-meta-divider" />
+                <div className="dt-meta-row">
+                  <div className="dt-meta-label">Email</div>
+                  <div className="dt-meta-value" style={{ wordBreak: "break-all" }}>
+                    {tiket.email_pelapor || "—"}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Riwayat */}
-            <div className="detail-history-title">Riwayat &amp; Tanggapan</div>
-            <div className="history-system">
-              <span>📧</span>
-              <span><strong>Sistem</strong> — tiket dibuat pada {formatDateTime(tiket.tanggal_dibuat)}</span>
-            </div>
-
-            {(tiket.komentar || []).map((k) => {
-              const isFile  = isFileKomentar(k.isi);
-              const isStaf  = k.role === "Staff Administrasi";
-              const displayName = isStaf
-                ? (tiket.staf_nama || k.role)
-                : (tiket.mahasiswa_nama || k.role);
-              const initials = displayName.slice(0, 2).toUpperCase();
-              return (
-                <div key={k.id} className="history-item">
-                  <div
-                    className="detail-avatar"
-                    style={{
-                      width: 36, height: 36, fontSize: 13, flexShrink: 0,
-                      background: isStaf
-                        ? "linear-gradient(135deg, #7c3aed, #a855f7)"
-                        : "linear-gradient(135deg, #1a4fad, #0ea5e9)"
-                    }}
-                  >
-                    {initials}
-                  </div>
-                  <div className={`history-item-content ${isFile ? "file-item" : ""}`}>
-                    <div className="history-item-header">
-                      <span className="history-item-name">{displayName}</span>
-                      <span className="history-item-time">{formatDateTime(k.waktu)}</span>
-                    </div>
-                    <div className="history-item-body">
-                      {isFile ? (
-                        <span>📎 <strong>{getFileName(k.isi)}</strong></span>
-                      ) : k.isi}
-                    </div>
-                  </div>
+            {/* Detail Tiket */}
+            <div className="dt-sidebar-card">
+              <div className="dt-sidebar-section-title">Detail Tiket</div>
+              <div className="dt-detail-rows">
+                <div className="dt-detail-row">
+                  <span className="dt-detail-key">Kategori</span>
+                  <span className="dt-badge-kategori">{tiket.kategori || "—"}</span>
                 </div>
-              );
-            })}
-
-            {/* Reply box */}
-            {canComment && (
-              <div className="reply-box">
-                <div className="reply-box-title">Tulis Tanggapan</div>
-                <textarea
-                  className="reply-textarea"
-                  placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
-                  value={reply}
-                  onChange={e => setReply(e.target.value)}
-                />
-                <div className="reply-file-row">
-                  <label className="reply-file-label">
-                    📎 Lampirkan file (opsional)
-                    <input
-                      type="file"
-                      style={{ display: "none" }}
-                      onChange={e => setFileUpload(e.target.files[0] || null)}
-                    />
-                  </label>
-                  {fileUpload && (
-                    <>
-                      <span className="reply-file-name">{fileUpload.name}</span>
-                      <button className="btn-upload" disabled={uploading} onClick={handleUploadFile}>
-                        {uploading ? "Mengupload..." : "Upload"}
-                      </button>
-                      <button className="btn-batal" onClick={() => setFileUpload(null)}>✕</button>
-                    </>
+                <div className="dt-detail-row">
+                  <span className="dt-detail-key">Prioritas</span>
+                  {isPrioritas ? (
+                    <span className="dt-badge-tinggi">
+                      ▲ TINGGI
+                    </span>
+                  ) : (
+                    <span className="dt-badge-normal">Normal</span>
                   )}
                 </div>
-                <div className="reply-footer">
-                  <span className="reply-status-note">Status tiket: <strong>{tiket.status}</strong></span>
-                  <button className="btn-batal" onClick={() => setReply("")}>Batal</button>
-                  <button
-                    className="btn-kirim"
-                    disabled={!reply.trim() || sending}
-                    onClick={handleKirimBalasan}
-                  >
-                    {sending ? "Mengirim..." : "Kirim Tanggapan ▷"}
-                  </button>
+                <div className="dt-detail-row">
+                  <span className="dt-detail-key">Dibuat Pada</span>
+                  <span className="dt-detail-val" style={{ whiteSpace: "pre-line", textAlign: "right" }}>
+                    {formatTanggalPendek(tiket.tanggal_dibuat)}
+                  </span>
                 </div>
-              </div>
-            )}
-
-            {isMyTicket && isDiklaim && (
-              <div style={{ textAlign: "center", padding: "24px", color: "#94a3b8", fontSize: 13, background: "#f8fafc", borderRadius: 12, border: "1.5px dashed #e2e8f0" }}>
-                💬 Kolom pesan akan tersedia setelah Anda memilih untuk memproses tiket ini.
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT sidebar */}
-          <div>
-            <div className="detail-info-card">
-              <div className="detail-info-title">Detail Tiket</div>
-              <div className="detail-info-body">
-                <div className="detail-info-row">
-                  <div className="info-label">ID Tiket</div>
-                  <div className="info-val">#{tiket.id}</div>
-                </div>
-                <div className="detail-info-row">
-                  <div className="info-label">Status</div>
-                  <div className="info-val">
-                    <span className={`staf-status-pill pill-${tiket.status}`}>{tiket.status}</span>
-                  </div>
-                </div>
-                <div className="detail-info-row">
-                  <div className="info-label">Kategori</div>
-                  <div className="info-val">{tiket.kategori_nama || "—"}</div>
-                </div>
-                <div className="detail-info-row">
-                  <div className="info-label">Dibuat Pada</div>
-                  <div className="info-val">{formatDateTime(tiket.tanggal_dibuat)}</div>
-                </div>
-                <div className="detail-info-row">
-                  <div className="info-label">Pelapor (Mahasiswa)</div>
-                  <div className="info-val">
-                    {tiket.mahasiswa_nama || (tiket.mahasiswa_id ? `Mahasiswa #${tiket.mahasiswa_id}` : "—")}
-                  </div>
-                </div>
-                <div className="detail-info-row">
-                  <div className="info-label">Staf Penanganan</div>
-                  <div className="info-val">
-                    {tiket.staf_nama || (tiket.staf_id ? `Staf #${tiket.staf_id}` : "Belum diklaim")}
-                  </div>
+                <div className="dt-detail-row">
+                  <span className="dt-detail-key">SLA Target</span>
+                  <span className="dt-detail-val">{tiket.sla_target || "24 Jam"}</span>
                 </div>
               </div>
             </div>
 
-            {/* Tombol klaim */}
-            {!isMyTicket && tiket.status === "DIBUAT" && (
-              <div className="detail-info-card">
-                <div className="detail-info-body">
-                  <button
-                    className="btn-proses"
-                    style={{ width: "100%", justifyContent: "center" }}
-                    disabled={updating}
-                    onClick={async () => {
-                      try {
-                        setUpdating(true);
-                        await ticketService.claimTiket(id, { staf_id: user?.id });
-                        await fetchTiket();
-                        toast.success('Tiket berhasil diklaim! 🙋', 'Silakan proses tiket ini sekarang.');
-                      } catch (err) {
-                        toast.error('Gagal mengklaim tiket', err?.response?.data?.detail || 'Terjadi kesalahan.');
-                      } finally {
-                        setUpdating(false);
-                      }
-                    }}
-                  >
-                    {updating ? "Mengklaim..." : "🙋 Klaim Tiket Ini"}
-                  </button>
+            {/* Petugas */}
+            {tiket.nama_staf && (
+              <div className="dt-sidebar-card">
+                <div className="dt-sidebar-section-title">Petugas</div>
+                <div className="dt-petugas-row">
+                  <div className="dt-petugas-avatar">
+                    {getInitials(tiket.nama_staf)}
+                  </div>
+                  <div>
+                    <div className="dt-petugas-name">{tiket.nama_staf}</div>
+                    <div className="dt-petugas-role">{tiket.jabatan_staf || "Staf Akademik"}</div>
+                  </div>
                 </div>
               </div>
             )}
 
-            <div className="detail-info-card">
-              <div className="detail-info-title">Navigasi</div>
-              <div className="detail-info-body" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <Link to="/staff/antrean-tiket" style={{ color: "#2563eb", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>← Kembali ke Antrean</Link>
-                <Link to="/staff/tugas-saya" style={{ color: "#2563eb", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>← Tugas Saya</Link>
-              </div>
-            </div>
           </div>
         </div>
       </main>

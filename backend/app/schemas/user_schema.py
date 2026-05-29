@@ -9,8 +9,12 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     role: str = "mahasiswa"   # 'mahasiswa' | 'staf'
-    nim: Optional[str] = None          # PERBAIKAN: ditambahkan untuk mahasiswa
-    divisi_id: Optional[int] = None   # PERBAIKAN: ditambahkan untuk staf
+    nim: Optional[str] = None          # untuk mahasiswa
+    telepon: Optional[str] = None      # nomor telepon mahasiswa
+    fakultas: Optional[str] = None     # fakultas mahasiswa
+    departemen: Optional[str] = None   # departemen mahasiswa
+    divisi_id: Optional[int] = None    # untuk staf (by ID)
+    divisi_nama: Optional[str] = None  # untuk staf (by nama, auto-create)
 
 class DivisiStafCreate(BaseModel):
     nama_divisi: str
@@ -39,7 +43,11 @@ class UserResponse(BaseModel):
     email: str
     role: str
     nim: Optional[str] = None
+    telepon: Optional[str] = None
+    fakultas: Optional[str] = None
+    departemen: Optional[str] = None
     divisi_id: Optional[int] = None
+    divisi_nama: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -58,4 +66,7 @@ class PasswordUpdate(BaseModel):
 class UserUpdate(BaseModel):
     nama: Optional[str] = None
     nim: Optional[str] = None
+    telepon: Optional[str] = None
+    fakultas: Optional[str] = None
+    departemen: Optional[str] = None
     divisi_id: Optional[int] = None

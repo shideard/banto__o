@@ -28,11 +28,18 @@ class UserORM(Base):
     role     = Column(String(20), nullable=False)    # 'mahasiswa' | 'staf'
 
     # Mahasiswa fields
-    nim = Column(String(20), nullable=True, unique=True)
+    nim        = Column(String(20),  nullable=True, unique=True)
+    telepon    = Column(String(20),  nullable=True)
+    fakultas   = Column(String(150), nullable=True)
+    departemen = Column(String(150), nullable=True)
 
     # Staf fields
     divisi_id = Column(Integer, ForeignKey("divisi_staf.id"), nullable=True)
     divisi    = relationship("DivisiStafORM", back_populates="staf")
+
+    @property
+    def divisi_nama(self):
+        return self.divisi.nama_divisi if self.divisi else None
 
     # Relationships
     tiket_diajukan = relationship(

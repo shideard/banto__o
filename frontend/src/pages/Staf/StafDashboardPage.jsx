@@ -32,6 +32,8 @@ const styles = `
   .staf-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 
   .staf-table-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  .staf-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .staf-table-scroll table.staf-table { min-width: 480px; }
   .staf-table-header { padding: 20px 24px; border-bottom: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
   .staf-table-header h2 { font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   .staf-table-header p { font-size: 13px; color: #64748b; }
@@ -184,6 +186,7 @@ export default function StafDashboardPage() {
               </div>
             </div>
 
+            <div className="staf-table-scroll">
             <table className="staf-table">
               <thead>
                 <tr>
@@ -220,6 +223,7 @@ export default function StafDashboardPage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             <div className="staf-table-footer">
               <span>{filteredTugas.length} tiket aktif</span>
@@ -246,6 +250,7 @@ export default function StafDashboardPage() {
               </div>
             </div>
 
+            <div className="staf-table-scroll">
             <table className="staf-table">
               <thead>
                 <tr>
@@ -287,6 +292,7 @@ export default function StafDashboardPage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             <div className="staf-table-footer">
               <span>{filteredAntrean.length} tiket menunggu</span>

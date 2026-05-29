@@ -57,6 +57,10 @@ def login(
         "email": user.email,
         "id": user.id,
         "nim": user.nim,
+        "telepon": user.telepon,
+        "fakultas": user.fakultas,
+        "departemen": user.departemen,
+        "divisi_id": user.divisi_id,
     }
 
 
@@ -97,6 +101,12 @@ def update_profile(
         current_user.nama = payload.nama
     if payload.nim is not None and current_user.role == "mahasiswa":
         current_user.nim = payload.nim
+    if payload.telepon is not None and current_user.role == "mahasiswa":
+        current_user.telepon = payload.telepon
+    if payload.fakultas is not None and current_user.role == "mahasiswa":
+        current_user.fakultas = payload.fakultas
+    if payload.departemen is not None and current_user.role == "mahasiswa":
+        current_user.departemen = payload.departemen
     if payload.divisi_id is not None and current_user.role == "staf":
         current_user.divisi_id = payload.divisi_id
     db.commit()

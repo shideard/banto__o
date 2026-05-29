@@ -1,4 +1,5 @@
 // frontend/src/pages/staf/ProfilStafPage.jsx
+// ✅ UPDATED: divisi pakai nama string (konsisten dengan RegisterPage), bukan ID numerik
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -7,7 +8,6 @@ import apiClient from "../../services/ApiClient";
 
 // ─────────────────────────── STYLES ───────────────────────────────────────────
 const styles = `
-  /* Layout */
   .profil-main {
     padding: 32px 40px;
     max-width: 1100px;
@@ -33,7 +33,6 @@ const styles = `
     align-items: start;
   }
 
-  /* ── Card umum ── */
   .profil-card {
     background: #fff;
     border: 1.5px solid #e2e8f0;
@@ -57,7 +56,6 @@ const styles = `
   }
   .profil-card-body { padding: 22px; }
 
-  /* ── Avatar & identitas ── */
   .profil-avatar-wrap {
     display: flex;
     flex-direction: column;
@@ -111,7 +109,6 @@ const styles = `
   }
   .profil-divider { width: 100%; height: 1px; background: #f1f5f9; margin-bottom: 20px; }
 
-  /* Info list */
   .profil-info-list { width: 100%; display: flex; flex-direction: column; gap: 14px; }
   .profil-info-item { display: flex; align-items: flex-start; gap: 12px; text-align: left; }
   .profil-info-icon {
@@ -122,10 +119,9 @@ const styles = `
     font-size: 15px; flex-shrink: 0;
   }
   .profil-info-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-  .profil-info-val { font-size: 13.5px; color: #1e293b; font-weight: 600; word-break: break-all; }
+  .profil-info-val { font-size: 13.5px; color: #1e293b; font-weight: 600; word-break: break-word; }
   .profil-info-val.muted { color: #94a3b8; font-weight: 500; font-style: italic; }
 
-  /* ── Statistik ── */
   .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
   .stat-box {
     background: #f8fafc;
@@ -148,13 +144,11 @@ const styles = `
   .stat-box.avg      .stat-box-num { color: #c2410c; font-size: 22px; padding-top: 7px; }
   .stat-box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #64748b; }
 
-  /* Progress bar selesai */
   .completion-wrap { margin-bottom: 20px; }
   .completion-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; }
   .completion-bar-bg { height: 8px; background: #f1f5f9; border-radius: 100px; overflow: hidden; }
   .completion-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #7c3aed, #2563eb); transition: width 0.8s ease; }
 
-  /* Tiket aktif list */
   .tiket-list-mini { display: flex; flex-direction: column; gap: 10px; }
   .tiket-mini-item {
     display: flex; align-items: center;
@@ -170,14 +164,13 @@ const styles = `
   .tiket-mini-id { font-size: 12px; font-weight: 700; color: #94a3b8; white-space: nowrap; }
   .tiket-mini-subj { font-size: 13px; font-weight: 600; color: #1e293b; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tiket-mini-pill { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 100px; white-space: nowrap; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
+  .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
+  .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
   .tiket-mini-empty { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; }
 
-  /* ── Form edit ── */
   .form-group { margin-bottom: 18px; }
   .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
   .form-input {
@@ -195,11 +188,15 @@ const styles = `
     font-family: 'Plus Jakarta Sans', sans-serif;
     outline: none; background: #f8fafc; cursor: pointer;
     transition: border-color 0.18s; box-sizing: border-box;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
   }
-  .form-select:focus { border-color: #7c3aed; background: #fff; }
+  .form-select:focus { border-color: #7c3aed; background-color: #fff; }
   .form-hint { font-size: 11px; color: #94a3b8; margin-top: 5px; }
 
-  /* Tombol */
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .btn-primary-sm {
     display: inline-flex; align-items: center; gap: 6px;
@@ -224,11 +221,9 @@ const styles = `
   }
   .btn-danger-sm:hover { background: #fee2e2; }
 
-  /* Alert */
   .alert-success { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #15803d; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .alert-error   { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #dc2626; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-  /* Modal ganti password */
   .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .modal-box { background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); animation: modalIn 0.22s ease; }
   @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -236,11 +231,17 @@ const styles = `
   .modal-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 
-  /* Skeleton */
   .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  /* Responsive */
+  /* Divisi grup info badge */
+  .divisi-grup-badge {
+    margin-top: 6px; padding: 8px 12px;
+    background: #f5f3ff; border: 1px solid #ddd6fe;
+    border-radius: 8px; font-size: 12px; color: #6d28d9;
+    display: flex; gap: 6px; align-items: center; line-height: 1.5;
+  }
+
   @media (max-width: 900px) {
     .profil-main { padding: 20px 16px; }
     .profil-grid { grid-template-columns: 1fr; }
@@ -248,50 +249,116 @@ const styles = `
   }
 `;
 
+// ─────────────────────────── DATA DIVISI ──────────────────────────────────────
+// ✅ PERBAIKAN: Sama persis dengan RegisterPage — pakai nama string, BUKAN ID numerik
+const DIVISI_STAF = [
+  {
+    grup: "Kemahasiswaan & Akademik",
+    divisi: [
+      "Admin Kemahasiswaan Ormawa",
+      "Bantuan Pendidikan Non Beasiswa",
+      "Evaluasi Pendidikan",
+      "Kesejahteraan Mahasiswa",
+      "KKNT IPB",
+      "KRS Multistrata",
+      "Lomba Mahasiswa dan SKPI",
+      "MBKM Program Studi",
+      "Ormawa dan Softskill",
+      "Penerimaan Mahasiswa Baru",
+      "Perencanaan dan Info Pendidikan",
+      "PPKU IPB",
+      "Program Pendidikan Internasional",
+      "UKT Multistrata",
+    ],
+  },
+  {
+    grup: "Administrasi & Dokumen",
+    divisi: [
+      "Admin Surat/Dokumen APPMB",
+      "Administrasi Fakultas/Departemen",
+      "Akademik Pascasarjana",
+      "Akademik Sekolah Bisnis",
+      "Akademik Sekolah Vokasi",
+      "Arsip",
+      "Update-No Rekening-KBM",
+    ],
+  },
+  {
+    grup: "Pengaduan & Kepatuhan",
+    divisi: [
+      "Crisis Center-Pengaduan",
+      "Pengaduan Dugaan Korupsi",
+      "Pengaduan Kekerasan Seksual",
+      "Pengaduan Melanggar Kode Etik",
+      "Pengaduan Melanggar Tata Tertib",
+      "KMMAI-Standar Mutu",
+    ],
+  },
+  {
+    grup: "SDM & Keuangan",
+    divisi: [
+      "BKD SISTER",
+      "Pengembangan SDM dan PKK",
+      "Rekrutmen Evaluasi Kinerja",
+      "Remunerasi dan Kesejahteraan",
+    ],
+  },
+  {
+    grup: "Layanan & Fasilitas",
+    divisi: [
+      "Informasi Publik",
+      "Kehumasan",
+      "Layanan Pengembangan Karir",
+      "Layanan Perpustakaan",
+      "Layanan Promosi IPB",
+      "Layanan Unit Kesehatan",
+      "Museum & Galeri IPB Future",
+      "Perpustakaan",
+      "Riset dan Inovasi",
+      "Sarana Dan Prasarana",
+      "Teknologi Informasi",
+    ],
+  },
+];
+
 // ─────────────────────────── HELPERS ──────────────────────────────────────────
 function getInitials(nama = "") {
   return nama.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?";
 }
 
 function hitungRataWaktu(tiketSelesai) {
-  const valid = tiketSelesai.filter(t => t.tanggal_dibuat);
-  if (valid.length === 0) return null;
-  // Estimasi: rata-rata waktu dari dibuat sampai "sekarang" untuk yang selesai
-  // (backend idealnya punya tanggal_selesai; pakai tanggal_dibuat + estimasi)
-  return valid.length > 0 ? `~${Math.ceil(valid.length * 0.5 + 1)} hari` : null;
+  if (tiketSelesai.length === 0) return null;
+  return `~${Math.ceil(tiketSelesai.length * 0.5 + 1)} hari`;
 }
 
-// ─────────────────────────── DIVISI LIST ──────────────────────────────────────
-const DIVISI_LIST = [
-  { id: 1, nama: "IT Support" },
-  { id: 2, nama: "Akademik" },
-  { id: 3, nama: "Administrasi" },
-  { id: 4, nama: "Keuangan" },
-  { id: 5, nama: "Fasilitas" },
-];
+// Cari nama grup berdasarkan nama divisi
+function findGrupDivisi(divisiName) {
+  for (const g of DIVISI_STAF) {
+    if (g.divisi.includes(divisiName)) return g.grup;
+  }
+  return null;
+}
 
 // ─────────────────────────── KOMPONEN UTAMA ───────────────────────────────────
 export default function ProfilStafPage() {
   const { user, logout } = useAuth();
 
-  // ── State tiket ──
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets]     = useState([]);
   const [loadingTiket, setLoadingTiket] = useState(true);
 
   // ── State edit profil ──
-  const [editMode, setEditMode]   = useState(false);
-  const [formNama, setFormNama]   = useState(user?.nama || "");
-  const [formDivisi, setFormDivisi] = useState(user?.divisi_id || "");
+  const [editMode, setEditMode]     = useState(false);
+  const [formNama, setFormNama]     = useState(user?.nama   || "");
+  const [formDivisi, setFormDivisi] = useState(user?.divisi || ""); // ✅ nama string
   const [savingProfil, setSavingProfil] = useState(false);
-  const [profilMsg, setProfilMsg] = useState({ type: "", text: "" });
+  const [profilMsg, setProfilMsg]   = useState({ type: "", text: "" });
 
   // ── State modal ganti password ──
   const [showPwModal, setShowPwModal] = useState(false);
   const [pwForm, setPwForm] = useState({ lama: "", baru: "", konfirmasi: "" });
-  const [savingPw, setSavingPw]   = useState(false);
-  const [pwMsg, setPwMsg]         = useState({ type: "", text: "" });
+  const [savingPw, setSavingPw] = useState(false);
+  const [pwMsg, setPwMsg]       = useState({ type: "", text: "" });
 
-  // ── Fetch tiket ──
   useEffect(() => {
     ticketService.getAllTiket()
       .then(data => setTickets(Array.isArray(data) ? data : []))
@@ -299,16 +366,24 @@ export default function ProfilStafPage() {
       .finally(() => setLoadingTiket(false));
   }, []);
 
-  // ── Statistik ──
-  const milikku  = tickets.filter(t => t.staf_id === user?.id);
-  const handled  = milikku.length;
-  const selesai  = milikku.filter(t => t.status === "SELESAI").length;
-  const aktif    = milikku.filter(t => t.status !== "SELESAI");
-  const rataWaktu = hitungRataWaktu(milikku.filter(t => t.status === "SELESAI"));
+  const milikku    = tickets.filter(t => t.staf_id === user?.id);
+  const handled    = milikku.length;
+  const selesai    = milikku.filter(t => t.status === "SELESAI").length;
+  const aktif      = milikku.filter(t => t.status !== "SELESAI");
+  const rataWaktu  = hitungRataWaktu(milikku.filter(t => t.status === "SELESAI"));
   const completion = handled > 0 ? Math.round((selesai / handled) * 100) : 0;
   const recentAktif = aktif.slice(0, 4);
 
-  const namaDivisi = DIVISI_LIST.find(d => d.id === (user?.divisi_id || formDivisi))?.nama || "—";
+  // Divisi dari user atau form
+  const divisiTampil = user?.divisi || "—";
+  const grupDivisiEdit = formDivisi ? findGrupDivisi(formDivisi) : null;
+
+  // ── Buka edit mode ──
+  const handleOpenEdit = () => {
+    setFormNama(user?.nama   || "");
+    setFormDivisi(user?.divisi || "");
+    setEditMode(true);
+  };
 
   // ── Simpan profil ──
   const handleSaveProfil = async () => {
@@ -316,14 +391,20 @@ export default function ProfilStafPage() {
     try {
       setSavingProfil(true);
       setProfilMsg({ type: "", text: "" });
+      // ✅ Kirim divisi sebagai nama string, backend yang handle mapping ke ID jika perlu
       await apiClient.patch("/auth/me", {
-        nama: formNama.trim(),
-        divisi_id: formDivisi ? Number(formDivisi) : null,
+        nama:   formNama.trim(),
+        divisi: formDivisi || null,
       });
       setProfilMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
+      // Update localStorage agar konsisten
       const stored = JSON.parse(localStorage.getItem("banto_user") || "{}");
-      localStorage.setItem("banto_user", JSON.stringify({ ...stored, nama: formNama.trim(), divisi_id: formDivisi ? Number(formDivisi) : null }));
+      localStorage.setItem("banto_user", JSON.stringify({
+        ...stored,
+        nama:   formNama.trim(),
+        divisi: formDivisi || null,
+      }));
       setTimeout(() => setProfilMsg({ type: "", text: "" }), 3000);
     } catch {
       setProfilMsg({ type: "error", text: "Gagal memperbarui profil. Coba lagi." });
@@ -363,7 +444,6 @@ export default function ProfilStafPage() {
     }
   };
 
-  // ─────────────────────────── RENDER ─────────────────────────────────────────
   return (
     <>
       <style>{styles}</style>
@@ -398,9 +478,11 @@ export default function ProfilStafPage() {
             </div>
 
             <div className="modal-actions">
-              <button className="btn-outline-sm" onClick={() => { setShowPwModal(false); setPwMsg({ type: "", text: "" }); setPwForm({ lama: "", baru: "", konfirmasi: "" }); }}>
-                Batal
-              </button>
+              <button className="btn-outline-sm" onClick={() => {
+                setShowPwModal(false);
+                setPwMsg({ type: "", text: "" });
+                setPwForm({ lama: "", baru: "", konfirmasi: "" });
+              }}>Batal</button>
               <button className="btn-primary-sm" disabled={savingPw} onClick={handleGantiPassword}>
                 {savingPw ? "Menyimpan..." : "Simpan Password"}
               </button>
@@ -410,7 +492,6 @@ export default function ProfilStafPage() {
       )}
 
       <main className="profil-main">
-        {/* Breadcrumb */}
         <div className="profil-breadcrumb">
           <Link to="/staff/dashboard">Dashboard</Link>
           <span>›</span>
@@ -419,7 +500,7 @@ export default function ProfilStafPage() {
 
         <div className="profil-grid">
 
-          {/* ── KOLOM KIRI — Kartu identitas ── */}
+          {/* ── KOLOM KIRI ── */}
           <div>
             <div className="profil-card">
               <div className="profil-avatar-wrap">
@@ -431,6 +512,8 @@ export default function ProfilStafPage() {
                 <div className="profil-role-badge">🛡️ Staff Administrasi</div>
                 <div className="profil-divider" />
                 <div className="profil-info-list">
+
+                  {/* Email */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">✉️</div>
                     <div>
@@ -438,15 +521,43 @@ export default function ProfilStafPage() {
                       <div className="profil-info-val">{user?.email || "—"}</div>
                     </div>
                   </div>
+
+                  {/* Telepon — ✅ BARU */}
+                  <div className="profil-info-item">
+                    <div className="profil-info-icon">📱</div>
+                    <div>
+                      <div className="profil-info-label">Telepon</div>
+                      <div className="profil-info-val">
+                        {user?.telepon || <span className="muted">Belum tersedia</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Divisi — ✅ PERBAIKAN: tampilkan nama string langsung */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">🏢</div>
                     <div>
                       <div className="profil-info-label">Divisi</div>
                       <div className="profil-info-val">
-                        {namaDivisi !== "—" ? namaDivisi : <span className="muted">Belum ditentukan</span>}
+                        {divisiTampil !== "—"
+                          ? divisiTampil
+                          : <span className="muted">Belum ditentukan</span>}
                       </div>
                     </div>
                   </div>
+
+                  {/* Grup divisi — ✅ BARU: tampilkan kelompok divisi */}
+                  {user?.divisi && findGrupDivisi(user.divisi) && (
+                    <div className="profil-info-item">
+                      <div className="profil-info-icon">📂</div>
+                      <div>
+                        <div className="profil-info-label">Kelompok Divisi</div>
+                        <div className="profil-info-val">{findGrupDivisi(user.divisi)}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Institusi */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">🏛️</div>
                     <div>
@@ -454,6 +565,7 @@ export default function ProfilStafPage() {
                       <div className="profil-info-val">IPB University</div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -464,10 +576,18 @@ export default function ProfilStafPage() {
                 <span className="profil-card-title">Aksi Akun</span>
               </div>
               <div className="profil-card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <button className="btn-outline-sm" style={{ width: "100%", justifyContent: "center" }} onClick={() => setShowPwModal(true)}>
+                <button
+                  className="btn-outline-sm"
+                  style={{ width: "100%", justifyContent: "center" }}
+                  onClick={() => setShowPwModal(true)}
+                >
                   🔑 Ganti Password
                 </button>
-                <button className="btn-danger-sm" style={{ width: "100%", justifyContent: "center" }} onClick={logout}>
+                <button
+                  className="btn-danger-sm"
+                  style={{ width: "100%", justifyContent: "center" }}
+                  onClick={logout}
+                >
                   🚪 Keluar dari Akun
                 </button>
               </div>
@@ -488,7 +608,9 @@ export default function ProfilStafPage() {
               <div className="profil-card-body">
                 {loadingTiket ? (
                   <div className="stat-row">
-                    {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 88, borderRadius: 14 }} />)}
+                    {[1,2,3].map(i => (
+                      <div key={i} className="skeleton" style={{ height: 88, borderRadius: 14 }} />
+                    ))}
                   </div>
                 ) : (
                   <>
@@ -507,7 +629,6 @@ export default function ProfilStafPage() {
                       </div>
                     </div>
 
-                    {/* Progress bar completion rate */}
                     {handled > 0 && (
                       <div className="completion-wrap">
                         <div className="completion-label">
@@ -522,7 +643,6 @@ export default function ProfilStafPage() {
                   </>
                 )}
 
-                {/* Tiket aktif */}
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
                     Tiket Aktif Saat Ini
@@ -560,7 +680,7 @@ export default function ProfilStafPage() {
                   <button
                     className="btn-outline-sm"
                     style={{ padding: "5px 14px", fontSize: 12 }}
-                    onClick={() => { setEditMode(true); setFormNama(user?.nama || ""); setFormDivisi(user?.divisi_id || ""); }}
+                    onClick={handleOpenEdit}
                   >
                     ✏️ Edit
                   </button>
@@ -573,6 +693,7 @@ export default function ProfilStafPage() {
                   </div>
                 )}
 
+                {/* Nama */}
                 <div className="form-group">
                   <label className="form-label">Nama Lengkap</label>
                   <input
@@ -583,40 +704,64 @@ export default function ProfilStafPage() {
                     readOnly={!editMode}
                   />
                 </div>
+
+                {/* Email — readonly */}
                 <div className="form-group">
                   <label className="form-label">Email</label>
                   <input type="email" className="form-input readonly" value={user?.email || ""} readOnly />
                   <div className="form-hint">Email tidak dapat diubah.</div>
                 </div>
+
+                {/* Divisi — ✅ PERBAIKAN: dropdown nama string, bukan ID numerik */}
                 <div className="form-group" style={{ marginBottom: editMode ? 18 : 0 }}>
-                  <label className="form-label">Divisi</label>
+                  <label className="form-label">Nama Divisi</label>
                   {editMode ? (
-                    <select
-                      className="form-select"
-                      value={formDivisi}
-                      onChange={e => setFormDivisi(e.target.value)}
-                    >
-                      <option value="">— Pilih Divisi —</option>
-                      {DIVISI_LIST.map(d => (
-                        <option key={d.id} value={d.id}>{d.nama}</option>
-                      ))}
-                    </select>
+                    <>
+                      <select
+                        className="form-select"
+                        value={formDivisi}
+                        onChange={e => setFormDivisi(e.target.value)}
+                      >
+                        <option value="">— Pilih Divisi —</option>
+                        {DIVISI_STAF.map(g => (
+                          <optgroup key={g.grup} label={`── ${g.grup} (${g.divisi.length})`}>
+                            {g.divisi.map(d => (
+                              <option key={d} value={d}>{d}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                      {/* Tampilkan grup divisi yang dipilih */}
+                      {formDivisi && grupDivisiEdit && (
+                        <div className="divisi-grup-badge">
+                          📂 Kelompok: <strong>{grupDivisiEdit}</strong>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <input
                       type="text"
                       className="form-input readonly"
-                      value={namaDivisi}
+                      value={user?.divisi || ""}
                       readOnly
+                      placeholder="Belum ditentukan"
                     />
                   )}
                 </div>
 
                 {editMode && (
                   <div className="btn-row">
-                    <button className="btn-primary-sm" disabled={savingProfil || !formNama.trim()} onClick={handleSaveProfil}>
+                    <button
+                      className="btn-primary-sm"
+                      disabled={savingProfil || !formNama.trim()}
+                      onClick={handleSaveProfil}
+                    >
                       {savingProfil ? "Menyimpan..." : "💾 Simpan Perubahan"}
                     </button>
-                    <button className="btn-outline-sm" onClick={() => { setEditMode(false); setProfilMsg({ type: "", text: "" }); }}>
+                    <button
+                      className="btn-outline-sm"
+                      onClick={() => { setEditMode(false); setProfilMsg({ type: "", text: "" }); }}
+                    >
                       Batal
                     </button>
                   </div>

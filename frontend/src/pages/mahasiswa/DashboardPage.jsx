@@ -93,6 +93,15 @@ const styles = `
     box-shadow: 0 2px 10px rgba(0,0,0,0.02);
   }
 
+  .table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-scroll-wrapper table {
+    min-width: 560px;
+  }
+
   .table-header {
     padding: 20px 24px;
     border-bottom: 1.5px solid var(--gray-200);
@@ -268,6 +277,7 @@ export default function DashboardPage() {
             <h2>Tiket Terbaru</h2>
             <Link to="/tiket/saya" className="btn-outline">Lihat Semua</Link>
           </div>
+          <div className="table-scroll-wrapper">
           <table>
             <thead>
               <tr>
@@ -305,6 +315,7 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </main>
     </>

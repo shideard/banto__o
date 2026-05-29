@@ -75,6 +75,16 @@ class TicketService {
     });
     return res.data;
   }
+
+  async getRiwayat(tiketId) {
+    const tiket = await this.getTiketById(tiketId);
+    return tiket.komentar || [];
+  }
+
+  async kirimBalasan(tiketId, payload) {
+    const res = await apiClient.post(`/tiket/${tiketId}/komentar`, payload);
+    return res.data;
+  }
 }
 
 const ticketService = new TicketService();
