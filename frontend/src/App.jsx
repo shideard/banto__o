@@ -23,12 +23,12 @@ import ChatbotPage from "./pages/mahasiswa/ChatbotPage";
 import ProfilPage from "./pages/mahasiswa/ProfilPage";
 
 // ── Halaman Staf ──────────────────────────────────────────────────────────────
-import StafDashboardPage from "./pages/staf/StafDashboardPage";
-import TugasSayaPage from "./pages/staf/TugasSayaPage";
-import AntreanTiketPage from "./pages/staf/AntreanTiketPage";
-import DetailTiketStafPage from "./pages/staf/DetailTiketStafPage";
-import BuatTiketStafPage from "./pages/staf/BuatTiketStafPage";
-import ProfilStafPage from "./pages/staf/ProfilStafPage";
+import StafDashboardPage from "./pages/Staf/StafDashboardPage";
+import TugasSayaPage from "./pages/Staf/TugasSayaPage";
+import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
+import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
+import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
+import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
 // ── Halaman Admin ─────────────────────────────────────────────────────────────
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
