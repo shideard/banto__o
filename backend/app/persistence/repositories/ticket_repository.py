@@ -1,7 +1,7 @@
 # backend/app/persistence/repositories/ticket_repository.py
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
-from app.persistence.ticket_orm import TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM
+from app.persistence.ticket_orm import TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM, LampiranORM
 from app.persistence.user_orm import NotifikasiORM, UserORM
 
 class TicketRepository:
@@ -27,7 +27,17 @@ class TicketRepository:
         return tiket
 
     def get_tiket_by_id(self, tiket_id: int) -> Optional[TiketORM]:
-        return self.db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
+        return (
+            self.db.query(TiketORM)
+            .options(
+                joinedload(TiketORM.pengajuan).joinedload(PengajuanORM.lampiran),
+                joinedload(TiketORM.komentar),
+                joinedload(TiketORM.mahasiswa),
+                joinedload(TiketORM.staf),
+            )
+            .filter(TiketORM.id == tiket_id)
+            .first()
+        )
 
     def get_all_tiket(self) -> List[TiketORM]:
         return self.db.query(TiketORM).order_by(TiketORM.tanggal_dibuat.desc()).all()

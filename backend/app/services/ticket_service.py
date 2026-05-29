@@ -227,8 +227,12 @@ class TicketService:
         tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
             raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
-        if tiket.status != "DIPROSES":
-            raise ValueError("Upload file hanya bisa saat status tiket DIPROSES.")
+
+        STATUS_BOLEH_UPLOAD = {"DIBUAT", "DIKLAIM", "DIPROSES", "REVISI"}
+        if tiket.status not in STATUS_BOLEH_UPLOAD:
+            raise ValueError(
+                f"Upload file tidak tersedia saat status tiket '{tiket.status}'."
+            )
 
         upload_dir = f"uploads/tiket_{tiket_id}"
         os.makedirs(upload_dir, exist_ok=True)
@@ -236,12 +240,15 @@ class TicketService:
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file_obj, f)
 
-        payload = KomentarCreate(
-            isi=f"[FILE] {nama_file} — {file_path}",
+        # Buat komentar file langsung (bypass validasi status di tambah_komentar
+        # agar bisa upload dari status DIBUAT sekalipun)
+        komentar = KomentarORM(
+            tiket_id=tiket_id,
             penulis_id=penulis_id,
             role=role,
+            isi=f"[FILE] {nama_file} — {file_path}",
         )
-        return self.tambah_komentar(tiket_id, payload)
+        return self.repo.create_komentar(komentar)
     
  # ── Update Kategori ───────────────────────────────────────────────────────
 

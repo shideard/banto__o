@@ -33,12 +33,24 @@ class KomentarResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ── Lampiran ─────────────────────────────────────────────────────────────────
+
+class LampiranResponse(BaseModel):
+    id: int
+    nama_file: str
+    tipe_file: str
+    url_file: Optional[str] = None
+    tanggal_upload: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
 # ── Pengajuan ─────────────────────────────────────────────────────────────────
 
 class PengajuanResponse(BaseModel):
     id: int
     tiket_id: int
     deskripsi: str
+    lampiran: List[LampiranResponse] = []
     model_config = ConfigDict(from_attributes=True)
 
 
