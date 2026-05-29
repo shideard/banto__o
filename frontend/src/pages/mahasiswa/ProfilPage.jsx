@@ -448,20 +448,20 @@ export default function ProfilPage() {
   const [loadingTiket, setLoadingTiket] = useState(true);
 
   // ── State edit profil ──
-  const [editMode, setEditMode]       = useState(false);
-  const [formNama, setFormNama]       = useState(user?.nama       || "");
-  const [formNim, setFormNim]         = useState(user?.nim        || "");
-  const [formTelepon, setFormTelepon] = useState(user?.telepon    || "");
-  const [formFakultas, setFormFakultas]   = useState(user?.fakultas   || "");
+  const [editMode, setEditMode] = useState(false);
+  const [formNama, setFormNama] = useState(user?.nama || "");
+  const [formNim, setFormNim] = useState(user?.nim || "");
+  const [formTelepon, setFormTelepon] = useState(user?.telepon || "");
+  const [formFakultas, setFormFakultas] = useState(user?.fakultas || "");
   const [formDepartemen, setFormDepartemen] = useState(user?.departemen || "");
-  const [savingNama, setSavingNama]   = useState(false);
-  const [namaMsg, setNamaMsg]         = useState({ type: "", text: "" });
+  const [savingNama, setSavingNama] = useState(false);
+  const [namaMsg, setNamaMsg] = useState({ type: "", text: "" });
 
   // ── State modal ganti password ──
   const [showPwModal, setShowPwModal] = useState(false);
-  const [pwForm, setPwForm]           = useState({ lama: "", baru: "", konfirmasi: "" });
-  const [savingPw, setSavingPw]       = useState(false);
-  const [pwMsg, setPwMsg]             = useState({ type: "", text: "" });
+  const [pwForm, setPwForm] = useState({ lama: "", baru: "", konfirmasi: "" });
+  const [savingPw, setSavingPw] = useState(false);
+  const [pwMsg, setPwMsg] = useState({ type: "", text: "" });
 
   // Departemen list berdasarkan fakultas yang dipilih
   const departemenList = FAKULTAS.find(f => f.nama === formFakultas)?.departemen || [];
@@ -473,10 +473,10 @@ export default function ProfilPage() {
       .finally(() => setLoadingTiket(false));
   }, []);
 
-  const total   = tickets.length;
-  const proses  = tickets.filter(t => ["DIKLAIM", "DIPROSES", "REVISI"].includes(t.status)).length;
+  const total = tickets.length;
+  const proses = tickets.filter(t => ["DIKLAIM", "DIPROSES", "REVISI"].includes(t.status)).length;
   const selesai = tickets.filter(t => t.status === "SELESAI").length;
-  const recent  = [...tickets]
+  const recent = [...tickets]
     .sort((a, b) => new Date(b.tanggal_dibuat) - new Date(a.tanggal_dibuat))
     .slice(0, 4);
 
@@ -490,19 +490,21 @@ export default function ProfilPage() {
       setSavingNama(true);
       setNamaMsg({ type: "", text: "" });
       const payload = {
-        nama:       formNama.trim(),
-        nim:        formNim.trim()        || null,
-        telepon:    formTelepon.trim()    || null,
-        fakultas:   formFakultas          || null,
-        departemen: formDepartemen        || null,
+        nama: formNama.trim(),
+        nim: formNim.trim() || null,
+        telepon: formTelepon.trim() || null,
+        fakultas: formFakultas || null,
+        departemen: formDepartemen || null,
       };
       const res = await apiClient.patch("/auth/me", payload);
+      const resData = res.data;
+
       updateUser({
-        nama:       res.data.nama,
-        nim:        (res.data.nim        ?? formNim.trim())        || null,
-        telepon:    (res.data.telepon    ?? formTelepon.trim())    || null,
-        fakultas:   (res.data.fakultas   ?? formFakultas)          || null,
-        departemen: (res.data.departemen ?? formDepartemen)        || null,
+        nama: resData.nama,
+        nim: resData.nim || formNim.trim() || null,
+        telepon: resData.telepon || formTelepon.trim() || null,
+        fakultas: resData.fakultas || formFakultas || null,
+        departemen: resData.departemen || formDepartemen || null,
       });
       setNamaMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
@@ -516,10 +518,10 @@ export default function ProfilPage() {
 
   // ── Buka edit mode: isi form dari data user terkini ──
   const handleOpenEdit = () => {
-    setFormNama(user?.nama       || "");
-    setFormNim(user?.nim         || "");
+    setFormNama(user?.nama || "");
+    setFormNim(user?.nim || "");
     setFormTelepon(user?.telepon || "");
-    setFormFakultas(user?.fakultas   || "");
+    setFormFakultas(user?.fakultas || "");
     setFormDepartemen(user?.departemen || "");
     setEditMode(true);
   };
@@ -754,7 +756,7 @@ export default function ProfilPage() {
               <div className="profil-card-body">
                 {loadingTiket ? (
                   <div className="stat-row">
-                    {[1,2,3].map(i => (
+                    {[1, 2, 3].map(i => (
                       <div key={i} className="skeleton" style={{ height: 88, borderRadius: 14 }} />
                     ))}
                   </div>
@@ -781,7 +783,7 @@ export default function ProfilPage() {
                   </div>
                   {loadingTiket ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {[1,2,3].map(i => (
+                      {[1, 2, 3].map(i => (
                         <div key={i} className="skeleton" style={{ height: 44, borderRadius: 10 }} />
                       ))}
                     </div>

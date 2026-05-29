@@ -61,6 +61,7 @@ def login(
         "fakultas": user.fakultas,
         "departemen": user.departemen,
         "divisi_id": user.divisi_id,
+        "divisi_nama": user.divisi_nama,
     }
 
 

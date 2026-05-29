@@ -34,6 +34,7 @@ export function AuthProvider({ children }) {
         fakultas: response.data.fakultas,
         departemen: response.data.departemen,
         divisi_id: response.data.divisi_id,
+        divisi_nama: response.data.divisi_nama,
       };
       localStorage.setItem(TOKEN_KEY, data.access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(data));

@@ -341,7 +341,7 @@ function findGrupDivisi(divisiName) {
 
 // ─────────────────────────── KOMPONEN UTAMA ───────────────────────────────────
 export default function ProfilStafPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
   const [tickets, setTickets]     = useState([]);
   const [loadingTiket, setLoadingTiket] = useState(true);
@@ -375,13 +375,13 @@ export default function ProfilStafPage() {
   const recentAktif = aktif.slice(0, 4);
 
   // Divisi dari user atau form
-  const divisiTampil = user?.divisi || "—";
+  const divisiTampil = user?.divisi_nama || user?.divisi || "—";
   const grupDivisiEdit = formDivisi ? findGrupDivisi(formDivisi) : null;
 
   // ── Buka edit mode ──
   const handleOpenEdit = () => {
     setFormNama(user?.nama   || "");
-    setFormDivisi(user?.divisi || "");
+    setFormDivisi(user?.divisi_nama || user?.divisi || "");
     setEditMode(true);
   };
 
@@ -398,13 +398,12 @@ export default function ProfilStafPage() {
       });
       setProfilMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
-      // Update localStorage agar konsisten
-      const stored = JSON.parse(localStorage.getItem("banto_user") || "{}");
-      localStorage.setItem("banto_user", JSON.stringify({
-        ...stored,
-        nama:   formNama.trim(),
-        divisi: formDivisi || null,
-      }));
+      // ✅ Update context + localStorage via updateUser agar data langsung sinkron
+      updateUser({
+        nama:       formNama.trim(),
+        divisi_nama: formDivisi || null,
+        divisi:      formDivisi || null,
+      });
       setTimeout(() => setProfilMsg({ type: "", text: "" }), 3000);
     } catch {
       setProfilMsg({ type: "error", text: "Gagal memperbarui profil. Coba lagi." });

@@ -27,8 +27,8 @@ class TiketORM(Base):
     staf_id      = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     kategori  = relationship("KategoriTiketORM", back_populates="tiket")
-    mahasiswa = relationship("UserORM", foreign_keys=[mahasiswa_id], back_populates="tiket_diajukan")
-    staf      = relationship("UserORM", foreign_keys=[staf_id],      back_populates="tiket_dikelola")
+    mahasiswa = relationship("UserORM", foreign_keys=[mahasiswa_id], back_populates="tiket_diajukan", lazy="joined")
+    staf      = relationship("UserORM", foreign_keys=[staf_id],      back_populates="tiket_dikelola", lazy="joined")
 
     @property
     def mahasiswa_nama(self):

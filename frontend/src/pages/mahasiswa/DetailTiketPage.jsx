@@ -335,11 +335,53 @@ const styles = `
     max-width: 100%; max-height: 70vh;
     border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   }
+  /* ★ BARU — iframe PDF di modal */
+  .mdt-preview-body iframe {
+    border-radius: 8px;
+  }
   .mdt-preview-file-icon {
     display: flex; flex-direction: column; align-items: center; gap: 12px;
     color: var(--gray-400);
   }
   .mdt-preview-file-icon p { font-size: 13px; font-weight: 600; color: var(--gray-500); }
+
+  /* ★ BARU — Preview lampiran sebelum dikirim */
+  .mdt-form-pending-lampiran {
+    padding: 12px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    background: #f0f7ff;
+  }
+  .mdt-form-pending-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #2563eb;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mdt-form-pending-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mdt-btn-hapus-lampiran {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .mdt-btn-hapus-lampiran:hover { background: #fee2e2; }
 
   @media (max-width: 1024px) {
     .mdt-body { grid-template-columns: 1fr; }
@@ -392,6 +434,11 @@ function parseLampiran(isi) {
 const IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"];
 function isImage(nama = "") {
   return IMAGE_EXTS.some(ext => nama.toLowerCase().endsWith(ext));
+}
+
+// ★ BARU: cek apakah file adalah PDF
+function isPDF(nama = "") {
+  return nama.toLowerCase().endsWith(".pdf");
 }
 
 function getFileExt(nama = "") {
@@ -464,7 +511,7 @@ function LampiranChip({ nama, url, onPreview }) {
       </div>
       <div className="mdt-lampiran-chip-info">
         <div className="mdt-lampiran-chip-name">{nama}</div>
-        <div className="mdt-lampiran-chip-type">{ext} • Klik untuk lihat</div>
+        <div className="mdt-lampiran-chip-type">{ext} • Klik untuk preview</div>
       </div>
       <button className="mdt-lampiran-chip-dl" onClick={handleDownload} title="Download">
         <AppIcon name="Download" size={13} />
@@ -477,6 +524,7 @@ function LampiranChip({ nama, url, onPreview }) {
 function PreviewModal({ file, onClose }) {
   if (!file) return null;
   const img = isImage(file.nama);
+  const pdf = isPDF(file.nama);
   return (
     <div className="mdt-preview-overlay" onClick={onClose}>
       <div className="mdt-preview-box" onClick={e => e.stopPropagation()}>
@@ -499,8 +547,22 @@ function PreviewModal({ file, onClose }) {
         </div>
         <div className="mdt-preview-body">
           {img ? (
+            /* ── Gambar ── */
             <img src={file.url} alt={file.nama} />
+          ) : pdf ? (
+            /* ── PDF: embed iframe ── */
+            <iframe
+              src={file.url}
+              title={file.nama}
+              style={{
+                width: "75vw",
+                height: "68vh",
+                border: "none",
+                borderRadius: 8,
+              }}
+            />
           ) : (
+            /* ── File lain: icon + link ── */
             <div className="mdt-preview-file-icon">
               <AppIcon name="FileText" size={56} color="#cbd5e1" />
               <p>{file.nama}</p>
@@ -584,6 +646,8 @@ export default function MahasiswaDetailTiketPage() {
 
   const [balasan, setBalasan]   = useState("");
   const [file, setFile]         = useState(null);
+  // ★ BARU — menyimpan { nama, url } untuk preview sebelum kirim
+  const [selLmp, setSelLmp]     = useState(null);
   const [mengirim, setMengirim] = useState(false);
   const [errKirim, setErrKirim] = useState(null);
 
@@ -610,13 +674,13 @@ export default function MahasiswaDetailTiketPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleKirim = async () => {
-    if (!balasan.trim()) return;
+    if (!balasan.trim() && !file) return;
     try {
       setMengirim(true);
       setErrKirim(null);
       await ticketService.kirimBalasan(id, { isi: balasan, lampiran: file });
       setBalasan("");
-      setFile(null);
+      clearFile();
       await fetchData();
     } catch {
       setErrKirim("Gagal mengirim balasan. Coba lagi.");
@@ -626,7 +690,19 @@ export default function MahasiswaDetailTiketPage() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files?.[0]) setFile(e.target.files[0]);
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    // Buat object URL untuk preview lokal sebelum upload
+    const url = URL.createObjectURL(f);
+    setSelLmp({ nama: f.name, url, isImg: isImage(f.name) });
+  };
+
+  // ★ BARU — reset file + lampiran pending sekaligus
+  const clearFile = () => {
+    setFile(null);
+    setSelLmp(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (loading) {
@@ -773,11 +849,41 @@ export default function MahasiswaDetailTiketPage() {
                     <span className="mdt-form-upload-link">pilih berkas</span>
                   </span>
                   {file && (
-                    <span style={{ marginLeft: "auto", fontSize: 12, color: "#2563eb", fontWeight: 600 }}>
-                      {file.name}
+                    <span style={{
+                      marginLeft: "auto", fontSize: 12,
+                      color: "#2563eb", fontWeight: 600,
+                      maxWidth: 160, overflow: "hidden",
+                      textOverflow: "ellipsis", whiteSpace: "nowrap"
+                    }}>
+                      📎 {file.name}
                     </span>
                   )}
                 </div>
+
+                {/* ★ BARU — area preview lampiran sebelum dikirim */}
+                {selLmp && (
+                  <div className="mdt-form-pending-lampiran">
+                    <div className="mdt-form-pending-label">
+                      <AppIcon name="Paperclip" variant="sm" />
+                      Lampiran akan dikirim
+                    </div>
+                    <div className="mdt-form-pending-row">
+                      <LampiranChip
+                        nama={selLmp.nama}
+                        url={selLmp.url}
+                        onPreview={setPreviewFile}
+                      />
+                      <button
+                        className="mdt-btn-hapus-lampiran"
+                        onClick={clearFile}
+                        title="Hapus lampiran"
+                      >
+                        <AppIcon name="X" size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <input
                   type="file" ref={fileInputRef}
                   style={{ display: "none" }} onChange={handleFileChange}
@@ -796,7 +902,7 @@ export default function MahasiswaDetailTiketPage() {
                   <div className="mdt-form-actions">
                     <button
                       className="mdt-btn-batal"
-                      onClick={() => { setBalasan(""); setFile(null); }}
+                      onClick={() => { setBalasan(""); clearFile(); }}
                     >
                       Batal
                     </button>
@@ -815,6 +921,49 @@ export default function MahasiswaDetailTiketPage() {
 
           {/* ── Sidebar ── */}
           <div className="mdt-sidebar">
+
+            <div className="mdt-sidebar-card">
+              <div className="mdt-sidebar-section-title">Informasi Pemohon</div>
+              {tiket.mahasiswa ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                    <div className="mdt-avatar" style={{ flexShrink: 0 }}>
+                      {getInitials(tiket.mahasiswa.nama)}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "var(--gray-900)" }}>
+                        {tiket.mahasiswa.nama || "—"}
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--gray-400)", fontWeight: 500 }}>
+                        {tiket.mahasiswa.nim || "—"}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 8, borderTop: "1px solid var(--gray-100)" }}>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--gray-400)", marginBottom: 2 }}>Email</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--gray-700)", wordBreak: "break-all" }}>{tiket.mahasiswa.email || "—"}</div>
+                    </div>
+                    {tiket.mahasiswa.fakultas && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--gray-400)", marginBottom: 2 }}>Fakultas</div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--gray-700)" }}>{tiket.mahasiswa.fakultas}</div>
+                      </div>
+                    )}
+                    {tiket.mahasiswa.departemen && (
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--gray-400)", marginBottom: 2 }}>Departemen</div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--gray-700)" }}>{tiket.mahasiswa.departemen}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: "var(--gray-400)", fontStyle: "italic" }}>
+                  Data pemohon tidak tersedia.
+                </div>
+              )}
+            </div>
 
             <div className="mdt-sidebar-card">
               <div className="mdt-sidebar-section-title">Detail Tiket</div>

@@ -292,18 +292,114 @@ class ChatbotService:
     def rekomendasi_kategori(self, deskripsi: str) -> Optional[str]:
         """Rekomendasikan kategori tiket berdasarkan kata kunci."""
         KEYWORD_KATEGORI = {
-            "legalisir":  "Legalisasi Dokumen",
-            "ijazah":     "Legalisasi Dokumen",
-            "transkrip":  "Legalisasi Dokumen",
-            "krs":        "Akademik",
-            "wisuda":     "Akademik",
-            "beasiswa":   "Keuangan & Beasiswa",
-            "pembayaran": "Keuangan & Beasiswa",
-            "ukt":        "Keuangan & Beasiswa",
-            "surat":      "Administrasi Umum",
+            # Kemahasiswaan / Ditmawa
+            "ormawa":           "Admin Kemahasiswaan Ormawa",
+            "organisasi mahasiswa": "Admin Kemahasiswaan Ormawa",
+            "pinjam ruang":     "Peminjaman SarPras Ditmawa-PPKU",
+            "peminjaman":       "Peminjaman SarPras Ditmawa-PPKU",
+            "sarpras":          "Peminjaman SarPras Ditmawa-PPKU",
+            "sertifikat":       "Penandatanganan Sertifikat",
+            "ttd sertifikat":   "Penandatanganan Sertifikat",
+            "laporan kegiatan": "Pengesahan Laporan Kegiatan",
+            "pengesahan":       "Pengesahan Laporan Kegiatan",
+            "sponsorship":      "Proposal Sponsorship",
+            "sponsor":          "Proposal Sponsorship",
+            "surat izin":       "Surat Izin Akademik",
+            "izin akademik":    "Surat Izin Akademik",
+            "surat pengantar":  "Surat Pengantar Kegiatan Mahasiswa",
+            "surat tugas":      "Surat Tugas Mahasiswa",
+            "surat undangan":   "Surat Undangan Kegiatan Kemahasiswaan",
+            "undangan kegiatan":"Surat Undangan Kegiatan Kemahasiswaan",
+            "kesejahteraan mahasiswa": "Kesejahteraan Mahasiswa",
+            "lomba":            "Lomba Mahasiswa dan SKPI",
+            "skpi":             "Lomba Mahasiswa dan SKPI",
+            "softskill":        "Ormawa dan Softskill",
+            "kknt":             "KKNT IPB",
+            "kuliah kerja nyata": "KKNT IPB",
+
+            # Administrasi & Surat
+            "appmb":            "Admin Surat/Dokumen APPMB",
+            "surat appmb":      "Admin Surat/Dokumen APPMB",
+            "administrasi fakultas": "Administrasi Fakultas/Departemen",
+            "departemen":       "Administrasi Fakultas/Departemen",
+            "arsip":            "Arsip",
+            "informasi publik": "Informasi Publik",
+            "kehumasan":        "Kehumasan",
+            "humas":            "Kehumasan",
+            "penerimaan mahasiswa baru": "Penerimaan Mahasiswa Baru",
+            "pmb":              "Penerimaan Mahasiswa Baru",
+
+            # Akademik
+            "pascasarjana":     "Akademik Pascasarjana",
+            "s2":               "Akademik Pascasarjana",
+            "s3":               "Akademik Pascasarjana",
+            "sekolah bisnis":   "Akademik Sekolah Bisnis",
+            "sb-ipb":           "Akademik Sekolah Bisnis",
+            "vokasi":           "Akademik Sekolah Vokasi",
+            "sekolah vokasi":   "Akademik Sekolah Vokasi",
+            "evaluasi pendidikan": "Evaluasi Pendidikan",
+            "krs":              "KRS Multistrata",
+            "kartu rencana studi": "KRS Multistrata",
+            "mbkm":             "MBKM Program Studi",
+            "merdeka belajar":  "MBKM Program Studi",
+            "ppku":             "PPKU IPB",
+            "perencanaan pendidikan": "Perencanaan dan Info Pendidikan",
+            "info pendidikan":  "Perencanaan dan Info Pendidikan",
+            "internasional":    "Program Pendidikan Internasional",
+            "ukt":              "UKT Multistrata",
+            "uang kuliah":      "UKT Multistrata",
+
+            # Keuangan & SDM
+            "beasiswa":         "Bantuan Pendidikan Non Beasiswa",
+            "bantuan pendidikan": "Bantuan Pendidikan Non Beasiswa",
+            "bkd":              "BKD SISTER",
+            "sister":           "BKD SISTER",
+            "remunerasi":       "Remunerasi dan Kesejahteraan",
+            "kesejahteraan":    "Remunerasi dan Kesejahteraan",
+            "nomor rekening":   "Update-No Rekening-KBM",
+            "rekening kbm":     "Update-No Rekening-KBM",
+            "rekrutmen":        "Rekrutmen Evaluasi Kinerja",
+            "kinerja":          "Rekrutmen Evaluasi Kinerja",
+            "sdm":              "Pengembangan SDM dan PKK",
+            "pkk":              "Pengembangan SDM dan PKK",
+
+            # Pengaduan
+            "crisis center":    "Crisis Center-Pengaduan",
+            "pengaduan":        "Crisis Center-Pengaduan",
+            "korupsi":          "Pengaduan Dugaan Korupsi",
+            "kekerasan seksual":"Pengaduan Kekerasan Seksual",
+            "pelecehan":        "Pengaduan Kekerasan Seksual",
+            "kode etik":        "Pengaduan Melanggar Kode Etik",
+            "tata tertib":      "Pengaduan Melanggar Tata Tertib",
+
+            # Teknologi Informasi
+            "teknologi informasi": "Teknologi Informasi",
+            "tik":              "Teknologi Informasi",
+            "it":               "Teknologi Informasi",
+            "kmmai":            "KMMAI-Standar Mutu",
+            "standar mutu":     "KMMAI-Standar Mutu",
+
+            # Fasilitas & Sarana
+            "sarana prasarana": "Sarana Dan Prasarana",
+            "gedung":           "Sarana Dan Prasarana",
+            "kesehatan":        "Layanan Unit Kesehatan",
+            "klinik":           "Layanan Unit Kesehatan",
+            "museum":           "Museum & Galeri IPB Future",
+            "galeri":           "Museum & Galeri IPB Future",
+
+            # Layanan & Perpustakaan
+            "karir":            "Layanan Pengembangan Karir",
+            "lowongan":         "Layanan Pengembangan Karir",
+            "perpustakaan":     "Layanan Perpustakaan",
+            "pustaka":          "Layanan Perpustakaan",
+            "buku":             "Layanan Perpustakaan",
+            "promosi":          "Layanan Promosi IPB",
+            "riset":            "Riset dan Inovasi",
+            "penelitian":       "Riset dan Inovasi",
+            "inovasi":          "Riset dan Inovasi",
         }
         lower = deskripsi.lower()
         for keyword, kategori in KEYWORD_KATEGORI.items():
             if keyword in lower:
                 return kategori
-        return None
+        return None

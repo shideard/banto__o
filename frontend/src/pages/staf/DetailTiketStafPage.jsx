@@ -623,10 +623,52 @@ const styles = `
     max-width: 100%; max-height: 70vh;
     border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   }
+  /* ★ BARU — iframe PDF di modal */
+  .dt-preview-body iframe {
+    border-radius: 8px;
+  }
   .dt-preview-file-icon {
     display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--gray-400);
   }
   .dt-preview-file-icon p { font-size: 13px; font-weight: 600; color: var(--gray-500); }
+
+  /* ★ BARU — Preview lampiran sebelum dikirim */
+  .dt-form-pending-lampiran {
+    padding: 12px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    background: #f0f7ff;
+  }
+  .dt-form-pending-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #2563eb;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dt-form-pending-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dt-btn-hapus-lampiran {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .dt-btn-hapus-lampiran:hover { background: #fee2e2; }
 
   /* ── Responsive ── */
   @media (max-width: 1024px) {
@@ -685,6 +727,10 @@ const IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"];
 function isImage(nama = "") {
   return IMAGE_EXTS.some(ext => nama.toLowerCase().endsWith(ext));
 }
+// ★ BARU: cek apakah file adalah PDF
+function isPDF(nama = "") {
+  return nama.toLowerCase().endsWith(".pdf");
+}
 function getFileExt(nama = "") {
   const dot = nama.lastIndexOf(".");
   return dot !== -1 ? nama.slice(dot + 1).toUpperCase() : "FILE";
@@ -717,7 +763,7 @@ function LampiranChip({ nama, url, onPreview }) {
       </div>
       <div className="dt-lampiran-chip-info">
         <div className="dt-lampiran-chip-name">{nama}</div>
-        <div className="dt-lampiran-chip-type">{ext} • Klik untuk lihat</div>
+        <div className="dt-lampiran-chip-type">{ext} • Klik untuk preview</div>
       </div>
       <button className="dt-lampiran-chip-dl" onClick={handleDownload} title="Download">
         <AppIcon name="Download" size={13} />
@@ -730,6 +776,7 @@ function LampiranChip({ nama, url, onPreview }) {
 function PreviewModal({ file, onClose }) {
   if (!file) return null;
   const img = isImage(file.nama);
+  const pdf = isPDF(file.nama);
   return (
     <div className="dt-preview-overlay" onClick={onClose}>
       <div className="dt-preview-box" onClick={e => e.stopPropagation()}>
@@ -746,8 +793,22 @@ function PreviewModal({ file, onClose }) {
         </div>
         <div className="dt-preview-body">
           {img ? (
+            /* ── Gambar ── */
             <img src={file.url} alt={file.nama} />
+          ) : pdf ? (
+            /* ── PDF: embed iframe ── */
+            <iframe
+              src={file.url}
+              title={file.nama}
+              style={{
+                width: "75vw",
+                height: "68vh",
+                border: "none",
+                borderRadius: 8,
+              }}
+            />
           ) : (
+            /* ── File lain: icon + link ── */
             <div className="dt-preview-file-icon">
               <AppIcon name="FileText" size={56} color="#cbd5e1" />
               <p>{file.nama}</p>
@@ -870,6 +931,8 @@ export default function StafDetailTiketPage() {
 
   const [balasan, setBalasan] = useState("");
   const [file, setFile] = useState(null);
+  // ★ BARU — menyimpan { nama, url } untuk preview sebelum kirim
+  const [selLmp, setSelLmp] = useState(null);
   const [mengirim, setMengirim] = useState(false);
   const [errKirim, setErrKirim] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
@@ -900,23 +963,22 @@ export default function StafDetailTiketPage() {
     try {
       setMengirim(true);
       setErrKirim(null);
-      
+
       // Kirim balasan teks jika ada
       if (balasan.trim()) {
-        await ticketService.kirimBalasan(id, { 
+        await ticketService.kirimBalasan(id, {
           isi: balasan,
           role: "Staf"
         });
       }
-      
+
       // Jika ada file, upload sebagai komentar lampiran
       if (file) {
         await ticketService.uploadFile(id, file);
       }
-      
+
       setBalasan("");
-      setFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      clearFile();
       await fetchData();
     } catch {
       setErrKirim("Gagal mengirim balasan. Coba lagi.");
@@ -926,7 +988,19 @@ export default function StafDetailTiketPage() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files?.[0]) setFile(e.target.files[0]);
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    // Buat object URL untuk preview lokal sebelum upload
+    const url = URL.createObjectURL(f);
+    setSelLmp({ nama: f.name, url, isImg: isImage(f.name) });
+  };
+
+  // ★ BARU — reset file + lampiran pending sekaligus
+  const clearFile = () => {
+    setFile(null);
+    setSelLmp(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (loading) {
@@ -1067,11 +1141,41 @@ export default function StafDetailTiketPage() {
                   <span className="dt-form-upload-link">pilih berkas</span>
                 </span>
                 {file && (
-                  <span style={{ marginLeft: "auto", fontSize: 12, color: "#2563eb", fontWeight: 600 }}>
-                    {file.name}
+                  <span style={{
+                    marginLeft: "auto", fontSize: 12,
+                    color: "#2563eb", fontWeight: 600,
+                    maxWidth: 160, overflow: "hidden",
+                    textOverflow: "ellipsis", whiteSpace: "nowrap"
+                  }}>
+                    📎 {file.name}
                   </span>
                 )}
               </div>
+
+              {/* ★ BARU — area preview lampiran sebelum dikirim */}
+              {selLmp && (
+                <div className="dt-form-pending-lampiran">
+                  <div className="dt-form-pending-label">
+                    <AppIcon name="Paperclip" variant="sm" />
+                    Lampiran akan dikirim
+                  </div>
+                  <div className="dt-form-pending-row">
+                    <LampiranChip
+                      nama={selLmp.nama}
+                      url={selLmp.url}
+                      onPreview={setPreviewFile}
+                    />
+                    <button
+                      className="dt-btn-hapus-lampiran"
+                      onClick={clearFile}
+                      title="Hapus lampiran"
+                    >
+                      <AppIcon name="X" size={14} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <input
                 type="file"
                 ref={fileInputRef}
@@ -1092,7 +1196,7 @@ export default function StafDetailTiketPage() {
                 <div className="dt-form-actions">
                   <button
                     className="dt-btn-batal"
-                    onClick={() => { setBalasan(""); setFile(null); }}
+                    onClick={() => { setBalasan(""); clearFile(); }}
                   >
                     Batal
                   </button>
@@ -1116,25 +1220,45 @@ export default function StafDetailTiketPage() {
               <div className="dt-sidebar-section-title">Informasi Pelapor</div>
               <div className="dt-pelapor-top">
                 <div className="dt-pelapor-avatar">
-                  {getInitials(tiket.nama_pelapor || "")}
+                  {getInitials(tiket.mahasiswa?.nama || tiket.nama_pelapor || "")}
                 </div>
                 <div>
-                  <div className="dt-pelapor-name">{tiket.nama_pelapor || "—"}</div>
-                  <div className="dt-pelapor-nim">{tiket.nim || "—"}</div>
+                  <div className="dt-pelapor-name">
+                    {tiket.mahasiswa?.nama || tiket.nama_pelapor || "—"}
+                  </div>
+                  <div className="dt-pelapor-nim">
+                    {tiket.mahasiswa?.nim || tiket.nim || "—"}
+                  </div>
                 </div>
               </div>
               <div className="dt-sidebar-meta">
                 <div className="dt-meta-row">
-                  <div className="dt-meta-label">Fakultas / Departemen</div>
-                  <div className="dt-meta-value">{tiket.fakultas || "—"}</div>
+                  <div className="dt-meta-label">Email</div>
+                  <div className="dt-meta-value" style={{ wordBreak: "break-all" }}>
+                    {tiket.mahasiswa?.email || tiket.email_pelapor || "—"}
+                  </div>
                 </div>
                 <div className="dt-meta-divider" />
                 <div className="dt-meta-row">
-                  <div className="dt-meta-label">Email</div>
-                  <div className="dt-meta-value" style={{ wordBreak: "break-all" }}>
-                    {tiket.email_pelapor || "—"}
+                  <div className="dt-meta-label">Fakultas / Departemen</div>
+                  <div className="dt-meta-value">
+                    {tiket.mahasiswa?.fakultas || tiket.fakultas || "—"}
+                    {(tiket.mahasiswa?.departemen || tiket.departemen) && (
+                      <div style={{ fontSize: 11, color: "var(--gray-400)", marginTop: 2 }}>
+                        {tiket.mahasiswa?.departemen || tiket.departemen}
+                      </div>
+                    )}
                   </div>
                 </div>
+                {(tiket.mahasiswa?.telepon) && (
+                  <>
+                    <div className="dt-meta-divider" />
+                    <div className="dt-meta-row">
+                      <div className="dt-meta-label">Telepon</div>
+                      <div className="dt-meta-value">{tiket.mahasiswa.telepon}</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

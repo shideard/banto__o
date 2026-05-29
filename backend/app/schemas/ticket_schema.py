@@ -42,6 +42,30 @@ class PengajuanResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ── Ringkasan User (untuk nested di TiketResponse) ───────────────────────────
+
+class MahasiswaRingkasanResponse(BaseModel):
+    """Data ringkasan mahasiswa untuk ditampilkan di detail tiket."""
+    id: int
+    nama: str
+    email: str
+    nim: Optional[str] = None
+    telepon: Optional[str] = None
+    fakultas: Optional[str] = None
+    departemen: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class StafRingkasanResponse(BaseModel):
+    """Data ringkasan staf untuk ditampilkan di detail tiket."""
+    id: int
+    nama: str
+    email: str
+    divisi_id: Optional[int] = None
+    divisi_nama: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 # ── Tiket ─────────────────────────────────────────────────────────────────────
 
 class TiketCreate(BaseModel):
@@ -73,6 +97,8 @@ class TiketResponse(BaseModel):
     staf_nama: Optional[str] = None
     pengajuan: Optional[PengajuanResponse] = None
     komentar: List[KomentarResponse] = []
+    mahasiswa: Optional[MahasiswaRingkasanResponse] = None
+    staf: Optional[StafRingkasanResponse] = None
     model_config = ConfigDict(from_attributes=True)
 
 
