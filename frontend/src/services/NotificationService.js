@@ -1,7 +1,7 @@
 // frontend/src/services/NotificationService.js
 import apiClient from './ApiClient';
 
-const BASE = '/api/v1/notifikasi';
+const BASE = '/notifikasi';
 
 const NotificationService = {
   /** Ambil semua notifikasi milik user yang sedang login */
