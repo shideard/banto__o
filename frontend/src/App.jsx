@@ -31,7 +31,7 @@ import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
 import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
 // ── Halaman Admin ─────────────────────────────────────────────────────────────
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
 
 
 // ── Helper redirect berdasarkan role ─────────────────────────────────────────
