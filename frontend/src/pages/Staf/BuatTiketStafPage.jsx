@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 900px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }

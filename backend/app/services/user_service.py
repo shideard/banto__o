@@ -56,6 +56,22 @@ class UserService:
             if self.repo.get_user_by_nim(user.nim):
                 raise ValueError(f"NIM {user.nim} sudah terdaftar")
 
+        # Untuk staf: resolve divisi_nama → divisi_id jika diperlukan
+        divisi_id = user.divisi_id
+        if user.role in ("staf", "admin") and user.divisi_nama and not divisi_id:
+            existing_divisi = (
+                self.repo.db.query(DivisiStafORM)
+                .filter(DivisiStafORM.nama_divisi == user.divisi_nama)
+                .first()
+            )
+            if existing_divisi:
+                divisi_id = existing_divisi.id
+            else:
+                new_divisi = DivisiStafORM(nama_divisi=user.divisi_nama)
+                self.repo.db.add(new_divisi)
+                self.repo.db.flush()  # get id tanpa commit
+                divisi_id = new_divisi.id
+
         hashed_password = self.get_password_hash(user.password)
         db_user = UserORM(
             email=user.email,
@@ -63,7 +79,10 @@ class UserService:
             password=hashed_password,
             role=user.role,
             nim=user.nim if user.role == "mahasiswa" else None,
-            divisi_id=user.divisi_id if user.role == "staf" else None,
+            telepon=user.telepon if user.role == "mahasiswa" else None,
+            fakultas=user.fakultas if user.role == "mahasiswa" else None,
+            departemen=user.departemen if user.role == "mahasiswa" else None,
+            divisi_id=divisi_id if user.role in ("staf", "admin") else None,
         )
         return self.repo.create_user(db_user)
 
