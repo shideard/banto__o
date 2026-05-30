@@ -5,47 +5,47 @@ import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
-  .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .staf-breadcrumb { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+  .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: var(--font-sans); }
+  .staf-breadcrumb { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
   .staf-breadcrumb span { margin: 0 6px; }
-  .staf-breadcrumb a { color: #64748b; text-decoration: none; }
-  .staf-breadcrumb a:hover { color: #2563eb; }
-  .staf-breadcrumb strong { color: #334155; }
+  .staf-breadcrumb a { color: var(--gray-500); text-decoration: none; }
+  .staf-breadcrumb a:hover { color: var(--color-brand); }
+  .staf-breadcrumb strong { color: var(--gray-700); }
   .staf-page-header { margin-bottom: 24px; }
-  .staf-page-header h1 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-  .staf-page-header p { font-size: 14px; color: #64748b; }
+  .staf-page-header h1 { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+  .staf-page-header p { font-size: 14px; color: var(--gray-500); }
   .staf-alert { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #92400e; margin-bottom: 28px; }
 
   .staf-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-  .staf-stat-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
+  .staf-stat-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
   .staf-stat-card.warning { border-color: #fed7aa; background: #fff7ed; }
-  .staf-stat-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+  .staf-stat-title { font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
   .staf-stat-title.warning-title { color: #ea580c; }
-  .staf-stat-value { font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; color: #0a1f5c; line-height: 1; margin-bottom: 12px; }
+  .staf-stat-value { font-family: var(--font-display); font-size: 40px; font-weight: 900; color: #0a1f5c; line-height: 1; margin-bottom: 12px; }
   .staf-stat-value.warning-value { color: #ea580c; }
-  .staf-stat-sub { font-size: 12px; color: #64748b; font-weight: 500; }
-  .staf-stat-sub a { color: #2563eb; font-weight: 700; text-decoration: none; font-size: 12px; }
+  .staf-stat-sub { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+  .staf-stat-sub a { color: var(--color-brand); font-weight: 700; text-decoration: none; font-size: 12px; }
   .staf-stat-icon { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
   .staf-stat-icon.blue { background: #eff6ff; color: var(--color-brand); }
   .staf-stat-icon.orange { background: #fff7ed; color: #f97316; }
 
   .staf-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 
-  .staf-table-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  .staf-table-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
   .staf-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .staf-table-scroll table.staf-table { min-width: 480px; }
-  .staf-table-header { padding: 20px 24px; border-bottom: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-  .staf-table-header h2 { font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-  .staf-table-header p { font-size: 13px; color: #64748b; }
-  .staf-table-search { display: flex; align-items: center; gap: 8px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 12px; background: #f8fafc; min-width: 180px; }
-  .staf-table-search input { border: none; background: transparent; font-size: 13px; color: #334155; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; }
-  .staf-table-search input::placeholder { color: #94a3b8; }
+  .staf-table-header { padding: 20px 24px; border-bottom: 1.5px solid var(--gray-200); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .staf-table-header h2 { font-size: 17px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+  .staf-table-header p { font-size: 13px; color: var(--gray-500); }
+  .staf-table-search { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 7px 12px; background: var(--gray-50); min-width: 180px; }
+  .staf-table-search input { border: none; background: transparent; font-size: 13px; color: var(--gray-700); outline: none; font-family: var(--font-sans); width: 100%; }
+  .staf-table-search input::placeholder { color: var(--gray-400); }
 
   table.staf-table { width: 100%; border-collapse: collapse; text-align: left; }
-  table.staf-table th { padding: 11px 18px; font-size: 11px; font-weight: 700; color: #64748b; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #e2e8f0; }
-  table.staf-table td { padding: 13px 18px; font-size: 13px; color: #0f172a; border-bottom: 1.5px solid #f1f5f9; vertical-align: middle; }
+  table.staf-table th { padding: 11px 18px; font-size: 11px; font-weight: 700; color: var(--gray-500); background: var(--gray-50); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid var(--gray-200); }
+  table.staf-table td { padding: 13px 18px; font-size: 13px; color: var(--gray-900); border-bottom: 1.5px solid var(--gray-100); vertical-align: middle; }
   table.staf-table tr:last-child td { border-bottom: none; }
-  .td-ticket-id { font-weight: 700; color: #2563eb; font-size: 13px; text-decoration: none; }
+  .td-ticket-id { font-weight: 700; color: var(--color-brand); font-size: 13px; text-decoration: none; }
   .td-ticket-id:hover { text-decoration: underline; }
 
   .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
@@ -54,14 +54,14 @@ const styles = `
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
   .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
+  .pill-DITOLAK  { background: var(--gray-100); color: #475569; }
 
-  .btn-lihat { background: #fff; color: #2563eb; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; text-decoration: none; display: inline-block; white-space: nowrap; }
+  .btn-lihat { background: var(--white); color: var(--color-brand); border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font-sans); transition: all 0.18s; text-decoration: none; display: inline-block; white-space: nowrap; }
   .btn-lihat:hover { background: #eff6ff; }
-  .btn-lanjut { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; text-decoration: none; display: inline-block; white-space: nowrap; }
+  .btn-lanjut { background: var(--color-brand); color: var(--white); border: none; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font-sans); transition: all 0.18s; text-decoration: none; display: inline-block; white-space: nowrap; }
   .btn-lanjut:hover { background: #1d4ed8; }
 
-  .staf-table-footer { padding: 13px 18px; border-top: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #64748b; }
+  .staf-table-footer { padding: 13px 18px; border-top: 1.5px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--gray-500); }
   .state-row td { text-align: center; padding: 32px; font-size: 13px; }
 
   .tugas-label { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
@@ -72,7 +72,8 @@ const styles = `
 
 export default function StafDashboardPage() {
   const { user } = useAuth();
-  const [tickets, setTickets]       = useState([]);
+  const [antrean, setAntrean]       = useState([]);
+  const [tugasSayaAll, setTugasSayaAll] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
   const [searchAntrean, setSearchAntrean] = useState("");
@@ -82,8 +83,12 @@ export default function StafDashboardPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.getAllTiket();
-      setTickets(Array.isArray(res) ? res : []);
+      const [unclaimed, mine] = await Promise.all([
+        ticketService.getUnclaimedTickets(),
+        ticketService.getMyTasks(),
+      ]);
+      setAntrean(Array.isArray(unclaimed) ? unclaimed : []);
+      setTugasSayaAll(Array.isArray(mine) ? mine : []);
     } catch {
       setError("Gagal memuat data tiket.");
     } finally {
@@ -93,12 +98,10 @@ export default function StafDashboardPage() {
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
-  // Tiket yang belum diklaim siapapun
-  const belumDiklaim = tickets.filter(t => t.status === "DIBUAT");
+  const belumDiklaim = antrean;
 
-  // Tiket yang sudah diklaim oleh staf ini
-  const tugasSaya = tickets.filter(t =>
-    t.staf_id === user?.id && t.status !== "SELESAI" && t.status !== "DITOLAK"
+  const tugasSaya = tugasSayaAll.filter(t =>
+    t.status !== "SELESAI" && t.status !== "DITOLAK"
   );
 
   const filteredAntrean = belumDiklaim.filter(t =>
@@ -111,14 +114,14 @@ export default function StafDashboardPage() {
     (t.subjek || "").toLowerCase().includes(searchTugas.toLowerCase())
   );
 
-  const totalSelesai = tickets.filter(t => t.staf_id === user?.id && t.status === "SELESAI").length;
+  const totalSelesai = tugasSayaAll.filter(t => t.status === "SELESAI").length;
 
   return (
     <>
       <style>{styles}</style>
       <main className="staf-main">
         <div className="staf-breadcrumb">
-          <a href="/staff/dashboard">Beranda</a><span>›</span>
+          <Link to="/staff/dashboard">Beranda</Link><span>›</span>
           <strong>Dashboard Staf</strong>
         </div>
 
@@ -177,7 +180,7 @@ export default function StafDashboardPage() {
                 <p>Tiket yang sedang Anda tangani.</p>
               </div>
               <div className="staf-table-search">
-                <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
+                <AppIcon name="Search" variant="sm" style={{ color: "var(--gray-400)", flexShrink: 0 }} />
                 <input
                   placeholder="Cari..."
                   value={searchTugas}
@@ -198,10 +201,10 @@ export default function StafDashboardPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr className="state-row"><td colSpan="4" style={{ color: "#94a3b8" }}>⏳ Memuat...</td></tr>
+                  <tr className="state-row"><td colSpan="4" style={{ color: "var(--gray-400)" }}>⏳ Memuat...</td></tr>
                 ) : filteredTugas.length === 0 ? (
                   <tr className="state-row">
-                    <td colSpan="4" style={{ color: "#94a3b8" }}>
+                    <td colSpan="4" style={{ color: "var(--gray-400)" }}>
                       Belum ada tugas tiket aktif.
                     </td>
                   </tr>
@@ -227,7 +230,7 @@ export default function StafDashboardPage() {
 
             <div className="staf-table-footer">
               <span>{filteredTugas.length} tiket aktif</span>
-              <Link to="/staff/tugas-saya" style={{ color: "#2563eb", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+              <Link to="/staff/tugas-saya" style={{ color: "var(--color-brand)", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
                 Lihat semua →
               </Link>
             </div>
@@ -241,7 +244,7 @@ export default function StafDashboardPage() {
                 <p>Tiket belum diklaim — klik untuk baca &amp; klaim.</p>
               </div>
               <div className="staf-table-search">
-                <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
+                <AppIcon name="Search" variant="sm" style={{ color: "var(--gray-400)", flexShrink: 0 }} />
                 <input
                   placeholder="Cari..."
                   value={searchAntrean}
@@ -262,12 +265,12 @@ export default function StafDashboardPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr className="state-row"><td colSpan="4" style={{ color: "#94a3b8" }}>⏳ Memuat...</td></tr>
+                  <tr className="state-row"><td colSpan="4" style={{ color: "var(--gray-400)" }}>⏳ Memuat...</td></tr>
                 ) : error ? (
                   <tr className="state-row"><td colSpan="4" style={{ color: "#dc2626" }}>{error}</td></tr>
                 ) : filteredAntrean.length === 0 ? (
                   <tr className="state-row">
-                    <td colSpan="4" style={{ color: "#94a3b8" }}>
+                    <td colSpan="4" style={{ color: "var(--gray-400)" }}>
                       ✅ Tidak ada tiket yang menunggu.
                     </td>
                   </tr>
@@ -279,7 +282,7 @@ export default function StafDashboardPage() {
                     <td style={{ fontWeight: 600, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {t.subjek}
                     </td>
-                    <td style={{ fontSize: 12, color: "#64748b" }}>
+                    <td style={{ fontSize: 12, color: "var(--gray-500)" }}>
                       {t.tanggal_dibuat
                         ? new Date(t.tanggal_dibuat).toLocaleDateString("id-ID", { day: "numeric", month: "short" })
                         : "—"}
@@ -296,7 +299,7 @@ export default function StafDashboardPage() {
 
             <div className="staf-table-footer">
               <span>{filteredAntrean.length} tiket menunggu</span>
-              <Link to="/staff/antrean-tiket" style={{ color: "#2563eb", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+              <Link to="/staff/antrean-tiket" style={{ color: "var(--color-brand)", fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
                 Lihat semua →
               </Link>
             </div>

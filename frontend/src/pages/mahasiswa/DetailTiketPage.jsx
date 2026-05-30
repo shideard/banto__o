@@ -4,8 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../../utils/constants";
 
 const styles = `
   .mdt-main {
@@ -13,7 +12,7 @@ const styles = `
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   .mdt-breadcrumb {
@@ -25,20 +24,20 @@ const styles = `
     gap: 6px;
   }
   .mdt-breadcrumb a { color: var(--gray-500); text-decoration: none; }
-  .mdt-breadcrumb a:hover { color: #2563eb; }
+  .mdt-breadcrumb a:hover { color: var(--color-brand); }
   .mdt-breadcrumb strong { color: var(--gray-700); }
   .mdt-breadcrumb span { color: var(--gray-400); }
 
   .mdt-page-header { margin-bottom: 24px; }
   .mdt-page-header h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 28px; font-weight: 800;
     color: var(--gray-900); margin: 0 0 8px;
   }
   .mdt-page-header-meta {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   }
-  .mdt-ticket-id { font-size: 13px; font-weight: 700; color: #2563eb; }
+  .mdt-ticket-id { font-size: 13px; font-weight: 700; color: var(--color-brand); }
   .mdt-header-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gray-300); }
 
   .mdt-body {
@@ -68,13 +67,13 @@ const styles = `
     font-size: 13px; font-weight: 700; color: var(--gray-400);
     transition: all 0.2s;
   }
-  .mdt-step-circle.done { background: #2563eb; border-color: #2563eb; color: white; }
-  .mdt-step-circle.active { background: white; border-color: #2563eb; color: #2563eb; box-shadow: 0 0 0 4px #dbeafe; }
+  .mdt-step-circle.done { background: var(--color-brand); border-color: var(--color-brand); color: white; }
+  .mdt-step-circle.active { background: white; border-color: var(--color-brand); color: var(--color-brand); box-shadow: 0 0 0 4px #dbeafe; }
   .mdt-step-label { font-size: 12px; font-weight: 600; color: var(--gray-400); text-align: center; }
-  .mdt-step-label.done  { color: #2563eb; }
-  .mdt-step-label.active { color: #2563eb; font-weight: 700; }
+  .mdt-step-label.done  { color: var(--color-brand); }
+  .mdt-step-label.active { color: var(--color-brand); font-weight: 700; }
   .mdt-step-line { flex: 1; height: 2px; background: var(--gray-200); margin-bottom: 20px; z-index: 0; }
-  .mdt-step-line.done { background: #2563eb; }
+  .mdt-step-line.done { background: var(--color-brand); }
 
   /* Kartu pesan awal */
   .mdt-ticket-card {
@@ -87,7 +86,7 @@ const styles = `
   .mdt-ticket-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .mdt-avatar {
     width: 36px; height: 36px; border-radius: 50%;
-    background: #2563eb; color: white;
+    background: var(--color-brand); color: white;
     font-size: 13px; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -150,14 +149,14 @@ const styles = `
     width: 28px; height: 28px; border: none; background: transparent; border-radius: 6px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 700; color: var(--gray-500);
-    font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s;
+    font-family: var(--font-sans); transition: all 0.15s;
   }
   .mdt-toolbar-btn:hover { background: var(--gray-100); color: var(--gray-900); }
   .mdt-toolbar-divider { width: 1px; height: 18px; background: var(--gray-200); margin: 0 4px; }
   .mdt-form-textarea {
     width: 100%; min-height: 120px; padding: 16px 20px;
     border: none; outline: none; resize: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px; color: var(--gray-700); line-height: 1.7; box-sizing: border-box;
   }
   .mdt-form-textarea::placeholder { color: var(--gray-400); }
@@ -167,7 +166,7 @@ const styles = `
     font-size: 13px; color: var(--gray-400); cursor: pointer; transition: background 0.15s;
   }
   .mdt-form-upload-row:hover { background: var(--gray-50); }
-  .mdt-form-upload-link { color: #2563eb; font-weight: 600; }
+  .mdt-form-upload-link { color: var(--color-brand); font-weight: 600; }
   .mdt-form-footer {
     padding: 14px 20px; border-top: 1.5px solid var(--gray-200);
     display: flex; align-items: center; justify-content: space-between; background: var(--gray-50);
@@ -177,15 +176,15 @@ const styles = `
   .mdt-form-actions { display: flex; align-items: center; gap: 10px; }
   .mdt-btn-batal {
     background: transparent; border: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px; font-weight: 600; color: var(--gray-500);
     cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.15s;
   }
   .mdt-btn-batal:hover { color: var(--gray-700); background: var(--gray-100); }
   .mdt-btn-kirim {
-    background: #2563eb; color: white; border: none; border-radius: 8px;
+    background: var(--color-brand); color: white; border: none; border-radius: 8px;
     padding: 8px 18px; font-size: 13px; font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.18s;
   }
   .mdt-btn-kirim:hover { background: #1d4ed8; }
@@ -224,14 +223,14 @@ const styles = `
   }
   .mdt-status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
   .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
-  .pill-DIBUAT::before   { background: #2563eb; }
+  .pill-DIBUAT::before   { background: var(--color-brand); }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
   .pill-DIPROSES::before { background: #ea580c; }
   .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-SELESAI::before  { background: #16a34a; }
-  .pill-DITUTUP  { background: #f1f5f9; color: #475569; }
-  .pill-DITUTUP::before  { background: #64748b; }
+  .pill-DITUTUP  { background: var(--gray-100); color: #475569; }
+  .pill-DITUTUP::before  { background: var(--gray-500); }
 
   .mdt-badge-kategori { background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
   .mdt-badge-tinggi { color: #dc2626; font-weight: 700; font-size: 13px; }
@@ -240,7 +239,7 @@ const styles = `
   .mdt-petugas-row { display: flex; align-items: center; gap: 12px; }
   .mdt-petugas-avatar {
     width: 36px; height: 36px; border-radius: 50%;
-    background: #e2e8f0; color: var(--gray-700);
+    background: var(--gray-200); color: var(--gray-700);
     font-size: 12px; font-weight: 700;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
@@ -278,7 +277,7 @@ const styles = `
   .mdt-lampiran-chip-type { font-size: 11px; color: var(--gray-400); }
   .mdt-lampiran-chip-dl {
     width: 26px; height: 26px; border-radius: 6px;
-    background: #2563eb; color: white;
+    background: var(--color-brand); color: white;
     border: none; cursor: pointer; display: flex;
     align-items: center; justify-content: center;
     flex-shrink: 0; transition: background 0.15s;
@@ -293,7 +292,7 @@ const styles = `
     padding: 20px;
   }
   .mdt-preview-box {
-    background: #fff; border-radius: 16px; overflow: hidden;
+    background: var(--white); border-radius: 16px; overflow: hidden;
     max-width: 90vw; max-height: 90vh;
     display: flex; flex-direction: column;
     box-shadow: 0 24px 80px rgba(0,0,0,0.4);
@@ -321,14 +320,14 @@ const styles = `
     text-decoration: none;
   }
   .mdt-preview-btn:hover { background: var(--gray-50); }
-  .mdt-preview-btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .mdt-preview-btn.primary { background: var(--color-brand); color: white; border-color: var(--color-brand); }
   .mdt-preview-btn.primary:hover { background: #1d4ed8; }
   .mdt-preview-btn.close { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
   .mdt-preview-btn.close:hover { background: #fee2e2; }
   .mdt-preview-body {
     flex: 1; overflow: auto;
     display: flex; align-items: center; justify-content: center;
-    padding: 20px; background: #f8fafc;
+    padding: 20px; background: var(--gray-50);
     min-height: 200px;
   }
   .mdt-preview-body img {
@@ -415,7 +414,7 @@ const styles = `
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #2563eb;
+    color: var(--color-brand);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -588,7 +587,7 @@ function LampiranChip({ nama, url, onPreview }) {
       title={`Klik untuk preview: ${nama}`}
     >
       <div className={`mdt-lampiran-chip-icon ${img ? "mdt-lampiran-chip-img-icon" : ""}`}>
-        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "#2563eb"} />
+        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "var(--color-brand)"} />
       </div>
       <div className="mdt-lampiran-chip-info">
         <div className="mdt-lampiran-chip-name">{nama}</div>
@@ -718,12 +717,12 @@ function RiwayatItem({ item }) {
                 <AppIcon
                   name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
                   size={15}
-                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"}
+                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"}
                 />
               </div>
               <span className="mdt-file-chip-name">{lampiran.nama}</span>
               <span className="mdt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
-              <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+              <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
             </a>
           )}
         </div>
@@ -952,11 +951,11 @@ export default function MahasiswaDetailTiketPage() {
                           className="mdt-file-chip"
                         >
                           <div className={`mdt-file-chip-icon ${lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "mdt-file-chip-pdf" : ""}`}>
-                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"} />
+                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"} />
                           </div>
                           <span className="mdt-file-chip-name">{lmp.nama_file}</span>
                           <span className="mdt-file-chip-ext">{getFileExt(lmp.nama_file)}</span>
-                          <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+                          <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
                         </a>
                       );
                     })}
@@ -1019,7 +1018,7 @@ export default function MahasiswaDetailTiketPage() {
                   {file && (
                     <span style={{
                       marginLeft: "auto", fontSize: 12,
-                      color: "#2563eb", fontWeight: 600,
+                      color: "var(--color-brand)", fontWeight: 600,
                       maxWidth: 160, overflow: "hidden",
                       textOverflow: "ellipsis", whiteSpace: "nowrap"
                     }}>

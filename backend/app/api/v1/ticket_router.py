@@ -63,6 +63,26 @@ def list_tiket(
     return svc.get_all_tiket_for_user(current_user.id, current_user.role)
 
 
+@router.get("/tiket/tugas-saya", response_model=List[TiketResponse], tags=["Tiket"])
+def tiket_tugas_saya(
+    current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service),
+):
+    if current_user.role != "staf":
+        raise HTTPException(status_code=403, detail="Hanya staf yang dapat mengakses ini.")
+    return svc.get_tiket_by_staf(current_user.id)
+
+
+@router.get("/tiket/antrean", response_model=List[TiketResponse], tags=["Tiket"])
+def tiket_antrean(
+    current_user: Annotated[UserORM, Depends(get_current_user)],
+    svc: TicketService = Depends(get_ticket_service),
+):
+    if current_user.role != "staf":
+        raise HTTPException(status_code=403, detail="Hanya staf yang dapat mengakses ini.")
+    return svc.get_tiket_unclaimed()
+
+
 @router.get("/tiket/{tiket_id}", response_model=TiketResponse, tags=["Tiket"])
 def get_tiket(
     tiket_id: int,

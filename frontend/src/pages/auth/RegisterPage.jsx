@@ -194,7 +194,7 @@ const styles = `
   .pg {
     min-height: 100vh;
     display: flex;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* ── LEFT PANEL ── */
@@ -206,7 +206,7 @@ const styles = `
     flex-direction: column;
     justify-content: space-between;
     padding: 44px 52px;
-    background: linear-gradient(150deg, #0a1f5c 0%, #1a3a8a 55%, #2563eb 100%);
+    background: linear-gradient(150deg, #0a1f5c 0%, #1a3a8a 55%, var(--color-brand) 100%);
   }
   .pg-left::before {
     content: '';
@@ -231,7 +231,7 @@ const styles = `
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; backdrop-filter: blur(8px);
   }
-  .brand-text { color: #ffffff; }
+  .brand-text { color: var(--white); }
   .brand-text .univ {
     font-size: 10px; font-weight: 600;
     letter-spacing: 2.5px; text-transform: uppercase;
@@ -249,9 +249,9 @@ const styles = `
     color: rgba(255,255,255,0.8); margin-bottom: 20px;
   }
   .hero h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: clamp(26px, 2.8vw, 36px); font-weight: 800;
-    color: #ffffff; line-height: 1.15;
+    color: var(--white); line-height: 1.15;
     letter-spacing: -1px; margin-bottom: 16px;
   }
   .hero p {
@@ -273,7 +273,7 @@ const styles = `
   .pg-right {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: flex-start;
-    padding: 40px 40px; background: #ffffff;
+    padding: 40px 40px; background: var(--white);
     overflow-y: auto;
   }
   .form-box { width: 100%; max-width: 440px; padding-bottom: 40px; }
@@ -281,7 +281,7 @@ const styles = `
   /* ── TAB SWITCHER ── */
   .role-tabs {
     display: flex; gap: 0;
-    background: #f1f5f9;
+    background: var(--gray-100);
     border-radius: 10px;
     padding: 4px;
     margin-bottom: 24px;
@@ -289,14 +289,14 @@ const styles = `
   .role-tab {
     flex: 1; padding: 9px 16px;
     border: none; border-radius: 7px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px; font-weight: 600;
     cursor: pointer; transition: all 0.18s ease;
-    color: #64748b; background: transparent;
+    color: var(--gray-500); background: transparent;
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
   .role-tab.active {
-    background: #ffffff;
+    background: var(--white);
     color: #0a1f5c;
     box-shadow: 0 1px 6px rgba(0,0,0,0.08);
   }
@@ -305,43 +305,43 @@ const styles = `
   .form-head { margin-bottom: 20px; }
   .form-head .badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: #eff6ff; color: #2563eb;
+    background: #eff6ff; color: var(--color-brand);
     border: 1px solid #bfdbfe; border-radius: 100px;
     padding: 4px 11px; font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.6px;
     margin-bottom: 10px;
   }
   .form-head h2 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 22px; font-weight: 800;
-    color: #0f172a; letter-spacing: -0.5px;
+    color: var(--gray-900); letter-spacing: -0.5px;
     margin-bottom: 5px;
   }
-  .form-head p { font-size: 13px; color: #64748b; line-height: 1.55; }
+  .form-head p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
 
   /* ── FIELD ── */
   .field { margin-bottom: 13px; }
   .field-lbl {
     font-size: 12.5px; font-weight: 600;
-    color: #334155; margin-bottom: 5px; display: block;
+    color: var(--gray-700); margin-bottom: 5px; display: block;
   }
   .input-wrap { position: relative; }
   .input-icon {
     position: absolute; left: 13px; top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8; pointer-events: none;
+    color: var(--gray-400); pointer-events: none;
     display: flex; align-items: center; justify-content: center;
   }
   .fi {
     width: 100%; height: 44px;
     padding: 0 13px 0 40px;
-    border: 1.5px solid #e2e8f0; border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px; color: #0f172a;
-    background: #ffffff; outline: none;
+    border: 1.5px solid var(--gray-200); border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 13.5px; color: var(--gray-900);
+    background: var(--white); outline: none;
     transition: all 0.18s ease;
   }
-  .fi::placeholder { color: #94a3b8; }
+  .fi::placeholder { color: var(--gray-400); }
   .fi:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
   .fi.err { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.07); }
   select.fi {
@@ -350,24 +350,24 @@ const styles = `
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 36px;
-    color: #0f172a;
+    color: var(--gray-900);
   }
-  select.fi option[value=""] { color: #94a3b8; }
-  select.fi:disabled { background-color: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+  select.fi option[value=""] { color: var(--gray-400); }
+  select.fi:disabled { background-color: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
   .eye {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer;
-    color: #94a3b8; padding: 0; transition: color 0.15s;
+    color: var(--gray-400); padding: 0; transition: color 0.15s;
     display: flex; align-items: center;
   }
-  .eye:hover { color: #64748b; }
+  .eye:hover { color: var(--gray-500); }
   .ferr { margin-top: 4px; font-size: 11.5px; color: #dc2626; }
 
   /* ── DIVISI GROUP LABEL ── */
   .select-group-label {
     font-size: 10px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.5px;
-    color: #94a3b8; padding: 6px 8px 2px;
+    color: var(--gray-400); padding: 6px 8px 2px;
     pointer-events: none;
   }
 
@@ -383,10 +383,10 @@ const styles = `
   .btn-submit {
     width: 100%; height: 48px; margin-top: 8px;
     border: none; border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px; font-weight: 700;
-    color: #ffffff; cursor: pointer;
-    background: linear-gradient(130deg, #0a1f5c 0%, #2563eb 60%, #0ea5e9 100%);
+    color: var(--white); cursor: pointer;
+    background: linear-gradient(130deg, #0a1f5c 0%, var(--color-brand) 60%, #0ea5e9 100%);
     box-shadow: 0 4px 18px rgba(37,99,235,0.28);
     transition: all 0.2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -400,10 +400,10 @@ const styles = `
   /* ── FOOTER ── */
   .footer-note {
     margin-top: 18px;
-    font-size: 13px; color: #64748b;
+    font-size: 13px; color: var(--gray-500);
     text-align: center; line-height: 1.9;
   }
-  .footer-note a { color: #2563eb; font-weight: 700; text-decoration: none; }
+  .footer-note a { color: var(--color-brand); font-weight: 700; text-decoration: none; }
   .footer-note a:hover { text-decoration: underline; }
 
   /* ── GRUP BADGE di divisi info ── */

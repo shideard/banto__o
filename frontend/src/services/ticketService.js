@@ -17,9 +17,13 @@ class TicketService {
   }
 
   async getUnclaimedTickets() {
-    const res = await apiClient.get("/tiket");
-    const all = Array.isArray(res.data) ? res.data : [];
-    return all.filter(t => !t.staf_id);
+    const res = await apiClient.get("/tiket/antrean");
+    return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getMyTasks() {
+    const res = await apiClient.get("/tiket/tugas-saya");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getTiketById(tiketId) {

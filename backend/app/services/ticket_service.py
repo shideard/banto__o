@@ -93,6 +93,12 @@ class TicketService:
             return self.repo.get_tiket_by_mahasiswa_id(user_id)
         return self.repo.get_all_tiket()
 
+    def get_tiket_by_staf(self, staf_id: int) -> List[TiketORM]:
+        return self.repo.get_tiket_by_staf(staf_id)
+
+    def get_tiket_unclaimed(self) -> List[TiketORM]:
+        return self.repo.get_tiket_unclaimed()
+
     def get_tiket_for_user(self, tiket_id: int, user_id: int, role: str) -> TiketORM:
         tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:

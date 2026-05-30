@@ -3,8 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+import { BACKEND_URL } from "../../utils/constants";
 
 const styles = `
   /* ─── Layout utama ─── */
@@ -13,7 +12,7 @@ const styles = `
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* ─── Breadcrumb ─── */
@@ -29,7 +28,7 @@ const styles = `
     color: var(--gray-500);
     text-decoration: none;
   }
-  .dt-breadcrumb a:hover { color: #2563eb; }
+  .dt-breadcrumb a:hover { color: var(--color-brand); }
   .dt-breadcrumb strong { color: var(--gray-700); }
   .dt-breadcrumb span { color: var(--gray-400); }
 
@@ -38,7 +37,7 @@ const styles = `
     margin-bottom: 24px;
   }
   .dt-page-header h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 28px;
     font-weight: 800;
     color: var(--gray-900);
@@ -94,14 +93,14 @@ const styles = `
     transition: all 0.2s;
   }
   .dt-step-circle.done {
-    background: #2563eb;
-    border-color: #2563eb;
+    background: var(--color-brand);
+    border-color: var(--color-brand);
     color: white;
   }
   .dt-step-circle.active {
     background: white;
-    border-color: #2563eb;
-    color: #2563eb;
+    border-color: var(--color-brand);
+    color: var(--color-brand);
     box-shadow: 0 0 0 4px #dbeafe;
   }
   .dt-step-label {
@@ -110,8 +109,8 @@ const styles = `
     color: var(--gray-400);
     text-align: center;
   }
-  .dt-step-label.done { color: #2563eb; }
-  .dt-step-label.active { color: #2563eb; font-weight: 700; }
+  .dt-step-label.done { color: var(--color-brand); }
+  .dt-step-label.active { color: var(--color-brand); font-weight: 700; }
 
   /* Garis penghubung */
   .dt-step-line {
@@ -122,7 +121,7 @@ const styles = `
     position: relative;
     z-index: 0;
   }
-  .dt-step-line.done { background: #2563eb; }
+  .dt-step-line.done { background: var(--color-brand); }
 
   /* ─── Pesan awal tiket ─── */
   .dt-ticket-card {
@@ -142,7 +141,7 @@ const styles = `
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     font-size: 13px;
     font-weight: 700;
@@ -307,7 +306,7 @@ const styles = `
     font-size: 13px;
     font-weight: 700;
     color: var(--gray-500);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     transition: all 0.15s;
   }
   .dt-toolbar-btn:hover {
@@ -327,7 +326,7 @@ const styles = `
     border: none;
     outline: none;
     resize: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     color: var(--gray-700);
     line-height: 1.7;
@@ -346,7 +345,7 @@ const styles = `
     transition: background 0.15s;
   }
   .dt-form-upload-row:hover { background: var(--gray-50); }
-  .dt-form-upload-link { color: #2563eb; font-weight: 600; text-decoration: none; }
+  .dt-form-upload-link { color: var(--color-brand); font-weight: 600; text-decoration: none; }
   .dt-form-footer {
     padding: 14px 20px;
     border-top: 1.5px solid var(--gray-200);
@@ -365,7 +364,7 @@ const styles = `
   .dt-btn-batal {
     background: transparent;
     border: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     color: var(--gray-500);
@@ -377,14 +376,14 @@ const styles = `
   .dt-btn-batal:hover { color: var(--gray-700); background: var(--gray-100); }
 
   .dt-btn-kirim {
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     border: none;
     border-radius: 8px;
     padding: 8px 18px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -424,7 +423,7 @@ const styles = `
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -510,7 +509,7 @@ const styles = `
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #e2e8f0;
+    background: var(--gray-200);
     color: var(--gray-700);
     font-size: 12px;
     font-weight: 700;
@@ -569,7 +568,7 @@ const styles = `
   .dt-lampiran-chip-type { font-size: 11px; color: var(--gray-400); }
   .dt-lampiran-chip-dl {
     width: 26px; height: 26px; border-radius: 6px;
-    background: #2563eb; color: white;
+    background: var(--color-brand); color: white;
     border: none; cursor: pointer; display: flex;
     align-items: center; justify-content: center;
     flex-shrink: 0; transition: background 0.15s;
@@ -584,7 +583,7 @@ const styles = `
     padding: 20px;
   }
   .dt-preview-box {
-    background: #fff; border-radius: 16px; overflow: hidden;
+    background: var(--white); border-radius: 16px; overflow: hidden;
     max-width: 90vw; max-height: 90vh;
     display: flex; flex-direction: column;
     box-shadow: 0 24px 80px rgba(0,0,0,0.4);
@@ -610,14 +609,14 @@ const styles = `
     color: var(--gray-700); cursor: pointer; transition: all 0.15s; text-decoration: none;
   }
   .dt-preview-btn:hover { background: var(--gray-50); }
-  .dt-preview-btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .dt-preview-btn.primary { background: var(--color-brand); color: white; border-color: var(--color-brand); }
   .dt-preview-btn.primary:hover { background: #1d4ed8; }
   .dt-preview-btn.close { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
   .dt-preview-btn.close:hover { background: #fee2e2; }
   .dt-preview-body {
     flex: 1; overflow: auto;
     display: flex; align-items: center; justify-content: center;
-    padding: 20px; background: #f8fafc; min-height: 200px;
+    padding: 20px; background: var(--gray-50); min-height: 200px;
   }
   .dt-preview-body img {
     max-width: 100%; max-height: 70vh;
@@ -643,7 +642,7 @@ const styles = `
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #2563eb;
+    color: var(--color-brand);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -767,14 +766,14 @@ const styles = `
     flex-wrap: wrap;
   }
   .dt-btn-klaim {
-    background: #2563eb;
+    background: var(--color-brand);
     color: var(--white);
     border: none;
     border-radius: 8px;
     padding: 9px 20px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -792,7 +791,7 @@ const styles = `
     padding: 9px 20px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -824,7 +823,7 @@ const styles = `
     border: 1.5px solid #fecaca;
     border-radius: 8px;
     padding: 10px 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--gray-700);
     line-height: 1.6;
@@ -835,7 +834,7 @@ const styles = `
     transition: border-color 0.2s;
   }
   .dt-tolak-textarea:focus { border-color: #dc2626; }
-  .dt-tolak-textarea::placeholder { color: #94a3b8; }
+  .dt-tolak-textarea::placeholder { color: var(--gray-400); }
   .dt-tolak-actions {
     display: flex;
     gap: 8px;
@@ -850,7 +849,7 @@ const styles = `
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -867,7 +866,7 @@ const styles = `
     padding: 8px 14px;
     font-size: 13px;
     font-weight: 600;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     transition: all 0.18s;
   }
@@ -905,7 +904,7 @@ const styles = `
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -942,7 +941,7 @@ const styles = `
     border: 1.5px solid var(--gray-200);
     border-radius: 8px;
     padding: 6px 12px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--gray-700);
     background: var(--white);
@@ -950,7 +949,7 @@ const styles = `
     transition: border-color 0.2s;
     cursor: pointer;
   }
-  .dt-waktu-input:focus { border-color: #2563eb; }
+  .dt-waktu-input:focus { border-color: var(--color-brand); }
   .dt-waktu-hint {
     font-size: 11px;
     color: var(--gray-400);
@@ -966,7 +965,7 @@ const styles = `
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -1104,7 +1103,7 @@ function LampiranChip({ nama, url, onPreview }) {
   return (
     <div className="dt-lampiran-chip" onClick={() => onPreview({ nama, url })} title={`Preview: ${nama}`}>
       <div className={`dt-lampiran-chip-icon ${img ? "dt-lampiran-chip-img-icon" : ""}`}>
-        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "#2563eb"} />
+        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "var(--color-brand)"} />
       </div>
       <div className="dt-lampiran-chip-info">
         <div className="dt-lampiran-chip-name">{nama}</div>
@@ -1265,12 +1264,12 @@ function RiwayatItem({ item }) {
                 <AppIcon
                   name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
                   size={15}
-                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"}
+                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"}
                 />
               </div>
               <span className="dt-file-chip-name">{lampiran.nama}</span>
               <span className="dt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
-              <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+              <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
             </a>
           )}
         </div>
@@ -1678,11 +1677,11 @@ export default function StafDetailTiketPage() {
                           className="dt-file-chip"
                         >
                           <div className={`dt-file-chip-icon ${lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "dt-file-chip-pdf" : ""}`}>
-                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"} />
+                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"} />
                           </div>
                           <span className="dt-file-chip-name">{lmp.nama_file}</span>
                           <span className="dt-file-chip-ext">{getFileExt(lmp.nama_file)}</span>
-                          <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+                          <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
                         </a>
                       );
                     })}
@@ -1745,7 +1744,7 @@ export default function StafDetailTiketPage() {
                   {file && (
                     <span style={{
                       marginLeft: "auto", fontSize: 12,
-                      color: "#2563eb", fontWeight: 600,
+                      color: "var(--color-brand)", fontWeight: 600,
                       maxWidth: 160, overflow: "hidden",
                       textOverflow: "ellipsis", whiteSpace: "nowrap"
                     }}>

@@ -265,7 +265,7 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (ev) => {
-    ev.preventDefault();
+    ev?.preventDefault?.();
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
@@ -274,7 +274,6 @@ export default function LoginPage() {
       const data = await login(email, password);
       if (data.role === "mahasiswa") navigate("/dashboard");
       else if (data.role === "staf") navigate("/staff/dashboard");
-      else if (data.role === "admin") navigate("/admin/dashboard");
       else navigate("/login");
     } catch (err) {
       setErrors({ email: err?.detail || "Login gagal, periksa kembali data kamu" });
@@ -334,7 +333,7 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} noValidate>
+            <div className="login-fields">
               {/* E-mail */}
               <div className="field">
                 <div className="field-lbl"><span>E-mail</span></div>
@@ -376,10 +375,10 @@ export default function LoginPage() {
                 {errors.password && <div className="ferr"><AppIcon name="AlertCircle" variant="xs" /> {errors.password}</div>}
               </div>
 
-              <button className="btn-submit" type="submit" disabled={loading}>
+              <button className="btn-submit" type="button" disabled={loading} onClick={handleSubmit}>
                 {loading ? <><div className="spin" /> Memverifikasi...</> : "Masuk →"}
               </button>
-            </form>
+            </div>
 
             <div className="divider">atau</div>
 

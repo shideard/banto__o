@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { faqCategories } from "../../data/faqData";
 import AppIcon from "../../components/ui/AppIcon";
 
@@ -263,7 +264,7 @@ export default function ChatbotPage() {
         <div className="cb-footer-info">
           <AppIcon name="Lightbulb" variant="xs" style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />
           Pilih tombol di atas untuk mendapatkan jawaban ·{" "}
-          <a href="/tiket/buat" className="cb-footer-link">Buat tiket bantuan</a>{" "}
+          <Link to="/tiket/buat" className="cb-footer-link">Buat tiket bantuan</Link>{" "}
           jika masalah belum teratasi
         </div>
 

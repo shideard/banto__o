@@ -28,7 +28,7 @@ const styles = `
   .bt-breadcrumb a:hover { color: rgba(255,255,255,0.9); }
   .bt-breadcrumb span { color: rgba(255,255,255,0.9); font-weight: 600; }
   
-  .bt-header h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; margin-bottom: 6px; }
+  .bt-header h1 { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; margin-bottom: 6px; }
   .bt-header p { font-size: 14px; color: rgba(255,255,255,0.65); }
 
   .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 40px; position: relative; z-index: 2; }
@@ -39,7 +39,7 @@ const styles = `
   .bt-form-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
   .bt-form-card-header { padding: 20px 24px; border-bottom: 1.5px solid var(--gray-200); display: flex; align-items: center; gap: 10px; }
   .bt-form-card-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .bt-form-card-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
+  .bt-form-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
   .bt-form-card-body { padding: 24px; }
 
   .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
@@ -50,7 +50,7 @@ const styles = `
   .bt-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 7px; }
   .bt-label .required { color: var(--error); margin-left: 3px; }
 
-  .bt-select, .bt-input, .bt-textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--gray-900); background: var(--white); outline: none; transition: all 0.2s ease; }
+  .bt-select, .bt-input, .bt-textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: var(--font-sans); font-size: 14px; color: var(--gray-900); background: var(--white); outline: none; transition: all 0.2s ease; }
   .bt-select { height: 46px; padding: 0 14px; cursor: pointer; }
   .bt-input { height: 46px; padding: 0 14px; }
   .bt-textarea { padding: 12px 14px; resize: vertical; min-height: 120px; line-height: 1.6; }
@@ -70,9 +70,9 @@ const styles = `
   .bt-file-remove:hover { color: var(--error); }
 
   .bt-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1.5px solid var(--gray-200); margin-top: 8px; }
-  .bt-btn-cancel { padding: 10px 20px; border: 1.5px solid var(--gray-200); border-radius: 9px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.18s; }
+  .bt-btn-cancel { padding: 10px 20px; border: 1.5px solid var(--gray-200); border-radius: 9px; background: var(--white); font-family: var(--font-sans); font-size: 13.5px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.18s; }
   .bt-btn-cancel:hover { background: var(--gray-50); border-color: var(--gray-400); }
-  .bt-btn-submit { padding: 10px 24px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.18s; box-shadow: 0 2px 10px rgba(37,99,235,0.28); display: flex; align-items: center; gap: 7px; }
+  .bt-btn-submit { padding: 10px 24px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); font-family: var(--font-sans); font-size: 13.5px; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.18s; box-shadow: 0 2px 10px rgba(37,99,235,0.28); display: flex; align-items: center; gap: 7px; }
   .bt-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.38); }
   .bt-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
@@ -97,7 +97,7 @@ const styles = `
   .chat-msg.user .chat-msg-time { text-align: right; }
 
   .chat-quick-replies { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-  .chat-quick-btn { padding: 5px 10px; border: 1.5px solid var(--ipb-blue-lite); border-radius: 100px; background: rgba(59,130,246,0.06); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ipb-blue-mid); cursor: pointer; transition: all 0.15s; }
+  .chat-quick-btn { padding: 5px 10px; border: 1.5px solid var(--ipb-blue-lite); border-radius: 100px; background: rgba(59,130,246,0.06); font-family: var(--font-sans); font-size: 11.5px; font-weight: 600; color: var(--ipb-blue-mid); cursor: pointer; transition: all 0.15s; }
   .chat-quick-btn:hover { background: var(--ipb-blue-mid); color: var(--white); border-color: var(--ipb-blue-mid); }
 
   .chat-typing { display: flex; gap: 4px; padding: 10px 13px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 4px 12px 12px 12px; width: fit-content; }
@@ -106,7 +106,7 @@ const styles = `
   .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
 
   .bt-chatbot-input { padding: 12px 14px; border-top: 1.5px solid var(--gray-200); display: flex; gap: 8px; align-items: flex-end; background: var(--white); }
-  .chatbot-input-field { flex: 1; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 9px 13px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--gray-900); outline: none; resize: none; line-height: 1.5; max-height: 80px; transition: border-color 0.2s; }
+  .chatbot-input-field { flex: 1; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 9px 13px; font-family: var(--font-sans); font-size: 13px; color: var(--gray-900); outline: none; resize: none; line-height: 1.5; max-height: 80px; transition: border-color 0.2s; }
   .chatbot-input-field:focus { border-color: var(--ipb-blue-lite); }
   .chatbot-input-field::placeholder { color: var(--gray-400); }
   .chatbot-send-btn { width: 36px; height: 36px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.18s; box-shadow: 0 2px 8px rgba(37,99,235,0.28); }
@@ -126,7 +126,7 @@ const styles = `
     background: rgba(59,130,246,0.07); color: #1d4ed8;
     border: 1px solid rgba(59,130,246,0.25);
     border-radius: 6px; padding: 4px 10px;
-    font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px; font-weight: 600; font-family: var(--font-sans);
     text-decoration: none; transition: background .15s;
   }
   .chat-cb-link-btn:hover { background: #dbeafe; }
@@ -286,7 +286,7 @@ export default function BuatTiketPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
@@ -382,7 +382,7 @@ export default function BuatTiketPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} noValidate>
+              <div className="bt-form-fields">
                 <div className="bt-field">
                   <label className="bt-label">Topik Bantuan <span className="required">*</span></label>
                   <select
@@ -457,7 +457,7 @@ export default function BuatTiketPage() {
                   >
                     <input type="file" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                     <div className="bt-upload-icon">
-                      <AppIcon name="Paperclip" size={26} color="#94a3b8" />
+                      <AppIcon name="Paperclip" size={26} color="var(--gray-400)" />
                     </div>
                     <div className="bt-upload-text">Drag & drop atau klik untuk upload</div>
                     <div className="bt-upload-sub">PDF, DOC, JPG, PNG — Maks. 10MB per file</div>
@@ -476,11 +476,11 @@ export default function BuatTiketPage() {
 
                 <div className="bt-actions">
                   <button type="button" className="bt-btn-cancel" onClick={() => window.history.back()}>Batal</button>
-                  <button type="submit" className="bt-btn-submit" disabled={submitting}>
+                  <button type="button" className="bt-btn-submit" disabled={submitting} onClick={handleSubmit}>
                     {submitting ? <><div className="spinner" /> Mengirim...</> : <><AppIcon name="Ticket" variant="sm" /> Buat Tiket</>}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
 

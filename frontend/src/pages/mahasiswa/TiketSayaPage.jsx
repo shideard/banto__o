@@ -30,7 +30,7 @@ const styles = `
   }
 
   .ts-header-text h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 800;
     color: var(--gray-900);
@@ -81,7 +81,7 @@ const styles = `
     padding: 10px 14px 10px 38px;
     border: 1.5px solid var(--gray-200);
     border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
@@ -100,7 +100,7 @@ const styles = `
     border: none;
     background: transparent;
     border-radius: 6px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     color: var(--gray-500);
@@ -185,11 +185,11 @@ const styles = `
   .pill-diproses { background: #fff7ed; color: #c2410c; }
   .pill-diproses::before { background: #ea580c; }
   .pill-dibuka { background: #eff6ff; color: #1d4ed8; }
-  .pill-dibuka::before { background: #2563eb; }
+  .pill-dibuka::before { background: var(--color-brand); }
   .pill-selesai { background: #f0fdf4; color: #15803d; }
   .pill-selesai::before { background: #16a34a; }
-  .pill-ditutup { background: #f1f5f9; color: #475569; }
-  .pill-ditutup::before { background: #64748b; }
+  .pill-ditutup { background: var(--gray-100); color: #475569; }
+  .pill-ditutup::before { background: var(--gray-500); }
 
   /* Modal Styles */
   .modal-overlay {
@@ -396,7 +396,7 @@ export default function TiketSayaPage() {
                             display: "inline-block",
                             padding: "5px 12px",
                             background: "#eff6ff",
-                            color: "#2563eb",
+                            color: "var(--color-brand)",
                             borderRadius: 6,
                             fontSize: 12,
                             fontWeight: 700,

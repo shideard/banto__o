@@ -50,6 +50,27 @@ class TicketRepository:
             .all()
         )
 
+    def get_tiket_by_staf(self, staf_id: int) -> List[TiketORM]:
+        """Ambil semua tiket yang diklaim oleh staf tertentu."""
+        return (
+            self.db.query(TiketORM)
+            .filter(TiketORM.staf_id == staf_id)
+            .order_by(TiketORM.tanggal_dibuat.desc())
+            .all()
+        )
+
+    def get_tiket_unclaimed(self) -> List[TiketORM]:
+        """Ambil tiket dengan status DIBUAT dan staf_id NULL."""
+        return (
+            self.db.query(TiketORM)
+            .filter(
+                TiketORM.status == "DIBUAT",
+                TiketORM.staf_id.is_(None),
+            )
+            .order_by(TiketORM.tanggal_dibuat.desc())
+            .all()
+        )
+
     def update_tiket(self, tiket: TiketORM) -> TiketORM:
         self.db.commit()
         self.db.refresh(tiket)
