@@ -10,6 +10,7 @@ class StatusPengajuan(str, Enum):
     DIPROSES = "DIPROSES"
     REVISI   = "REVISI"
     SELESAI  = "SELESAI"
+    DITOLAK  = "DITOLAK"
 
 
 @dataclass
@@ -20,21 +21,17 @@ class KategoriTiketDomain:
 
 @dataclass
 class LampiranDomain:
-    """Komposisi dari Pengajuan. Upload file butuh storage service."""
     nama_file: str
     tipe_file: str
     id: Optional[int] = None
     pengajuan_id: Optional[int] = None
 
     def download(self):
-        raise NotImplementedError(
-            "Membutuhkan storage service (S3/GCS) untuk download file."
-        )
+        raise NotImplementedError("Membutuhkan storage service untuk download file.")
 
 
 @dataclass
 class PengajuanDomain:
-    """Komposisi 1-to-1 dengan Tiket — menyimpan deskripsi detail pengajuan."""
     deskripsi: str
     id: Optional[int] = None
     tiket_id: Optional[int] = None
@@ -44,8 +41,8 @@ class PengajuanDomain:
 @dataclass
 class KomentarDomain:
     tiket_id: int
-    penulis_id: Optional[int]   # FK ke users.id — sementara nullable sebelum auth
-    role: str                    # 'Mahasiswa' atau 'Staff Administrasi'
+    penulis_id: Optional[int]
+    role: str
     isi: str
     id: Optional[int] = None
     waktu: datetime = field(default_factory=datetime.now)
@@ -64,7 +61,6 @@ class TiketDomain:
     komentar: List[KomentarDomain] = field(default_factory=list)
 
     def assign_staf(self, staf_id: int) -> None:
-        """Klaim tiket oleh staf — status otomatis berubah ke DIKLAIM."""
         if self.status != StatusPengajuan.DIBUAT:
             raise ValueError(
                 f"Tiket tidak bisa diklaim karena statusnya '{self.status.value}', bukan 'DIBUAT'."
@@ -72,10 +68,21 @@ class TiketDomain:
         self.staf_id = staf_id
         self.status = StatusPengajuan.DIKLAIM
 
-    def add_comment_logic(
-        self, penulis_id: Optional[int], role: str, isi: str
-    ) -> KomentarDomain:
-        """Validasi dan buat objek KomentarDomain."""
+    def mulai_proses(self) -> None:
+        if self.status != StatusPengajuan.DIKLAIM:
+            raise ValueError(
+                f"Tiket harus berstatus DIKLAIM untuk mulai diproses, bukan '{self.status.value}'."
+            )
+        self.status = StatusPengajuan.DIPROSES
+
+    def tolak_tiket(self, alasan: str) -> None:
+        if self.status != StatusPengajuan.DIKLAIM:
+            raise ValueError("Tiket hanya bisa ditolak saat berstatus DIKLAIM.")
+        if not alasan or not alasan.strip():
+            raise ValueError("Alasan penolakan wajib diisi.")
+        self.status = StatusPengajuan.DITOLAK
+
+    def add_comment_logic(self, penulis_id: Optional[int], role: str, isi: str) -> KomentarDomain:
         if not isi or not isi.strip():
             raise ValueError("Isi komentar tidak boleh kosong.")
         return KomentarDomain(
@@ -86,13 +93,8 @@ class TiketDomain:
             isi=isi,
         )
 
-    def validate_revision(
-        self, new_status: StatusPengajuan, catatan: Optional[str]
-    ) -> None:
-        """Status REVISI wajib disertai catatan penjelasan."""
+    def validate_revision(self, new_status: StatusPengajuan, catatan: Optional[str]) -> None:
         if self.status == StatusPengajuan.SELESAI:
             raise ValueError("Status tiket sudah SELESAI dan tidak dapat diubah lagi.")
         if new_status == StatusPengajuan.REVISI and (not catatan or not catatan.strip()):
-            raise ValueError(
-                "Status 'REVISI' wajib menyertakan catatan penjelasan untuk mahasiswa."
-            )
+            raise ValueError("Status 'REVISI' wajib menyertakan catatan penjelasan untuk mahasiswa.")

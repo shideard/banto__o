@@ -23,14 +23,18 @@ export function AuthProvider({ children }) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      // Di AuthContext.jsx — fungsi login()
       const data = {
         access_token: response.data.access_token,
         role: response.data.role,
         nama: response.data.nama,
         email: response.data.email,
-        id: response.data.id,      // ← TAMBAHKAN INI
-        nim: response.data.nim,    // ← untuk mahasiswa
+        id: response.data.id,
+        nim: response.data.nim,
+        telepon: response.data.telepon,
+        fakultas: response.data.fakultas,
+        departemen: response.data.departemen,
+        divisi_id: response.data.divisi_id,
+        divisi_nama: response.data.divisi_nama,
       };
       localStorage.setItem(TOKEN_KEY, data.access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(data));
@@ -49,6 +53,14 @@ export function AuthProvider({ children }) {
         email: userData.email,
         password: userData.password,
         role: userData.role || "mahasiswa",
+        // Mahasiswa fields
+        nim: userData.nim || null,
+        telepon: userData.telepon || null,
+        fakultas: userData.fakultas || null,
+        departemen: userData.departemen || null,
+        // Staf fields — kirim nama divisi agar backend resolve ke ID
+        divisi_nama: userData.divisi || null,
+        divisi_id: userData.divisi_id || null,
       });
       return { success: true };
     } catch (error) {
@@ -63,8 +75,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Perbarui data user di context + localStorage setelah edit profil
+  const updateUser = (data) => {
+    const updated = { ...user, ...data };
+    localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, register }}>
+    <AuthContext.Provider value={{ user, token, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,6 @@
 // frontend/src/services/ApiClient.js
 import axios from "axios";
-import { API_BASE_URL, TOKEN_KEY } from "../utils/constants";
+import { API_BASE_URL, TOKEN_KEY, USER_KEY } from "../utils/constants";
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
@@ -27,8 +27,11 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          if (!window.location.pathname.includes("/login")) {
+          // Clear auth data and redirect only once
+          const currentPath = window.location.pathname;
+          if (!currentPath.includes("/login") && !currentPath.includes("/register")) {
             localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(USER_KEY);
             window.location.href = "/login";
           }
         }

@@ -1,7 +1,5 @@
-# backend/app/services/ticket_service.py
-
-from sqlalchemy.orm import Session
 from typing import List, Optional
+import os, shutil
 
 from app.persistence.ticket_orm import (
     TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM
@@ -12,79 +10,102 @@ from app.schemas.ticket_schema import (
     KomentarCreate, KategoriCreate
 )
 from app.domain.ticket_entity import TiketDomain, StatusPengajuan
+from app.persistence.repositories.ticket_repository import TicketRepository
 
 
 class TicketService:
-    # PERBAIKAN: hapus `db` dari __init__ supaya bisa dibuat tanpa argumen
-    # di ticket_router.py (svc = TicketService()).
-    # db diterima per-method lewat dependency injection FastAPI.
+    def __init__(self, repo: TicketRepository):
+        self.repo = repo
 
     # ── Kategori ──────────────────────────────────────────────────────────────
 
-    def get_all_kategori(self, db: Session) -> List[KategoriTiketORM]:
-        return db.query(KategoriTiketORM).all()
+    def get_all_kategori(self) -> List[KategoriTiketORM]:
+        return self.repo.get_all_kategori()
 
-    def create_kategori(self, db: Session, payload: KategoriCreate) -> KategoriTiketORM:
+    def create_kategori(self, payload: KategoriCreate) -> KategoriTiketORM:
         orm = KategoriTiketORM(nama_kategori=payload.nama_kategori)
-        db.add(orm)
-        db.commit()
-        db.refresh(orm)
-        return orm
+        return self.repo.create_kategori(orm)
+
+    # ── Keyword untuk penentuan prioritas otomatis ────────────────────────────
+
+    KEYWORDS_PENTING = [
+        "ijazah", "wisuda", "kelulusan", "skripsi", "tesis", "disertasi",
+        "transkrip", "legalisir", "surat keterangan", "beasiswa", "deadline",
+        "batas waktu", "akhir semester", "nilai akhir", "kp", "pkl",
+        "kerja praktek", "sidang", "ujian", "akreditasi",
+    ]
+
+    KEYWORDS_MENDESAK = [
+        "tidak bisa login", "tidak bisa akses", "error", "gagal", "sistem down",
+        "server mati", "tidak bisa submit", "krs bermasalah", "krs error",
+        "tidak bisa bayar", "pembayaran gagal", "ukt", "segera", "urgent",
+        "darurat", "mendesak", "hari ini", "sekarang", "crash", "bug",
+        "tidak menemukan", "hilang", "terhapus", "terkunci", "sister", "simak",
+    ]
+
+    def _tentukan_prioritas(self, subjek: str, deskripsi: str) -> str:
+        """
+        Tentukan prioritas tiket secara otomatis berdasarkan keywords.
+        Urutan pengecekan: Penting → Mendesak → Normal (default).
+        """
+        teks = (subjek + " " + deskripsi).lower()
+
+        for kw in self.KEYWORDS_PENTING:
+            if kw in teks:
+                return "Penting"
+
+        for kw in self.KEYWORDS_MENDESAK:
+            if kw in teks:
+                return "Mendesak"
+
+        return "Normal"
 
     # ── Tiket ─────────────────────────────────────────────────────────────────
 
-    def buat_tiket(self, db: Session, payload: TiketCreate) -> TiketORM:
+    def buat_tiket(self, payload: TiketCreate) -> TiketORM:
+        prioritas = self._tentukan_prioritas(payload.subjek, payload.deskripsi)
+
         tiket = TiketORM(
             subjek=payload.subjek,
             kategori_id=payload.kategori_id,
             mahasiswa_id=payload.mahasiswa_id,
             status=StatusPengajuan.DIBUAT.value,
+            waktu_kejadian=payload.waktu_kejadian,
+            prioritas=prioritas,
         )
-        db.add(tiket)
-        db.flush()  # dapatkan tiket.id sebelum commit
+        pengajuan = PengajuanORM(deskripsi=payload.deskripsi)
+        tiket = self.repo.create_tiket(tiket, pengajuan)
 
-        pengajuan = PengajuanORM(tiket_id=tiket.id, deskripsi=payload.deskripsi)
-        db.add(pengajuan)
-        db.commit()
-        db.refresh(tiket)
+        # Kirim notifikasi ke semua staf — sertakan prefix prioritas jika Mendesak/Penting
+        semua_staf = self.repo.get_all_staf()
+        prefix_notif = f"[{prioritas.upper()}] " if prioritas != "Normal" else ""
+        for staf in semua_staf:
+            self.repo.create_notifikasi(NotifikasiORM(
+                user_id=staf.id,
+                tiket_id=tiket.id,
+                pesan=f"{prefix_notif}Tiket baru masuk: '{tiket.subjek}'. Segera tinjau di antrian.",
+            ))
+
         return tiket
 
-    def get_all_tiket_for_user(
-        self, db: Session, user_id: int, role: str
-    ) -> List[TiketORM]:
-        """
-        Mahasiswa → hanya tiket miliknya.
-        Staf / Admin → semua tiket.
-        """
+    def get_all_tiket_for_user(self, user_id: int, role: str) -> List[TiketORM]:
         if role == "mahasiswa":
-            return (
-                db.query(TiketORM)
-                .filter(TiketORM.mahasiswa_id == user_id)
-                .order_by(TiketORM.tanggal_dibuat.desc())
-                .all()
-            )
-        # staf & admin lihat semua
-        return db.query(TiketORM).order_by(TiketORM.tanggal_dibuat.desc()).all()
+            return self.repo.get_tiket_by_mahasiswa_id(user_id)
+        return self.repo.get_all_tiket()
 
-    def get_tiket_for_user(
-        self, db: Session, tiket_id: int, user_id: int, role: str
-    ) -> TiketORM:
-        tiket = db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
+    def get_tiket_for_user(self, tiket_id: int, user_id: int, role: str) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
             raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
-        # Mahasiswa hanya boleh lihat tiketnya sendiri
         if role == "mahasiswa" and tiket.mahasiswa_id != user_id:
             raise ValueError("Kamu tidak punya akses ke tiket ini.")
         return tiket
 
-    def klaim_tiket(
-        self, db: Session, tiket_id: int, payload: TiketAssignStaf
-    ) -> TiketORM:
-        tiket = db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
+    def klaim_tiket(self, tiket_id: int, payload: TiketAssignStaf) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
             raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
 
-        # Pakai domain logic untuk validasi status
         domain = TiketDomain(
             id=tiket.id,
             subjek=tiket.subjek,
@@ -92,36 +113,84 @@ class TicketService:
             status=StatusPengajuan(tiket.status),
             staf_id=tiket.staf_id,
         )
-        domain.assign_staf(payload.staf_id)  # raise ValueError jika status bukan DIBUAT
+        domain.assign_staf(payload.staf_id)
 
         tiket.staf_id = domain.staf_id
-        tiket.status = domain.status.value
+        tiket.status  = domain.status.value
+        tiket = self.repo.update_tiket(tiket)
 
-        # Kirim notifikasi ke mahasiswa
         if tiket.mahasiswa_id:
-            notif = NotifikasiORM(
+            self.repo.create_notifikasi(NotifikasiORM(
                 user_id=tiket.mahasiswa_id,
                 tiket_id=tiket.id,
                 pesan=f"Tiket '{tiket.subjek}' kamu sudah diklaim oleh staf.",
-            )
-            db.add(notif)
-
-        db.commit()
-        db.refresh(tiket)
+            ))
         return tiket
 
-    def update_status(
-        self,
-        db: Session,
-        tiket_id: int,
-        payload: TiketUpdateStatus,
-        staf_id: int,
-    ) -> TiketORM:
-        tiket = db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
+    def mulai_proses(self, tiket_id: int, staf_id: int) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
+        if not tiket:
+            raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
+        if tiket.staf_id != staf_id:
+            raise ValueError("Kamu bukan staf yang mengklaim tiket ini.")
+
+        domain = TiketDomain(
+            id=tiket.id,
+            subjek=tiket.subjek,
+            tanggal_dibuat=tiket.tanggal_dibuat,
+            status=StatusPengajuan(tiket.status),
+            staf_id=tiket.staf_id,
+        )
+        domain.mulai_proses()
+        tiket.status = domain.status.value
+        tiket = self.repo.update_tiket(tiket)
+
+        if tiket.mahasiswa_id:
+            self.repo.create_notifikasi(NotifikasiORM(
+                user_id=tiket.mahasiswa_id,
+                tiket_id=tiket.id,
+                pesan=f"Tiket '{tiket.subjek}' sedang diproses oleh staf.",
+            ))
+        return tiket
+
+    def tolak_tiket(self, tiket_id: int, staf_id: int, alasan: str) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
+        if not tiket:
+            raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
+        if tiket.staf_id != staf_id:
+            raise ValueError("Kamu bukan staf yang mengklaim tiket ini.")
+
+        domain = TiketDomain(
+            id=tiket.id,
+            subjek=tiket.subjek,
+            tanggal_dibuat=tiket.tanggal_dibuat,
+            status=StatusPengajuan(tiket.status),
+            staf_id=tiket.staf_id,
+        )
+        domain.tolak_tiket(alasan)
+        tiket.status = domain.status.value
+        tiket = self.repo.update_tiket(tiket)
+
+        self.repo.create_komentar(KomentarORM(
+            tiket_id=tiket.id,
+            penulis_id=staf_id,
+            role="Staff Administrasi",
+            isi=f"[DITOLAK] {alasan}",
+        ))
+
+        if tiket.mahasiswa_id:
+            self.repo.create_notifikasi(NotifikasiORM(
+                user_id=tiket.mahasiswa_id,
+                tiket_id=tiket.id,
+                pesan=f"Tiket '{tiket.subjek}' ditolak oleh staf.",
+            ))
+        return tiket
+
+    def update_status(self, tiket_id: int, payload: TiketUpdateStatus, staf_id: int) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
             raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
 
-        # Validasi lewat domain
         domain = TiketDomain(
             id=tiket.id,
             subjek=tiket.subjek,
@@ -131,38 +200,38 @@ class TicketService:
         domain.validate_revision(payload.new_status, payload.catatan)
 
         tiket.status = payload.new_status.value
+        tiket = self.repo.update_tiket(tiket)
 
-        # Tambah komentar otomatis jika ada catatan (misal saat REVISI)
         if payload.catatan and payload.catatan.strip():
-            komentar = KomentarORM(
+            self.repo.create_komentar(KomentarORM(
                 tiket_id=tiket.id,
                 penulis_id=staf_id,
                 role="Staff Administrasi",
                 isi=f"[{payload.new_status.value}] {payload.catatan}",
-            )
-            db.add(komentar)
+            ))
 
-        # Notifikasi ke mahasiswa
         if tiket.mahasiswa_id:
-            notif = NotifikasiORM(
+            self.repo.create_notifikasi(NotifikasiORM(
                 user_id=tiket.mahasiswa_id,
                 tiket_id=tiket.id,
                 pesan=f"Status tiket '{tiket.subjek}' diubah menjadi {payload.new_status.value}.",
-            )
-            db.add(notif)
-
-        db.commit()
-        db.refresh(tiket)
+            ))
         return tiket
 
     # ── Komentar ──────────────────────────────────────────────────────────────
 
-    def tambah_komentar(
-        self, db: Session, tiket_id: int, payload: KomentarCreate
-    ) -> KomentarORM:
-        tiket = db.query(TiketORM).filter(TiketORM.id == tiket_id).first()
+    def tambah_komentar(self, tiket_id: int, payload: KomentarCreate) -> KomentarORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
             raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
+
+        STATUS_BOLEH_KOMENTAR = {"DIPROSES", "REVISI", "SELESAI"}
+        if tiket.status not in STATUS_BOLEH_KOMENTAR:
+            raise ValueError(
+                f"Tidak bisa mengirim pesan saat status tiket '{tiket.status}'. "
+                f"Tiket harus berstatus DIPROSES terlebih dahulu."
+            )
+
         if not payload.isi or not payload.isi.strip():
             raise ValueError("Isi komentar tidak boleh kosong.")
 
@@ -172,9 +241,8 @@ class TicketService:
             role=payload.role,
             isi=payload.isi,
         )
-        db.add(komentar)
+        komentar = self.repo.create_komentar(komentar)
 
-        # Notifikasi ke pihak lain (mahasiswa → staf, staf → mahasiswa)
         notif_target = None
         if payload.role == "Mahasiswa" and tiket.staf_id:
             notif_target = tiket.staf_id
@@ -182,13 +250,52 @@ class TicketService:
             notif_target = tiket.mahasiswa_id
 
         if notif_target:
-            notif = NotifikasiORM(
+            self.repo.create_notifikasi(NotifikasiORM(
                 user_id=notif_target,
                 tiket_id=tiket_id,
                 pesan=f"Komentar baru di tiket '{tiket.subjek}'.",
-            )
-            db.add(notif)
-
-        db.commit()
-        db.refresh(komentar)
+            ))
         return komentar
+
+    # ── Upload File ───────────────────────────────────────────────────────────
+
+    def simpan_file_komentar(
+        self, tiket_id: int, penulis_id: int, role: str,
+        nama_file: str, file_obj
+    ) -> KomentarORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
+        if not tiket:
+            raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
+
+        STATUS_BOLEH_UPLOAD = {"DIBUAT", "DIKLAIM", "DIPROSES", "REVISI"}
+        if tiket.status not in STATUS_BOLEH_UPLOAD:
+            raise ValueError(
+                f"Upload file tidak tersedia saat status tiket '{tiket.status}'."
+            )
+
+        upload_dir = f"uploads/tiket_{tiket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
+        file_path = f"{upload_dir}/{nama_file}"
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(file_obj, f)
+
+        # Buat komentar file langsung (bypass validasi status di tambah_komentar
+        # agar bisa upload dari status DIBUAT sekalipun)
+        komentar = KomentarORM(
+            tiket_id=tiket_id,
+            penulis_id=penulis_id,
+            role=role,
+            isi=f"[FILE] {nama_file} — {file_path}",
+        )
+        return self.repo.create_komentar(komentar)
+    
+ # ── Update Kategori ───────────────────────────────────────────────────────
+
+    def update_kategori(self, tiket_id: int, kategori_id, staf_id: int) -> TiketORM:
+        tiket = self.repo.get_tiket_by_id(tiket_id)
+        if not tiket:
+            raise ValueError(f"Tiket {tiket_id} tidak ditemukan.")
+        if tiket.staf_id != staf_id:
+            raise ValueError("Hanya staf yang mengklaim tiket ini yang dapat mengubah kategori.")
+        tiket.kategori_id = kategori_id
+        return self.repo.update_tiket(tiket)   

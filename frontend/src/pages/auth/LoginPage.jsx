@@ -1,31 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
-  @import url('https://fonts.googleApiClients.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --blue-950: #0a1f5c;
-    --blue-800: #1a4fad;
-    --blue-600: #2563eb;
-    --blue-400: #3b82f6;
-    --blue-300: #60a5fa;
-    --white:    #ffffff;
-    --gray-50:  #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-900: #0f172a;
-    --error:    #dc2626;
-    --font:     'Poppins', sans-serif;
-  }
-
-  .pg { min-height: 100vh; display: flex; font-family: var(--font); }
+  .pg { min-height: 100vh; display: flex; font-family: var(--font-sans); }
 
   /* ── LEFT ── */
   .pg-left {
@@ -36,7 +17,7 @@ const styles = `
     flex-direction: column;
     justify-content: space-between;
     padding: 44px 52px;
-    background: linear-gradient(150deg, var(--blue-950) 0%, var(--blue-800) 55%, var(--blue-600) 100%);
+    background: linear-gradient(150deg, var(--color-brand-darkest) 0%, var(--color-brand-dark) 55%, var(--color-brand) 100%);
   }
 
   /* noise texture */
@@ -151,7 +132,7 @@ const styles = `
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
   .role-tab.on {
-    background: var(--white); color: var(--blue-600);
+    background: var(--color-white); color: var(--color-brand);
     box-shadow: 0 1px 6px rgba(0,0,0,0.07), 0 0 0 1px rgba(37,99,235,0.15);
   }
 
@@ -175,6 +156,7 @@ const styles = `
     position: absolute; left: 13px; top: 50%;
     transform: translateY(-50%);
     color: var(--gray-400); font-size: 15px; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
   }
   .fi {
     width: 100%; height: 46px;
@@ -202,7 +184,7 @@ const styles = `
     border: none; border-radius: 10px;
     font-family: var(--font); font-size: 14px; font-weight: 700;
     color: var(--white); cursor: pointer;
-    background: linear-gradient(130deg, var(--blue-800) 0%, var(--blue-600) 60%, #0ea5e9 100%);
+    background: linear-gradient(130deg, var(--color-brand-dark) 0%, var(--color-brand) 60%, #0ea5e9 100%);
     box-shadow: 0 4px 18px rgba(37,99,235,0.28);
     transition: all 0.2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -314,7 +296,9 @@ export default function LoginPage() {
           <div className="deco deco-blob" />
 
           <div className="brand">
-            <div className="brand-icon">🎓</div>
+            <div className="brand-icon">
+              <AppIcon name="GraduationCap" size={22} color="white" />
+            </div>
             <div className="brand-text">
               <span className="univ">IPB University</span>
               <span className="prod">Help Center</span>
@@ -341,12 +325,12 @@ export default function LoginPage() {
               <button type="button"
                 className={`role-tab ${role === "mahasiswa" ? "on" : ""}`}
                 onClick={() => setRole("mahasiswa")}>
-                🎓 Mahasiswa
+                <AppIcon name="GraduationCap" variant="sm" /> Mahasiswa
               </button>
               <button type="button"
                 className={`role-tab ${role === "staf" ? "on" : ""}`}
                 onClick={() => setRole("staf")}>
-                🏛 Staf Admin
+                <AppIcon name="Building2" variant="sm" /> Staf Admin
               </button>
             </div>
 
@@ -355,7 +339,7 @@ export default function LoginPage() {
               <div className="field">
                 <div className="field-lbl"><span>E-mail</span></div>
                 <div className="input-wrap">
-                  <span className="input-icon">✉</span>
+                  <span className="input-icon"><AppIcon name="Mail" variant="sm" /></span>
                   <input
                     type="email"
                     className={`fi ${errors.email ? "err" : ""}`}
@@ -365,7 +349,7 @@ export default function LoginPage() {
                     autoComplete="email"
                   />
                 </div>
-                {errors.email && <div className="ferr">⚠ {errors.email}</div>}
+                {errors.email && <div className="ferr"><AppIcon name="AlertCircle" variant="xs" /> {errors.email}</div>}
               </div>
 
               {/* Kata Sandi */}
@@ -375,7 +359,7 @@ export default function LoginPage() {
                   <button type="button" className="forgot">Lupa kata sandi?</button>
                 </div>
                 <div className="input-wrap">
-                  <span className="input-icon">🔑</span>
+                  <span className="input-icon"><AppIcon name="Lock" variant="sm" /></span>
                   <input
                     type={showPass ? "text" : "password"}
                     className={`fi ${errors.password ? "err" : ""}`}
@@ -386,10 +370,10 @@ export default function LoginPage() {
                     style={{ paddingRight: 42 }}
                   />
                   <button type="button" className="eye" onClick={() => setShowPass(!showPass)}>
-                    {showPass ? "🙈" : "👁️"}
+                    {showPass ? <AppIcon name="EyeOff" variant="sm" /> : <AppIcon name="Eye" variant="sm" />}
                   </button>
                 </div>
-                {errors.password && <div className="ferr">⚠ {errors.password}</div>}
+                {errors.password && <div className="ferr"><AppIcon name="AlertCircle" variant="xs" /> {errors.password}</div>}
               </div>
 
               <button className="btn-submit" type="submit" disabled={loading}>

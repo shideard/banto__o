@@ -1,9 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
+import AppIcon from "../../components/ui/AppIcon";
+import { useToast } from "../../components/ui/Toast";
+import { faqCategories } from "../../data/faqData";
+
 const styles = `
-  /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
   .bt-main {
     width: 100%;
     display: flex;
@@ -39,7 +42,7 @@ const styles = `
   .bt-form-card-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
   .bt-form-card-body { padding: 24px; }
 
-  .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
+  .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
   .bt-user-info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 3px; }
   .bt-user-info-value { font-size: 13px; font-weight: 600; color: var(--gray-700); }
 
@@ -54,12 +57,11 @@ const styles = `
   .bt-select:focus, .bt-input:focus, .bt-textarea:focus { border-color: var(--ipb-blue-lite); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
   .bt-select.has-error, .bt-input.has-error, .bt-textarea.has-error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
   .bt-field-error { margin-top: 5px; font-size: 12px; color: var(--error); }
-  .bt-topik-guide { margin-top: 10px; padding: 12px 14px; background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.15); border-radius: 8px; font-size: 12.5px; color: var(--ipb-blue); line-height: 1.6; animation: fadeIn 0.2s ease both; }
 
   .bt-upload { border: 2px dashed var(--gray-200); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
   .bt-upload:hover, .bt-upload.drag-over { border-color: var(--ipb-blue-lite); background: rgba(59,130,246,0.03); }
   .bt-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .bt-upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .bt-upload-icon { display: flex; justify-content: center; margin-bottom: 8px; }
   .bt-upload-text { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
   .bt-upload-sub { font-size: 11.5px; color: var(--gray-400); }
   .bt-file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
@@ -74,10 +76,9 @@ const styles = `
   .bt-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.38); }
   .bt-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
-  /* Chatbot UI di Halaman Buat Tiket */
   .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
-  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
   .chatbot-header-name { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 3px; }
   .chatbot-header-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255,255,255,0.65); }
   .chatbot-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.6); animation: pulse 2s infinite; }
@@ -119,88 +120,155 @@ const styles = `
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
 
+  .chat-cb-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chat-cb-link-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(59,130,246,0.07); color: #1d4ed8;
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
+    text-decoration: none; transition: background .15s;
+  }
+  .chat-cb-link-btn:hover { background: #dbeafe; }
+
   @media (max-width: 900px) {
     .bt-content { grid-template-columns: 1fr; }
     .bt-chatbot { position: static; height: 420px; }
   }
 `;
 
-const TOPIK_LIST = [
-  { value: "", label: "— Pilih Topik Bantuan —" },
-  { value: "akademik", label: "Akademik & Kurikulum" },
-  { value: "keuangan", label: "Keuangan & Beasiswa" },
-  { value: "kemahasiswaan", label: "Kemahasiswaan" },
-  { value: "administrasi", label: "Administrasi Umum" },
-  { value: "penelitian", label: "Penelitian & PKM" },
-  { value: "lainnya", label: "Lainnya" },
-];
-
-const TOPIK_GUIDE = {
-  akademik: "💡 Untuk topik Akademik, sertakan: nama mata kuliah, semester, dan deskripsi kendala secara detail.",
-  keuangan: "💡 Untuk topik Keuangan, sertakan: nomor tagihan/beasiswa, periode, dan lampirkan bukti pembayaran jika ada.",
-  kemahasiswaan: "💡 Untuk topik Kemahasiswaan, sertakan: nama organisasi/kegiatan dan nomor surat jika ada.",
-  administrasi: "💡 Untuk topik Administrasi, sertakan: jenis dokumen yang dibutuhkan dan keperluan penggunaannya.",
-  penelitian: "💡 Untuk topik Penelitian, sertakan: judul penelitian, nama dosen pembimbing, dan status pengajuan.",
-  lainnya: "💡 Deskripsikan kebutuhanmu sedetail mungkin agar staf dapat membantu dengan tepat.",
-};
-
-
-const INITIAL_MESSAGES = [
-  {
-    id: 1, type: "bot",
-    text: "Halo! Aku BantO__O 🤖 Asisten virtualmu. Ada yang bisa aku bantu sebelum kamu buat tiket?",
-    time: "Sekarang",
-    quickReplies: ["Cara mengisi tiket", "Topik apa yang tersedia?", "Berapa lama proses tiket?"],
-  },
-];
-
-const BOT_RESPONSES = {
-  "cara mengisi tiket": "Untuk mengisi tiket: 1️⃣ Pilih topik bantuan yang sesuai, 2️⃣ Isi deskripsi masalah secara detail, 3️⃣ Lampirkan dokumen pendukung jika ada, 4️⃣ Klik Buat Tiket. Staf kami akan segera memproses!",
-  "topik apa yang tersedia?": "Tersedia 6 topik: 📚 Akademik & Kurikulum, 💰 Keuangan & Beasiswa, 🎓 Kemahasiswaan, 📋 Administrasi Umum, 🔬 Penelitian & PKM, dan ❓ Lainnya.",
-  "berapa lama proses tiket?": "Tiket biasanya diproses dalam 1-3 hari kerja. Kamu bisa memantau status tiket di menu Tiket Saya. Kami akan notifikasi kamu setiap ada update! 📬",
-  default: "Terima kasih sudah bertanya! Untuk pertanyaan lebih lanjut, silakan buat tiket dan staf kami akan membantu kamu secara langsung. 😊",
-};
-
-
-function getNow() {
-  return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+/* ── helper: render **bold** dalam teks ────────────────────── */
+function parseText(text) {
+  const parts = text.split(/(\*\*(.*?)\*\*)/g);
+  return parts.map((part, i) => {
+    if (i % 3 === 2) return <strong key={i}>{part}</strong>;
+    if (i % 3 === 1) return null;
+    return part;
+  });
 }
+
+const GREETING =
+  "Halo! Aku **BantO__O** 🤖 — Asisten virtualmu.\nAda yang bisa aku bantu sebelum kamu buat tiket? Silakan pilih kategori:";
+
+const CATEGORY_ITEMS = faqCategories.map((c) => ({
+  id: c.id,
+  label: c.label,
+  icon: c.icon,
+}));
 
 export default function BuatTiketPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  const [topik, setTopik] = useState("");
-  const [subjek, setSubjek] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [files, setFiles] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [topik, setTopik]           = useState("");
+  const [subjek, setSubjek]         = useState("");
+  const [deskripsi, setDeskripsi]   = useState("");
+  const [waktuKejadian, setWaktuKejadian] = useState("");
+  const [files, setFiles]           = useState([]);
+  const [errors, setErrors]         = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [chatInput, setChatInput] = useState("");
-  const [botTyping, setBotTyping] = useState(false);
+  const [dragOver, setDragOver]     = useState(false);
+  const [kategoriList, setKategoriList] = useState([]);
+
+  // ── Chatbot state (FAQ-based, sama seperti ChatbotPage) ────
+  const [cbMessages, setCbMessages] = useState([
+    { id: "greeting", from: "bot", text: GREETING },
+  ]);
+  const [cbButtons, setCbButtons]   = useState({ type: "category", items: CATEGORY_ITEMS });
+  const [cbTyping, setCbTyping]     = useState(false);
+  const [cbCategory, setCbCategory] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, botTyping]);
+  }, [cbMessages, cbButtons, cbTyping]);
 
-  const sendMessage = useCallback((text) => {
-    if (!text.trim()) return;
-    const trimmed = text.trim();
-    const now = getNow();
-    setMessages(prev => [...prev, { id: prev.length + 1, type: "user", text: trimmed, time: now }]);
-    setChatInput("");
-    setBotTyping(true);
-
-    setTimeout(() => {
-      const key = trimmed.toLowerCase();
-      const reply = BOT_RESPONSES[key] || BOT_RESPONSES.default;
-      const replyTime = getNow();
-      setBotTyping(false);
-      setMessages(prev => [...prev, { id: prev.length + 2, type: "bot", text: reply, time: replyTime }]);
-    }, 1200);
+  useEffect(() => {
+    ticketService.getKategori().then(setKategoriList).catch(() => {});
   }, []);
+
+  function botReply(text, nextButtons, delay = 600) {
+    setCbTyping(true);
+    setCbButtons(null);
+    setTimeout(() => {
+      setCbTyping(false);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "bot", text }]);
+      if (nextButtons) setCbButtons(nextButtons);
+    }, delay);
+  }
+
+  function handleCbCategory(item) {
+    const category = faqCategories.find(c => c.id === item.id);
+    if (!category) return;
+    setCbCategory(category);
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: `${item.icon} ${item.label}` }]);
+    const qItems = category.questions.map(q => ({ id: q.id, label: q.q }));
+    botReply(
+      `Baik! Berikut pertanyaan seputar **${category.label}**.\nSilakan pilih yang paling sesuai:`,
+      { type: "question", items: qItems }
+    );
+  }
+
+  function handleCbQuestion(item) {
+    if (!cbCategory) return;
+    const qData = cbCategory.questions.find(q => q.id === item.id);
+    if (!qData) return;
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: qData.q }]);
+    const answerNode = (
+      <div>
+        <p style={{ margin: "0 0 10px 0", lineHeight: 1.7 }}>{parseText(qData.a)}</p>
+        {qData.links?.length > 0 && (
+          <div className="chat-cb-links">
+            {qData.links.map((lk, i) => (
+              <a key={i} href={lk.url} target="_blank" rel="noreferrer" className="chat-cb-link-btn">
+                <AppIcon name="ExternalLink" variant="xs" /> {lk.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+    const followUpBtns = {
+      type: "followup",
+      items: [
+        { id: "more-same",     label: "Pertanyaan lain di kategori ini" },
+        { id: "back-category", label: "Kembali ke menu utama" },
+      ],
+    };
+    setCbTyping(true);
+    setCbButtons(null);
+    setTimeout(() => {
+      setCbTyping(false);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "bot", node: answerNode }]);
+      setCbButtons(followUpBtns);
+    }, 700);
+  }
+
+  function handleCbFollowUp(item) {
+    if (item.id === "more-same" && cbCategory) {
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Pertanyaan lain di kategori ini" }]);
+      const qItems = cbCategory.questions.map(q => ({ id: q.id, label: q.q }));
+      botReply(
+        `Silakan pilih pertanyaan lain seputar **${cbCategory.label}**:`,
+        { type: "question", items: qItems }
+      );
+    } else {
+      setCbCategory(null);
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Kembali ke menu utama" }]);
+      botReply(
+        "Tentu! Ada hal lain yang bisa aku bantu? Silakan pilih kategori:",
+        { type: "category", items: CATEGORY_ITEMS }
+      );
+    }
+  }
+
+  function handleCbPick(item) {
+    if (!cbButtons || cbTyping) return;
+    if (cbButtons.type === "category") handleCbCategory(item);
+    else if (cbButtons.type === "question") handleCbQuestion(item);
+    else if (cbButtons.type === "followup") handleCbFollowUp(item);
+  }
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
@@ -213,42 +281,59 @@ export default function BuatTiketPage() {
     if (!subjek.trim()) errs.subjek = "Subjek wajib diisi";
     if (!deskripsi.trim()) errs.deskripsi = "Deskripsi wajib diisi";
     else if (deskripsi.trim().length < 20) errs.deskripsi = "Deskripsi minimal 20 karakter";
+    if (!waktuKejadian) errs.waktuKejadian = "Tanggal dan waktu kejadian wajib diisi";
     return errs;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const errs = validate();
-  if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-  setErrors({});
-  setSubmitting(true);
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
+    setSubmitting(true);
 
-  try {
-    await ticketService.createTicket({
-      subjek,
-      deskripsi,
-      kategori_id: topik ? parseInt(topik) : null,
-    });
-    alert("Tiket berhasil dibuat!");
-    window.location.href = "/tiket/saya";
-  } catch (error) {
-    // ✅ ambil pesan error yang benar dari backend
-    const msg =
-      error?.response?.data?.detail ||
-      error?.response?.data?.message ||
-      error?.message ||
-      "Gagal membuat tiket.";
-    alert("Error: " + msg);
-  } finally {
-    setSubmitting(false);
-  }
-};
+    try {
+      // 1. Buat tiket dulu
+      const tiketBaru = await ticketService.createTicket({
+        subjek,
+        deskripsi,
+        kategori_id: topik ? parseInt(topik) : null,
+        waktu_kejadian: waktuKejadian ? new Date(waktuKejadian).toISOString() : null,
+      });
+
+      // 2. Upload setiap file (satu per satu; gagal upload tidak batalkan tiket)
+      if (files.length > 0) {
+        for (const f of files) {
+          try {
+            await ticketService.uploadFile(tiketBaru.id, f);
+          } catch {
+            // Upload gagal diabaikan — tiket tetap terbuat
+          }
+        }
+      }
+
+      toast.success(
+        '🎫 Tiket berhasil dibuat!',
+        'Staf kami akan segera meninjau dan memproses tiket kamu.',
+        5000
+      );
+      setTimeout(() => navigate('/tiket/saya'), 1200);
+    } catch (error) {
+      const msg =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        error?.message ||
+        'Gagal membuat tiket.';
+      toast.error('Gagal membuat tiket', msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
       <style>{styles}</style>
-      
-      {/* KONTEN UTAMA - TANPA NAVBAR DAN SIDEBAR */}
+
       <main className="bt-main">
         <div className="bt-header">
           <div className="bt-header-inner">
@@ -264,7 +349,7 @@ export default function BuatTiketPage() {
 
         <div className="bt-alert">
           <div className="bt-alert-inner">
-            <span>⚠️</span>
+            <span><AppIcon name="AlertTriangle" variant="sm" /></span>
             <span>Pastikan kamu mengecek kembali tiket secara rutin untuk melihat tanggapan dari staff. Tiket yang tidak ada tanggapan dalam <strong>3 hari kerja</strong> akan ditutup otomatis.</span>
           </div>
         </div>
@@ -272,57 +357,108 @@ export default function BuatTiketPage() {
         <div className="bt-content">
           <div className="bt-form-card">
             <div className="bt-form-card-header">
-              <div className="bt-form-card-icon">📝</div>
+              <div className="bt-form-card-icon">
+                <AppIcon name="FileText" size={16} color="white" />
+              </div>
               <div className="bt-form-card-title">Formulir Tiket</div>
             </div>
             <div className="bt-form-card-body">
               <div className="bt-user-info">
                 <div className="bt-user-info-item">
-                  <div className="bt-user-info-label">Email</div>
-                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"}@apps.ipb.ac.id</div>
+                  <div className="bt-user-info-label">Nama</div>
+                  <div className="bt-user-info-value">{user?.nama || "—"}</div>
                 </div>
                 <div className="bt-user-info-item">
-                  <div className="bt-user-info-label">Klien</div>
-                  <div className="bt-user-info-value">{user?.identifier || "G6401231002"} — {user?.nama || "Mut"}</div>
+                  <div className="bt-user-info-label">NIM</div>
+                  <div className="bt-user-info-value">{user?.nim || "—"}</div>
+                </div>
+                <div className="bt-user-info-item">
+                  <div className="bt-user-info-label">Email</div>
+                  <div className="bt-user-info-value">{user?.email || "—"}</div>
+                </div>
+                <div className="bt-user-info-item">
+                  <div className="bt-user-info-label">Fakultas</div>
+                  <div className="bt-user-info-value">{user?.fakultas || "—"}</div>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} noValidate>
                 <div className="bt-field">
                   <label className="bt-label">Topik Bantuan <span className="required">*</span></label>
-                  <select className={`bt-select ${errors.topik ? "has-error" : ""}`} value={topik}
-                    onChange={(e) => { setTopik(e.target.value); setErrors(p => ({...p, topik: ""})); }}>
-                    {TOPIK_LIST.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  <select
+                    className={`bt-select ${errors.topik ? "has-error" : ""}`}
+                    value={topik}
+                    onChange={(e) => { setTopik(e.target.value); setErrors(p => ({...p, topik: ""})); }}
+                  >
+                    <option value="">— Pilih Topik Bantuan —</option>
+                    {kategoriList.map(k => (
+                      <option key={k.id} value={k.id}>{k.nama_kategori}</option>
+                    ))}
                   </select>
-                  {errors.topik && <div className="bt-field-error">⚠ {errors.topik}</div>}
-                  {topik && TOPIK_GUIDE[topik] && <div className="bt-topik-guide">{TOPIK_GUIDE[topik]}</div>}
+                  {errors.topik && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.topik}</div>}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Subjek <span className="required">*</span></label>
-                  <input type="text" className={`bt-input ${errors.subjek ? "has-error" : ""}`}
-                    placeholder="Tuliskan judul singkat masalahmu" value={subjek}
-                    onChange={(e) => { setSubjek(e.target.value); setErrors(p => ({...p, subjek: ""})); }} />
-                  {errors.subjek && <div className="bt-field-error">⚠ {errors.subjek}</div>}
+                  <input
+                    type="text"
+                    className={`bt-input ${errors.subjek ? "has-error" : ""}`}
+                    placeholder="Tuliskan judul singkat masalahmu"
+                    value={subjek}
+                    onChange={(e) => { setSubjek(e.target.value); setErrors(p => ({...p, subjek: ""})); }}
+                  />
+                  {errors.subjek && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.subjek}</div>}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Deskripsi Masalah <span className="required">*</span></label>
-                  <textarea className={`bt-textarea ${errors.deskripsi ? "has-error" : ""}`}
-                    placeholder="Jelaskan masalahmu secara detail..." value={deskripsi}
-                    onChange={(e) => { setDeskripsi(e.target.value); setErrors(p => ({...p, deskripsi: ""})); }} rows={5} />
+                  <textarea
+                    className={`bt-textarea ${errors.deskripsi ? "has-error" : ""}`}
+                    placeholder="Jelaskan masalahmu secara detail..."
+                    value={deskripsi}
+                    onChange={(e) => { setDeskripsi(e.target.value); setErrors(p => ({...p, deskripsi: ""})); }}
+                    rows={5}
+                  />
                   <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px", textAlign: "right" }}>{deskripsi.length} karakter</div>
-                  {errors.deskripsi && <div className="bt-field-error">⚠ {errors.deskripsi}</div>}
+                  {errors.deskripsi && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.deskripsi}</div>}
+                </div>
+
+                {/* ── Field Tanggal & Waktu Kejadian ── */}
+                <div className="bt-field">
+                  <label className="bt-label">
+                    Tanggal &amp; Waktu Kejadian <span className="required">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className={`bt-input ${errors.waktuKejadian ? "has-error" : ""}`}
+                    value={waktuKejadian}
+                    onChange={(e) => {
+                      setWaktuKejadian(e.target.value);
+                      setErrors(p => ({ ...p, waktuKejadian: "" }));
+                    }}
+                  />
+                  <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px" }}>
+                    Kapan masalah ini pertama kali kamu alami?
+                  </div>
+                  {errors.waktuKejadian && (
+                    <div className="bt-field-error">
+                      <AppIcon name="AlertCircle" variant="xs" /> {errors.waktuKejadian}
+                    </div>
+                  )}
                 </div>
 
                 <div className="bt-field">
                   <label className="bt-label">Lampiran <span style={{ color: "var(--gray-400)", fontWeight: 500 }}>(opsional, maks. 5 file)</span></label>
-                  <div className={`bt-upload ${dragOver ? "drag-over" : ""}`}
+                  <div
+                    className={`bt-upload ${dragOver ? "drag-over" : ""}`}
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
-                    onDrop={(e) => { e.preventDefault(); setDragOver(false); setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)].slice(0, 5)); }}>
+                    onDrop={(e) => { e.preventDefault(); setDragOver(false); setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)].slice(0, 5)); }}
+                  >
                     <input type="file" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
-                    <div className="bt-upload-icon">📎</div>
+                    <div className="bt-upload-icon">
+                      <AppIcon name="Paperclip" size={26} color="#94a3b8" />
+                    </div>
                     <div className="bt-upload-text">Drag & drop atau klik untuk upload</div>
                     <div className="bt-upload-sub">PDF, DOC, JPG, PNG — Maks. 10MB per file</div>
                   </div>
@@ -341,17 +477,19 @@ export default function BuatTiketPage() {
                 <div className="bt-actions">
                   <button type="button" className="bt-btn-cancel" onClick={() => window.history.back()}>Batal</button>
                   <button type="submit" className="bt-btn-submit" disabled={submitting}>
-                    {submitting ? <><div className="spinner" /> Mengirim...</> : <>🎫 Buat Tiket</>}
+                    {submitting ? <><div className="spinner" /> Mengirim...</> : <><AppIcon name="Ticket" variant="sm" /> Buat Tiket</>}
                   </button>
                 </div>
               </form>
             </div>
           </div>
 
-          {/* Chatbot Bantuan di Samping Kanan */}
+          {/* Chatbot — FAQ-based (sama seperti ChatbotPage) */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
-              <div className="chatbot-avatar">🤖</div>
+              <div className="chatbot-avatar">
+                <AppIcon name="Bot" size={18} color="white" />
+              </div>
               <div className="chatbot-header-info">
                 <div className="chatbot-header-name">BantO__O Assistant</div>
                 <div className="chatbot-header-status">
@@ -362,37 +500,61 @@ export default function BuatTiketPage() {
             </div>
 
             <div className="bt-chatbot-messages">
-              {messages.map(msg => (
-                <div key={msg.id} className={`chat-msg ${msg.type}`}>
-                  <div className="chat-msg-avatar">{msg.type === "bot" ? "🤖" : "👤"}</div>
-                  <div>
-                    <div className="chat-msg-bubble">{msg.text}</div>
-                    {msg.quickReplies && (
-                      <div className="chat-quick-replies">
-                        {msg.quickReplies.map((qr, i) => (
-                          <button key={i} className="chat-quick-btn" onClick={() => sendMessage(qr)}>{qr}</button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="chat-msg-time">{msg.time}</div>
+              {cbMessages.map(msg =>
+                msg.from === "bot" ? (
+                  <div key={msg.id} className="chat-msg bot">
+                    <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                    <div className="chat-msg-bubble" style={{ whiteSpace: "pre-wrap" }}>
+                      {msg.node
+                        ? msg.node
+                        : <p style={{ margin: 0, lineHeight: 1.7 }}>{parseText(msg.text)}</p>
+                      }
+                    </div>
                   </div>
-                </div>
-              ))}
-              {botTyping && (
+                ) : (
+                  <div key={msg.id} className="chat-msg user">
+                    <div className="chat-msg-avatar"><AppIcon name="User" variant="sm" /></div>
+                    <div className="chat-msg-bubble">{msg.text}</div>
+                  </div>
+                )
+              )}
+
+              {/* typing indicator */}
+              {cbTyping && (
                 <div className="chat-msg bot">
-                  <div className="chat-msg-avatar">🤖</div>
+                  <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
                   <div className="chat-typing"><span /><span /><span /></div>
                 </div>
               )}
+
+              {/* quick buttons */}
+              {!cbTyping && cbButtons && (
+                <div className="chat-msg bot">
+                  <div className="chat-msg-avatar" style={{ opacity: 0 }} aria-hidden>
+                    <AppIcon name="Bot" variant="sm" />
+                  </div>
+                  <div className="chat-quick-replies">
+                    {cbButtons.items.map(item => (
+                      <button
+                        key={item.id}
+                        className="chat-quick-btn"
+                        onClick={() => handleCbPick(item)}
+                        disabled={cbTyping}
+                      >
+                        {item.icon && <span>{item.icon}</span>} {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="bt-chatbot-input">
-              <textarea className="chatbot-input-field" placeholder="Tanya sesuatu..." value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(chatInput); } }}
-                rows={1} />
-              <button className="chatbot-send-btn" onClick={() => sendMessage(chatInput)} disabled={!chatInput.trim() || botTyping}>➤</button>
+            <div className="bt-chatbot-input" style={{ justifyContent: "center", padding: "10px 14px" }}>
+              <span style={{ fontSize: "12px", color: "var(--gray-400)" }}>
+                Pilih tombol di atas untuk mendapatkan jawaban
+              </span>
             </div>
           </div>
         </div>

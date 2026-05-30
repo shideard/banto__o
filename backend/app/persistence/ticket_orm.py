@@ -20,15 +20,29 @@ class TiketORM(Base):
     id             = Column(Integer, primary_key=True, index=True)
     subjek         = Column(String(255), nullable=False)
     tanggal_dibuat = Column(DateTime, default=datetime.utcnow)
+    waktu_kejadian = Column(DateTime, nullable=True)              # Waktu kejadian yang dilaporkan mahasiswa
     status         = Column(String(50), default="DIBUAT")
+    prioritas      = Column(String(20), default="Normal")         # Ditentukan otomatis: Normal | Mendesak | Penting
 
     kategori_id  = Column(Integer, ForeignKey("kategori_tiket.id"), nullable=True)
     mahasiswa_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     staf_id      = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     kategori  = relationship("KategoriTiketORM", back_populates="tiket")
-    mahasiswa = relationship("UserORM", foreign_keys=[mahasiswa_id], back_populates="tiket_diajukan")
-    staf      = relationship("UserORM", foreign_keys=[staf_id],      back_populates="tiket_dikelola")
+    mahasiswa = relationship("UserORM", foreign_keys=[mahasiswa_id], back_populates="tiket_diajukan", lazy="joined")
+    staf      = relationship("UserORM", foreign_keys=[staf_id],      back_populates="tiket_dikelola", lazy="joined")
+
+    @property
+    def mahasiswa_nama(self):
+        return self.mahasiswa.nama if self.mahasiswa else None
+
+    @property
+    def staf_nama(self):
+        return self.staf.nama if self.staf else None
+
+    @property
+    def kategori_nama(self):
+        return self.kategori.nama_kategori if self.kategori else None
 
     # Komposisi — terhapus jika tiket dihapus
     pengajuan  = relationship("PengajuanORM",  back_populates="tiket", uselist=False, cascade="all, delete-orphan")
@@ -56,7 +70,7 @@ class LampiranORM(Base):
     pengajuan_id   = Column(Integer, ForeignKey("pengajuan.id"), nullable=False)
     nama_file      = Column(String(255), nullable=False)
     tipe_file      = Column(String(100), nullable=False)
-    url_file       = Column(String(512), nullable=True)   # path relatif di server
+    url_file       = Column(String(512), nullable=True)
     tanggal_upload = Column(DateTime, default=datetime.utcnow)
 
     pengajuan = relationship("PengajuanORM", back_populates="lampiran")
@@ -67,7 +81,7 @@ class KomentarORM(Base):
 
     id         = Column(Integer, primary_key=True, index=True)
     tiket_id   = Column(Integer, ForeignKey("tiket.id"),  nullable=False)
-    penulis_id = Column(Integer, ForeignKey("users.id"),  nullable=True)   # nullable sebelum auth
+    penulis_id = Column(Integer, ForeignKey("users.id"),  nullable=True)
     role       = Column(String(50), nullable=False)
     isi        = Column(Text, nullable=False)
     waktu      = Column(DateTime, default=datetime.utcnow)
@@ -92,7 +106,7 @@ class ChatMessageORM(Base):
 
     id         = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=False)
-    type       = Column(String(10), nullable=False)   # "user" atau "bot"
+    type       = Column(String(10), nullable=False)
     text       = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

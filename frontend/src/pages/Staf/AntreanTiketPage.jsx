@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import ticketService from "../../services/TicketService";
+import ticketService from "../../services/ticketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
   .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -14,19 +15,23 @@ const styles = `
   .staf-page-header h1 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
   .staf-page-header p { font-size: 14px; color: #64748b; }
 
+  .antrean-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+  .antrean-tab { padding: 10px 22px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; margin-bottom: -2px; }
+  .antrean-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+  .antrean-tab:hover { color: #2563eb; }
+
   .antrean-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
   .antrean-stat { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between; }
   .antrean-stat .label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
   .antrean-stat .value { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 900; color: #0f172a; }
-  .antrean-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .antrean-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 
   .antrean-filter-row { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .antrean-search { display: flex; align-items: center; gap: 8px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; background: #f8fafc; flex: 1; min-width: 200px; }
   .antrean-search input { border: none; background: transparent; font-size: 13px; color: #334155; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; }
   .antrean-search input::placeholder { color: #94a3b8; }
-  .antrean-select { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; cursor: pointer; outline: none; min-width: 160px; }
 
-  .antrean-table-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  .antrean-table-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
   table.antrean-table { width: 100%; border-collapse: collapse; text-align: left; }
   table.antrean-table th { padding: 12px 20px; font-size: 11px; font-weight: 700; color: #64748b; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #e2e8f0; }
   table.antrean-table td { padding: 14px 20px; font-size: 13.5px; color: #0f172a; border-bottom: 1.5px solid #f1f5f9; vertical-align: middle; }
@@ -35,15 +40,15 @@ const styles = `
   .antrean-ticket-id:hover { text-decoration: underline; }
 
   .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
+  .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
+  .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
+  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
 
-  .btn-klaim { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; white-space: nowrap; }
-  .btn-klaim:hover { background: #1d4ed8; }
-  .btn-klaim:disabled { background: #93c5fd; cursor: not-allowed; }
+  .btn-baca { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.18s; white-space: nowrap; }
+  .btn-baca:hover { background: #dbeafe; }
   .btn-detail { background: #fff; color: #334155; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; display: inline-block; transition: all 0.18s; }
   .btn-detail:hover { background: #f1f5f9; }
 
@@ -59,13 +64,12 @@ const PAGE_SIZE = 10;
 
 export default function AntreanTiketPage() {
   const { user } = useAuth();
-  const [tickets, setTickets]       = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
-  const [search, setSearch]         = useState("");
-  const [statusFilter, setStatusFilter] = useState("DIBUAT");
-  const [page, setPage]             = useState(1);
-  const [klaimingId, setKlaimingId] = useState(null);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+  const [search, setSearch]   = useState("");
+  const [tab, setTab]         = useState("belum");  // "belum" | "semua"
+  const [page, setPage]       = useState(1);
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -82,30 +86,22 @@ export default function AntreanTiketPage() {
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
-  const handleKlaim = async (tiketId) => {
-    try {
-      setKlaimingId(tiketId);
-      await ticketService.claimTiket(tiketId, { staf_id: user?.id });
-      await fetchTickets();
-    } catch (err) {
-      alert(err?.response?.data?.detail || "Gagal mengklaim tiket.");
-    } finally {
-      setKlaimingId(null);
-    }
-  };
+  // Tiket belum diklaim = status DIBUAT
+  const belumDiklaim = tickets.filter(t => t.status === "DIBUAT");
+  // Semua tiket selain punya saya yang sudah diklaim
+  const semuaTiket   = tickets;
 
-  const belumDiklaim = tickets.filter(t => t.status === "DIBUAT").length;
-  const tugasSaya    = tickets.filter(t => t.staf_id === user?.id).length;
+  const sourceList = tab === "belum" ? belumDiklaim : semuaTiket;
 
-  const filtered = tickets.filter(t => {
-    const matchSearch = String(t.id).includes(search) ||
-      (t.subjek || "").toLowerCase().includes(search.toLowerCase());
-    const matchStatus = !statusFilter || t.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const filtered = sourceList.filter(t =>
+    String(t.id).includes(search) ||
+    (t.subjek || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const tugasSayaCount = tickets.filter(t => t.staf_id === user?.id).length;
 
   return (
     <>
@@ -117,39 +113,60 @@ export default function AntreanTiketPage() {
         </div>
         <div className="staf-page-header">
           <h1>Antrean Tiket</h1>
-          <p>Kelola dan klaim tiket yang belum ditugaskan.</p>
+          <p>Tiket yang belum diklaim dan daftar semua tiket yang masuk.</p>
         </div>
 
         {/* Stats */}
         <div className="antrean-stats">
           <div className="antrean-stat">
             <div><div className="label">Total Tiket</div><div className="value">{loading ? "—" : tickets.length}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#eff6ff" }}>📬</div>
+            <div className="antrean-stat-icon" style={{ background: "#eff6ff", color: "var(--color-brand)" }}>
+              <AppIcon name="Inbox" variant="lg" />
+            </div>
           </div>
           <div className="antrean-stat">
-            <div><div className="label">Tiket Saya</div><div className="value">{loading ? "—" : tugasSaya}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#f1f5f9" }}>🎫</div>
+            <div><div className="label">Tugas Saya</div><div className="value">{loading ? "—" : tugasSayaCount}</div></div>
+            <div className="antrean-stat-icon" style={{ background: "#f1f5f9", color: "#64748b" }}>
+              <AppIcon name="Ticket" variant="lg" />
+            </div>
           </div>
           <div className="antrean-stat">
-            <div><div className="label">Belum Diklaim</div><div className="value" style={{ color: "#ea580c" }}>{loading ? "—" : belumDiklaim}</div></div>
-            <div className="antrean-stat-icon" style={{ background: "#fff7ed" }}>⏳</div>
+            <div>
+              <div className="label">Belum Diklaim</div>
+              <div className="value" style={{ color: "#ea580c" }}>{loading ? "—" : belumDiklaim.length}</div>
+            </div>
+            <div className="antrean-stat-icon" style={{ background: "#fff7ed", color: "#f97316" }}>
+              <AppIcon name="Hourglass" variant="lg" />
+            </div>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Tabs */}
+        <div className="antrean-tabs">
+          <button
+            className={`antrean-tab ${tab === "belum" ? "active" : ""}`}
+            onClick={() => { setTab("belum"); setPage(1); }}
+          >
+            Belum Diklaim ({belumDiklaim.length})
+          </button>
+          <button
+            className={`antrean-tab ${tab === "semua" ? "active" : ""}`}
+            onClick={() => { setTab("semua"); setPage(1); }}
+          >
+            Semua Tiket ({tickets.length})
+          </button>
+        </div>
+
+        {/* Search */}
         <div className="antrean-filter-row">
           <div className="antrean-search">
-            <span>🔍</span>
-            <input placeholder="ID Tiket, Subjek..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
+            <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
+            <input
+              placeholder="Cari ID Tiket atau Subjek..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+            />
           </div>
-          <select className="antrean-select" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
-            <option value="">Semua Status</option>
-            <option value="DIBUAT">Belum Diklaim (DIBUAT)</option>
-            <option value="DIKLAIM">Diklaim</option>
-            <option value="DIPROSES">Diproses</option>
-            <option value="REVISI">Revisi</option>
-            <option value="SELESAI">Selesai</option>
-          </select>
         </div>
 
         {/* Table */}
@@ -170,20 +187,31 @@ export default function AntreanTiketPage() {
               ) : error ? (
                 <tr className="state-row"><td colSpan="5" style={{ color: "#dc2626" }}>{error}</td></tr>
               ) : paginated.length === 0 ? (
-                <tr className="state-row"><td colSpan="5" style={{ color: "#94a3b8" }}>Tidak ada tiket ditemukan.</td></tr>
+                <tr className="state-row">
+                  <td colSpan="5" style={{ color: "#94a3b8" }}>
+                    {tab === "belum" ? "✅ Semua tiket sudah diklaim." : "Tidak ada tiket ditemukan."}
+                  </td>
+                </tr>
               ) : paginated.map(t => (
                 <tr key={t.id}>
-                  <td><Link to={`/staff/tiket/${t.id}`} className="antrean-ticket-id">#{t.id}</Link></td>
+                  <td>
+                    <Link to={`/staff/tiket/${t.id}`} className="antrean-ticket-id">#{t.id}</Link>
+                  </td>
                   <td style={{ fontWeight: 600 }}>{t.subjek}</td>
-                  <td><span className={`staf-status-pill pill-${t.status}`}>{t.status}</span></td>
+                  <td>
+                    <span className={`staf-status-pill pill-${t.status}`}>{t.status}</span>
+                  </td>
                   <td style={{ fontSize: 13, color: "#64748b" }}>
-                    {t.tanggal_dibuat ? new Date(t.tanggal_dibuat).toLocaleDateString("id-ID") : "—"}
+                    {t.tanggal_dibuat
+                      ? new Date(t.tanggal_dibuat).toLocaleDateString("id-ID")
+                      : "—"}
                   </td>
                   <td>
                     {t.status === "DIBUAT" ? (
-                      <button className="btn-klaim" disabled={klaimingId === t.id} onClick={() => handleKlaim(t.id)}>
-                        {klaimingId === t.id ? "Mengklaim..." : "Klaim Tiket"}
-                      </button>
+                      // Belum diklaim — arahkan ke detail untuk baca dulu lalu klaim
+                      <Link to={`/staff/tiket/${t.id}`} className="btn-baca">
+                        Baca &amp; Klaim →
+                      </Link>
                     ) : (
                       <Link to={`/staff/tiket/${t.id}`} className="btn-detail">Detail</Link>
                     )}
@@ -199,7 +227,13 @@ export default function AntreanTiketPage() {
               <div className="staf-pagination">
                 <button className="staf-page-btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹</button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} className={`staf-page-btn ${page === p ? "active" : ""}`} onClick={() => setPage(p)}>{p}</button>
+                  <button
+                    key={p}
+                    className={`staf-page-btn ${page === p ? "active" : ""}`}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </button>
                 ))}
                 <button className="staf-page-btn" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>›</button>
               </div>
