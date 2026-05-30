@@ -47,17 +47,17 @@ import ProfilPage from "./pages/mahasiswa/ProfilPage";
 
 // ── Halaman Staf ──────────────────────────────────────────────────────────────
 
-import StafDashboardPage from "./pages/staf/StafDashboardPage";
+import StafDashboardPage from "./pages/Staf/StafDashboardPage";
 
-import TugasSayaPage from "./pages/staf/TugasSayaPage";
+import TugasSayaPage from "./pages/Staf/TugasSayaPage";
 
-import AntreanTiketPage from "./pages/staf/AntreanTiketPage";
+import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
 
-import DetailTiketStafPage from "./pages/staf/DetailTiketStafPage";
+import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
 
-import BuatTiketStafPage from "./pages/staf/BuatTiketStafPage";
+import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
 
-import ProfilStafPage from "./pages/staf/ProfilStafPage";
+import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
 
 
