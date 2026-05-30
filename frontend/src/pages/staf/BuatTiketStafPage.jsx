@@ -1,43 +1,43 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
+import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
-  .staf-main { padding: 32px 40px; max-width: 900px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .staf-breadcrumb { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+  .staf-main { padding: 32px 40px; max-width: 900px; width: 100%; margin: 0 auto; font-family: var(--font-sans); }
+  .staf-breadcrumb { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
   .staf-breadcrumb span { margin: 0 6px; }
-  .staf-breadcrumb a { color: #64748b; text-decoration: none; }
-  .staf-breadcrumb a:hover { color: #2563eb; }
-  .staf-breadcrumb strong { color: #334155; }
+  .staf-breadcrumb a { color: var(--gray-500); text-decoration: none; }
+  .staf-breadcrumb a:hover { color: var(--color-brand); }
+  .staf-breadcrumb strong { color: var(--gray-700); }
 
-  .buat-tiket-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 32px 36px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
-  .buat-tiket-card h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-  .buat-tiket-card .subtitle { font-size: 14px; color: #64748b; margin-bottom: 28px; line-height: 1.5; }
-  .buat-tiket-divider { height: 1.5px; background: #f1f5f9; margin: 24px 0; }
+  .buat-tiket-card { padding: 32px 36px; }
+  .buat-tiket-card h1 { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; }
+  .buat-tiket-card .subtitle { font-size: 14px; color: var(--gray-500); margin-bottom: 28px; line-height: 1.5; }
+  .buat-tiket-divider { height: 1.5px; background: var(--gray-100); margin: 24px 0; }
 
   .form-group { margin-bottom: 22px; }
-  .form-label { display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 8px; }
+  .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
   .form-nim-wrap { position: relative; }
-  .form-nim-wrap .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 15px; }
-  .form-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 11px 16px; font-size: 14px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; transition: border-color 0.18s; background: #f8fafc; box-sizing: border-box; }
+  .form-nim-wrap .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 15px; }
+  .form-input { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 11px 16px; font-size: 14px; color: var(--gray-700); font-family: var(--font-sans); outline: none; transition: border-color 0.18s; background: var(--gray-50); box-sizing: border-box; }
   .form-input.with-icon { padding-left: 40px; }
-  .form-input:focus { border-color: #2563eb; background: #fff; }
-  .form-input::placeholder { color: #94a3b8; }
+  .form-input:focus { border-color: var(--color-brand); background: var(--white); }
+  .form-input::placeholder { color: var(--gray-400); }
   .form-input.error-border { border-color: #dc2626; }
-  .form-hint { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; margin-top: 6px; }
+  .form-hint { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-500); margin-top: 6px; }
   .form-error { font-size: 12px; color: #dc2626; margin-top: 6px; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .form-select { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 11px 16px; font-size: 14px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; transition: border-color 0.18s; background: #f8fafc; cursor: pointer; box-sizing: border-box; }
-  .form-select:focus { border-color: #2563eb; background: #fff; }
-  .form-textarea { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; font-size: 14px; color: #334155; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; transition: border-color 0.18s; background: #f8fafc; resize: vertical; min-height: 120px; box-sizing: border-box; }
-  .form-textarea:focus { border-color: #2563eb; background: #fff; }
-  .form-textarea::placeholder { color: #94a3b8; }
+  .form-select { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 11px 16px; font-size: 14px; color: var(--gray-700); font-family: var(--font-sans); outline: none; transition: border-color 0.18s; background: var(--gray-50); cursor: pointer; box-sizing: border-box; }
+  .form-select:focus { border-color: var(--color-brand); background: var(--white); }
+  .form-textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--gray-700); font-family: var(--font-sans); outline: none; transition: border-color 0.18s; background: var(--gray-50); resize: vertical; min-height: 120px; box-sizing: border-box; }
+  .form-textarea:focus { border-color: var(--color-brand); background: var(--white); }
+  .form-textarea::placeholder { color: var(--gray-400); }
 
   .buat-tiket-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 28px; }
-  .btn-batal { padding: 10px 20px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .btn-batal:hover { background: #f1f5f9; }
-  .btn-buat { display: flex; align-items: center; gap: 8px; padding: 10px 22px; border: none; border-radius: 8px; background: #2563eb; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
+  .btn-batal { padding: 10px 20px; border: 1.5px solid var(--gray-200); border-radius: 8px; background: var(--white); font-size: 13px; font-weight: 600; color: var(--gray-700); cursor: pointer; font-family: var(--font-sans); transition: all 0.18s; }
+  .btn-batal:hover { background: var(--gray-100); }
+  .btn-buat { display: flex; align-items: center; gap: 8px; padding: 10px 22px; border: none; border-radius: 8px; background: var(--color-brand); font-size: 13px; font-weight: 700; color: var(--white); cursor: pointer; font-family: var(--font-sans); transition: all 0.18s; }
   .btn-buat:hover { background: #1d4ed8; }
   .btn-buat:disabled { background: #93c5fd; cursor: not-allowed; }
 
@@ -113,7 +113,7 @@ export default function BuatTiketStafPage() {
       <style>{styles}</style>
       <main className="staf-main">
         <div className="staf-breadcrumb">
-          <a href="/staff/dashboard">Tiket Saya</a><span>›</span>
+          <Link to="/staff/dashboard">Dashboard</Link><span>›</span>
           <strong>Buat Tiket Baru</strong>
         </div>
 
@@ -129,9 +129,9 @@ export default function BuatTiketStafPage() {
 
           {/* NIM (opsional - untuk referensi) */}
           <div className="form-group">
-            <label className="form-label">NIM Mahasiswa <span style={{ color: "#94a3b8", fontWeight: 400 }}>(opsional)</span></label>
+            <label className="form-label">NIM Mahasiswa <span style={{ color: "var(--gray-400)", fontWeight: 400 }}>(opsional)</span></label>
             <div className="form-nim-wrap">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon"><AppIcon name="Search" variant="sm" color="var(--gray-400)" /></span>
               <input
                 className="form-input with-icon"
                 placeholder="Masukkan NIM jika mewakili mahasiswa (Misal: G64190...)"
