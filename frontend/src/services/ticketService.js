@@ -11,8 +11,8 @@ class TicketService {
   }
 
   async getMyTickets() {
-    const all = await this.getAllTiket();
-    return all;
+    const res = await apiClient.get("/tiket/tugas-saya");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getAllTiket() {
@@ -30,9 +30,8 @@ class TicketService {
   }
 
   async getUnclaimedTickets() {
-    const res = await apiClient.get("/tiket");
-    const all = Array.isArray(res.data) ? res.data : [];
-    return all.filter(t => !t.staf_id);
+    const res = await apiClient.get("/tiket/antrean");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getTiketById(tiketId) {

@@ -158,3 +158,13 @@ def update_password(
     return {"message": "Password berhasil diubah"}
 
 
+@router.get("/divisi")
+def get_all_divisi(
+    db: Session = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
+    current_user: Annotated[UserORM, Depends(get_current_user)] = None
+):
+    """Daftar semua divisi staf — untuk dropdown di form profil."""
+    return user_service.get_all_divisi()
+
+

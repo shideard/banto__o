@@ -289,6 +289,12 @@ class TicketService:
         )
         return self.repo.create_komentar(komentar)
     
+    def get_tiket_by_staf(self, staf_id: int) -> List[TiketORM]:
+        return self.repo.get_tiket_by_staf(staf_id)
+
+    def get_tiket_unclaimed(self) -> List[TiketORM]:
+        return self.repo.get_tiket_unclaimed()
+    
  # ── Update Kategori ───────────────────────────────────────────────────────
 
     def update_kategori(self, tiket_id: int, kategori_id, staf_id: int) -> TiketORM:

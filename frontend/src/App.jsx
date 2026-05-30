@@ -8,7 +8,6 @@ import { useAuth } from "./hooks/useAuth";
 // ── Komponen Layout ───────────────────────────────────────────────────────────
 import MahasiswaLayout from "./components/layout/MahasiswaLayout";
 import StafLayout from "./components/layout/StafLayout";
-import AdminLayout from "./components/layout/AdminLayout";
 
 // ── Halaman Auth ──────────────────────────────────────────────────────────────
 import LoginPage from "./pages/auth/LoginPage";
@@ -31,13 +30,12 @@ import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
 import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
 // ── Halaman Admin ─────────────────────────────────────────────────────────────
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+// Admin pages removed from scope
 
 
 // ── Helper redirect berdasarkan role ─────────────────────────────────────────
 function getDashboard(role) {
   if (role === "staf") return "/staff/dashboard";
-  if (role === "admin") return "/admin/dashboard";
   return "/dashboard";
 }
 
@@ -93,14 +91,7 @@ function AppRoutes() {
         <Route path="/staff/profil" element={<ProfilStafPage />} />
       </Route>
 
-      {/* ── Admin ── */}
-      <Route element={
-        <ProtectedRoute allowedRole="admin">
-          <AdminLayout />
-        </ProtectedRoute>
-      }>
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-      </Route>
+      {/* Admin routes removed from scope */}
 
       {/* ── Default / Fallback ── */}
       <Route path="*" element={<Navigate to="/login" replace />} />

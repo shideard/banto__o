@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/ticketService";
 import apiClient from "../../services/ApiClient";
+import userService from "../../services/UserService";
 
 // ─────────────────────────── STYLES ───────────────────────────────────────────
 const styles = `
@@ -349,7 +350,8 @@ export default function ProfilStafPage() {
   // ── State edit profil ──
   const [editMode, setEditMode]     = useState(false);
   const [formNama, setFormNama]     = useState(user?.nama   || "");
-  const [formDivisi, setFormDivisi] = useState(user?.divisi || ""); // ✅ nama string
+  const [formDivisi, setFormDivisi] = useState(user?.divisi_id || ""); // store divisi_id when available
+  const [divisiList, setDivisiList] = useState([]);
   const [savingProfil, setSavingProfil] = useState(false);
   const [profilMsg, setProfilMsg]   = useState({ type: "", text: "" });
 
@@ -364,6 +366,10 @@ export default function ProfilStafPage() {
       .then(data => setTickets(Array.isArray(data) ? data : []))
       .catch(() => setTickets([]))
       .finally(() => setLoadingTiket(false));
+    // ambil daftar divisi dari backend untuk dropdown
+    userService.getDivisi()
+      .then(data => setDivisiList(Array.isArray(data) ? data : []))
+      .catch(() => setDivisiList([]));
   }, []);
 
   const milikku    = tickets.filter(t => t.staf_id === user?.id);
@@ -376,12 +382,12 @@ export default function ProfilStafPage() {
 
   // Divisi dari user atau form
   const divisiTampil = user?.divisi_nama || user?.divisi || "—";
-  const grupDivisiEdit = formDivisi ? findGrupDivisi(formDivisi) : null;
+  const grupDivisiEdit = divisiList.find(d => d.id === Number(formDivisi))?.nama_divisi || null;
 
   // ── Buka edit mode ──
   const handleOpenEdit = () => {
     setFormNama(user?.nama   || "");
-    setFormDivisi(user?.divisi_nama || user?.divisi || "");
+    setFormDivisi(user?.divisi_id || user?.divisi || "");
     setEditMode(true);
   };
 
@@ -394,15 +400,18 @@ export default function ProfilStafPage() {
       // ✅ Kirim divisi sebagai nama string, backend yang handle mapping ke ID jika perlu
       await apiClient.patch("/auth/me", {
         nama:   formNama.trim(),
-        divisi: formDivisi || null,
+        divisi_id: formDivisi ? Number(formDivisi) : null,
       });
       setProfilMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
       // ✅ Update context + localStorage via updateUser agar data langsung sinkron
+      // Update context: keep divisi_nama for display and divisi_id for internal use
+      const divisiObj = divisiList.find(d => d.id === Number(formDivisi));
       updateUser({
-        nama:       formNama.trim(),
-        divisi_nama: formDivisi || null,
-        divisi:      formDivisi || null,
+        nama:        formNama.trim(),
+        divisi_nama: divisiObj ? divisiObj.nama_divisi : (formDivisi || null),
+        divisi:      divisiObj ? divisiObj.nama_divisi : (formDivisi || null),
+        divisi_id:   formDivisi ? Number(formDivisi) : null,
       });
       setTimeout(() => setProfilMsg({ type: "", text: "" }), 3000);
     } catch {
@@ -716,26 +725,16 @@ export default function ProfilStafPage() {
                   <label className="form-label">Nama Divisi</label>
                   {editMode ? (
                     <>
-                      <select
-                        className="form-select"
-                        value={formDivisi}
-                        onChange={e => setFormDivisi(e.target.value)}
-                      >
-                        <option value="">— Pilih Divisi —</option>
-                        {DIVISI_STAF.map(g => (
-                          <optgroup key={g.grup} label={`── ${g.grup} (${g.divisi.length})`}>
-                            {g.divisi.map(d => (
-                              <option key={d} value={d}>{d}</option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                      {/* Tampilkan grup divisi yang dipilih */}
-                      {formDivisi && grupDivisiEdit && (
-                        <div className="divisi-grup-badge">
-                          📂 Kelompok: <strong>{grupDivisiEdit}</strong>
-                        </div>
-                      )}
+                        <select
+                          className="form-select"
+                          value={formDivisi}
+                          onChange={e => setFormDivisi(e.target.value)}
+                        >
+                          <option value="">— Pilih Divisi —</option>
+                          {divisiList.map(d => (
+                            <option key={d.id} value={d.id}>{d.nama_divisi}</option>
+                          ))}
+                        </select>
                     </>
                   ) : (
                     <input
