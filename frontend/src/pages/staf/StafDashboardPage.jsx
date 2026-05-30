@@ -49,12 +49,12 @@ const styles = `
   .td-ticket-id:hover { text-decoration: underline; }
 
   .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
+  .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
+  .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #fef2f2; color: #991b1b; }
+  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
 
   .btn-lihat { background: #fff; color: #2563eb; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 6px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; text-decoration: none; display: inline-block; white-space: nowrap; }
   .btn-lihat:hover { background: #eff6ff; }
@@ -177,7 +177,7 @@ export default function StafDashboardPage() {
                 <p>Tiket yang sedang Anda tangani.</p>
               </div>
               <div className="staf-table-search">
-                <span>🔍</span>
+                <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
                 <input
                   placeholder="Cari..."
                   value={searchTugas}
@@ -241,7 +241,7 @@ export default function StafDashboardPage() {
                 <p>Tiket belum diklaim — klik untuk baca &amp; klaim.</p>
               </div>
               <div className="staf-table-search">
-                <span>🔍</span>
+                <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
                 <input
                   placeholder="Cari..."
                   value={searchAntrean}

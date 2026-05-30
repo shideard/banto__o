@@ -85,6 +85,7 @@ class TiketCreate(BaseModel):
     deskripsi: str
     kategori_id: Optional[int] = None
     mahasiswa_id: Optional[int] = None
+    waktu_kejadian: Optional[datetime] = None    # Waktu kejadian yang dilaporkan mahasiswa
 
 class TiketUpdateStatus(BaseModel):
     new_status: StatusPengajuan
@@ -100,7 +101,9 @@ class TiketResponse(BaseModel):
     id: int
     subjek: str
     tanggal_dibuat: datetime
+    waktu_kejadian: Optional[datetime] = None    # Waktu kejadian yang dilaporkan mahasiswa
     status: str
+    prioritas: Optional[str] = "Normal"          # Ditentukan otomatis: "Normal" | "Mendesak" | "Penting"
     kategori_id: Optional[int] = None
     kategori_nama: Optional[str] = None
     mahasiswa_id: Optional[int] = None

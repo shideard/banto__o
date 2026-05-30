@@ -56,7 +56,7 @@ const styles = `
   }
   .btn-primary:hover { background: var(--ipb-blue); }
 
-  .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 40px; position: relative; z-index: 2; }
+  .bt-alert { margin-bottom: 24px; }
   .bt-alert-inner { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #92400e; line-height: 1.6; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
 
   .ts-controls {

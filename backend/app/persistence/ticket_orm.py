@@ -20,7 +20,9 @@ class TiketORM(Base):
     id             = Column(Integer, primary_key=True, index=True)
     subjek         = Column(String(255), nullable=False)
     tanggal_dibuat = Column(DateTime, default=datetime.utcnow)
+    waktu_kejadian = Column(DateTime, nullable=True)              # Waktu kejadian yang dilaporkan mahasiswa
     status         = Column(String(50), default="DIBUAT")
+    prioritas      = Column(String(20), default="Normal")         # Ditentukan otomatis: Normal | Mendesak | Penting
 
     kategori_id  = Column(Integer, ForeignKey("kategori_tiket.id"), nullable=True)
     mahasiswa_id = Column(Integer, ForeignKey("users.id"), nullable=True)

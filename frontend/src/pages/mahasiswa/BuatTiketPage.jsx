@@ -164,6 +164,7 @@ export default function BuatTiketPage() {
   const [topik, setTopik]           = useState("");
   const [subjek, setSubjek]         = useState("");
   const [deskripsi, setDeskripsi]   = useState("");
+  const [waktuKejadian, setWaktuKejadian] = useState("");
   const [files, setFiles]           = useState([]);
   const [errors, setErrors]         = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -280,6 +281,7 @@ export default function BuatTiketPage() {
     if (!subjek.trim()) errs.subjek = "Subjek wajib diisi";
     if (!deskripsi.trim()) errs.deskripsi = "Deskripsi wajib diisi";
     else if (deskripsi.trim().length < 20) errs.deskripsi = "Deskripsi minimal 20 karakter";
+    if (!waktuKejadian) errs.waktuKejadian = "Tanggal dan waktu kejadian wajib diisi";
     return errs;
   };
 
@@ -291,11 +293,25 @@ export default function BuatTiketPage() {
     setSubmitting(true);
 
     try {
-      await ticketService.createTicket({
+      // 1. Buat tiket dulu
+      const tiketBaru = await ticketService.createTicket({
         subjek,
         deskripsi,
         kategori_id: topik ? parseInt(topik) : null,
+        waktu_kejadian: waktuKejadian ? new Date(waktuKejadian).toISOString() : null,
       });
+
+      // 2. Upload setiap file (satu per satu; gagal upload tidak batalkan tiket)
+      if (files.length > 0) {
+        for (const f of files) {
+          try {
+            await ticketService.uploadFile(tiketBaru.id, f);
+          } catch {
+            // Upload gagal diabaikan — tiket tetap terbuat
+          }
+        }
+      }
+
       toast.success(
         '🎫 Tiket berhasil dibuat!',
         'Staf kami akan segera meninjau dan memproses tiket kamu.',
@@ -405,6 +421,30 @@ export default function BuatTiketPage() {
                   />
                   <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px", textAlign: "right" }}>{deskripsi.length} karakter</div>
                   {errors.deskripsi && <div className="bt-field-error"><AppIcon name="AlertCircle" variant="xs" /> {errors.deskripsi}</div>}
+                </div>
+
+                {/* ── Field Tanggal & Waktu Kejadian ── */}
+                <div className="bt-field">
+                  <label className="bt-label">
+                    Tanggal &amp; Waktu Kejadian <span className="required">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className={`bt-input ${errors.waktuKejadian ? "has-error" : ""}`}
+                    value={waktuKejadian}
+                    onChange={(e) => {
+                      setWaktuKejadian(e.target.value);
+                      setErrors(p => ({ ...p, waktuKejadian: "" }));
+                    }}
+                  />
+                  <div style={{ fontSize: "11px", color: "var(--gray-400)", marginTop: "4px" }}>
+                    Kapan masalah ini pertama kali kamu alami?
+                  </div>
+                  {errors.waktuKejadian && (
+                    <div className="bt-field-error">
+                      <AppIcon name="AlertCircle" variant="xs" /> {errors.waktuKejadian}
+                    </div>
+                  )}
                 </div>
 
                 <div className="bt-field">

@@ -38,12 +38,12 @@ const styles = `
   .tugas-card-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .tugas-ticket-id { font-size: 12px; font-weight: 700; color: #94a3b8; }
   .tugas-status-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
+  .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
+  .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #fef2f2; color: #991b1b; }
+  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
   .tugas-card-time { font-size: 12px; color: #94a3b8; white-space: nowrap; }
   .tugas-card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
   .tugas-card-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 14px; }
@@ -190,7 +190,7 @@ export default function TugasSayaPage() {
             </button>
           </div>
           <div className="tugas-search">
-            <span>🔍</span>
+            <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
             <input
               placeholder="Cari ID atau judul..."
               value={search}

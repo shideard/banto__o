@@ -40,12 +40,12 @@ const styles = `
   .antrean-ticket-id:hover { text-decoration: underline; }
 
   .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
-  .pill-DIBUAT   { background: #f0fdf4; color: #15803d; }
+  .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
-  .pill-SELESAI  { background: #eff6ff; color: #1d4ed8; }
+  .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #fef2f2; color: #991b1b; }
+  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
 
   .btn-baca { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.18s; white-space: nowrap; }
   .btn-baca:hover { background: #dbeafe; }
@@ -160,7 +160,7 @@ export default function AntreanTiketPage() {
         {/* Search */}
         <div className="antrean-filter-row">
           <div className="antrean-search">
-            <span>🔍</span>
+            <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
             <input
               placeholder="Cari ID Tiket atau Subjek..."
               value={search}

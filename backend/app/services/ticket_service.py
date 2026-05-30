@@ -26,25 +26,64 @@ class TicketService:
         orm = KategoriTiketORM(nama_kategori=payload.nama_kategori)
         return self.repo.create_kategori(orm)
 
+    # ── Keyword untuk penentuan prioritas otomatis ────────────────────────────
+
+    KEYWORDS_PENTING = [
+        "ijazah", "wisuda", "kelulusan", "skripsi", "tesis", "disertasi",
+        "transkrip", "legalisir", "surat keterangan", "beasiswa", "deadline",
+        "batas waktu", "akhir semester", "nilai akhir", "kp", "pkl",
+        "kerja praktek", "sidang", "ujian", "akreditasi",
+    ]
+
+    KEYWORDS_MENDESAK = [
+        "tidak bisa login", "tidak bisa akses", "error", "gagal", "sistem down",
+        "server mati", "tidak bisa submit", "krs bermasalah", "krs error",
+        "tidak bisa bayar", "pembayaran gagal", "ukt", "segera", "urgent",
+        "darurat", "mendesak", "hari ini", "sekarang", "crash", "bug",
+        "tidak menemukan", "hilang", "terhapus", "terkunci", "sister", "simak",
+    ]
+
+    def _tentukan_prioritas(self, subjek: str, deskripsi: str) -> str:
+        """
+        Tentukan prioritas tiket secara otomatis berdasarkan keywords.
+        Urutan pengecekan: Penting → Mendesak → Normal (default).
+        """
+        teks = (subjek + " " + deskripsi).lower()
+
+        for kw in self.KEYWORDS_PENTING:
+            if kw in teks:
+                return "Penting"
+
+        for kw in self.KEYWORDS_MENDESAK:
+            if kw in teks:
+                return "Mendesak"
+
+        return "Normal"
+
     # ── Tiket ─────────────────────────────────────────────────────────────────
 
     def buat_tiket(self, payload: TiketCreate) -> TiketORM:
+        prioritas = self._tentukan_prioritas(payload.subjek, payload.deskripsi)
+
         tiket = TiketORM(
             subjek=payload.subjek,
             kategori_id=payload.kategori_id,
             mahasiswa_id=payload.mahasiswa_id,
             status=StatusPengajuan.DIBUAT.value,
+            waktu_kejadian=payload.waktu_kejadian,
+            prioritas=prioritas,
         )
         pengajuan = PengajuanORM(deskripsi=payload.deskripsi)
         tiket = self.repo.create_tiket(tiket, pengajuan)
 
-        # Kirim notifikasi ke semua staf bahwa ada tiket baru masuk
+        # Kirim notifikasi ke semua staf — sertakan prefix prioritas jika Mendesak/Penting
         semua_staf = self.repo.get_all_staf()
+        prefix_notif = f"[{prioritas.upper()}] " if prioritas != "Normal" else ""
         for staf in semua_staf:
             self.repo.create_notifikasi(NotifikasiORM(
                 user_id=staf.id,
                 tiket_id=tiket.id,
-                pesan=f"Tiket baru masuk: '{tiket.subjek}'. Segera tinjau di antrian.",
+                pesan=f"{prefix_notif}Tiket baru masuk: '{tiket.subjek}'. Segera tinjau di antrian.",
             ))
 
         return tiket

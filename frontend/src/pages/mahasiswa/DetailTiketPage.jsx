@@ -345,6 +345,65 @@ const styles = `
   }
   .mdt-preview-file-icon p { font-size: 13px; font-weight: 600; color: var(--gray-500); }
 
+  /* Gambar inline di riwayat */
+  .mdt-lampiran-img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 10px;
+    border: 1.5px solid var(--gray-200);
+    display: block;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .mdt-lampiran-img:hover { opacity: 0.9; }
+
+  /* Chip untuk file non-gambar di riwayat */
+  .mdt-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--gray-200);
+    background: var(--gray-50);
+    text-decoration: none;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+    transition: all 0.18s;
+    max-width: 300px;
+  }
+  .mdt-file-chip:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+  .mdt-file-chip-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .mdt-file-chip-pdf { background: #fee2e2; }
+  .mdt-file-chip-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mdt-file-chip-ext {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-400);
+    flex-shrink: 0;
+  }
+
   /* ★ BARU — Preview lampiran sebelum dikirim */
   .mdt-form-pending-lampiran {
     padding: 12px 20px;
@@ -449,6 +508,28 @@ function getFileExt(nama = "") {
 // ─── Stepper ──────────────────────────────────────────────────
 const STEPS = ["DIBUAT", "DIKLAIM", "DIPROSES", "SELESAI"];
 const STEP_LABELS = ["Dibuat", "Diklaim", "Diproses", "Selesai"];
+
+// ─── Helper Prioritas ─────────────────────────────────────────
+const PRIORITAS_STYLE = {
+  Normal:   { bg: "#f0fdf4", color: "#15803d", dot: "#16a34a" },
+  Mendesak: { bg: "#fff7ed", color: "#c2410c", dot: "#ea580c" },
+  Penting:  { bg: "#fef2f2", color: "#dc2626", dot: "#dc2626" },
+};
+
+function PrioritasPill({ prioritas = "Normal" }) {
+  const s = PRIORITAS_STYLE[prioritas] || PRIORITAS_STYLE.Normal;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 10px", borderRadius: 100,
+      background: s.bg, color: s.color,
+      fontSize: 11, fontWeight: 700
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot }} />
+      {prioritas}
+    </span>
+  );
+}
 
 function getStepIndex(status) {
   const s = String(status || "").toUpperCase();
@@ -578,7 +659,7 @@ function PreviewModal({ file, onClose }) {
 }
 
 // ─── Item riwayat ──────────────────────────────────────────────
-function RiwayatItem({ item, onPreview }) {
+function RiwayatItem({ item }) {
   if (item.tipe === "sistem") {
     return (
       <div className="mdt-sistem-row">
@@ -595,29 +676,7 @@ function RiwayatItem({ item, onPreview }) {
 
   const isStaf = item.tipe === "staf";
   const lampiran = parseLampiran(item.isi);
-
-  // Jika ini komentar file, tampilkan sebagai chip lampiran saja
-  if (lampiran) {
-    return (
-      <div className={`mdt-reply-card ${isStaf ? "from-staf" : ""}`}>
-        <div className="mdt-reply-header">
-          <div className="mdt-reply-author-row">
-            <div className={`mdt-avatar ${isStaf ? "staf" : ""}`}>{getInitials(item.nama)}</div>
-            <div className="mdt-reply-name">{item.nama}</div>
-          </div>
-          <div className="mdt-reply-time">{formatTanggal(item.waktu)}</div>
-        </div>
-        <div className="mdt-lampiran-wrap">
-          <div className="mdt-lampiran-label">
-            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
-          </div>
-          <div className="mdt-lampiran-list">
-            <LampiranChip nama={lampiran.nama} url={lampiran.url} onPreview={onPreview} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isiTeks = lampiran ? null : item.isi;
 
   return (
     <div className={`mdt-reply-card ${isStaf ? "from-staf" : ""}`}>
@@ -628,7 +687,47 @@ function RiwayatItem({ item, onPreview }) {
         </div>
         <div className="mdt-reply-time">{formatTanggal(item.waktu)}</div>
       </div>
-      <div className="mdt-reply-body">{item.isi}</div>
+
+      {/* Teks balasan (jika bukan komentar file) */}
+      {isiTeks && (
+        <div className="mdt-reply-body">{isiTeks}</div>
+      )}
+
+      {/* Lampiran — gambar inline atau chip file */}
+      {lampiran && (
+        <div className="mdt-lampiran-wrap">
+          <div className="mdt-lampiran-label">
+            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
+          </div>
+          {isImage(lampiran.nama) ? (
+            <img
+              src={lampiran.url}
+              alt={lampiran.nama}
+              className="mdt-lampiran-img"
+              onError={(e) => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <a
+              href={lampiran.url}
+              target="_blank"
+              rel="noreferrer"
+              className="mdt-file-chip"
+              title={`Buka ${lampiran.nama} di tab baru`}
+            >
+              <div className={`mdt-file-chip-icon ${lampiran.nama.toLowerCase().endsWith(".pdf") ? "mdt-file-chip-pdf" : ""}`}>
+                <AppIcon
+                  name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
+                  size={15}
+                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"}
+                />
+              </div>
+              <span className="mdt-file-chip-name">{lampiran.nama}</span>
+              <span className="mdt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
+              <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -678,12 +777,22 @@ export default function MahasiswaDetailTiketPage() {
     try {
       setMengirim(true);
       setErrKirim(null);
-      await ticketService.kirimBalasan(id, { isi: balasan, lampiran: file });
+
+      // Pisahkan: kirim teks dulu (jika ada), lalu upload file (jika ada)
+      if (balasan.trim()) {
+        await ticketService.kirimBalasan(id, { isi: balasan });
+      }
+
+      if (file) {
+        await ticketService.uploadFile(id, file);
+      }
+
       setBalasan("");
       clearFile();
       await fetchData();
-    } catch {
-      setErrKirim("Gagal mengirim balasan. Coba lagi.");
+    } catch (err) {
+      const msg = err?.response?.data?.detail || "Gagal mengirim balasan. Coba lagi.";
+      setErrKirim(msg);
     } finally {
       setMengirim(false);
     }
@@ -731,7 +840,6 @@ export default function MahasiswaDetailTiketPage() {
 
   const statusUpper = String(tiket.status || "").toUpperCase();
   const isClosed    = statusUpper === "SELESAI" || statusUpper === "DITUTUP";
-  const isPrioritas = String(tiket.prioritas || "").toLowerCase() === "tinggi";
   const pillClass   = `pill-${statusUpper}`;
 
   // ✅ PERBAIKAN: Ambil nama & NIM dari data tiket jika tersedia,
@@ -784,16 +892,76 @@ export default function MahasiswaDetailTiketPage() {
                 </div>
               </div>
 
-              <div className="mdt-ticket-body">{tiket.deskripsi || "—"}</div>
+              {/* ── Badge Topik + Waktu Kejadian ── */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
+                {tiket.kategori_nama && (
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "#eff6ff", color: "#1d4ed8",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: 6, padding: "3px 10px",
+                    fontSize: 12, fontWeight: 700
+                  }}>
+                    <AppIcon name="Tag" variant="xs" />
+                    {tiket.kategori_nama}
+                  </span>
+                )}
+                {tiket.waktu_kejadian && (
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "var(--gray-50)", color: "var(--gray-500)",
+                    border: "1px solid var(--gray-200)",
+                    borderRadius: 6, padding: "3px 10px",
+                    fontSize: 12, fontWeight: 600
+                  }}>
+                    <AppIcon name="Clock" variant="xs" />
+                    Kejadian: {new Date(tiket.waktu_kejadian).toLocaleString("id-ID", {
+                      day: "2-digit", month: "short", year: "numeric",
+                      hour: "2-digit", minute: "2-digit"
+                    })} WIB
+                  </span>
+                )}
+              </div>
 
-              {tiket.lampiran_url && (
-                <>
+              <div className="mdt-ticket-body">{tiket.pengajuan?.deskripsi || tiket.deskripsi || "—"}</div>
+
+              {/* Lampiran dari pengajuan awal */}
+              {tiket.pengajuan?.lampiran?.length > 0 && (
+                <div className="mdt-lampiran-wrap" style={{ marginTop: 16 }}>
                   <div className="mdt-lampiran-label">
                     <AppIcon name="Paperclip" variant="sm" />
-                    LAMPIRAN (1)
+                    LAMPIRAN ({tiket.pengajuan.lampiran.length})
                   </div>
-                  <img src={tiket.lampiran_url} alt="lampiran" className="mdt-lampiran-thumb" />
-                </>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {tiket.pengajuan.lampiran.map((lmp, idx) => {
+                      const url = `${BACKEND_URL}/${lmp.url_file?.replace(/\\/g, "/")}`;
+                      return isImage(lmp.nama_file) ? (
+                        <img
+                          key={idx}
+                          src={url}
+                          alt={lmp.nama_file}
+                          className="mdt-lampiran-img"
+                          onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                      ) : (
+                        <a
+                          key={idx}
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mdt-file-chip"
+                        >
+                          <div className={`mdt-file-chip-icon ${lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "mdt-file-chip-pdf" : ""}`}>
+                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"} />
+                          </div>
+                          <span className="mdt-file-chip-name">{lmp.nama_file}</span>
+                          <span className="mdt-file-chip-ext">{getFileExt(lmp.nama_file)}</span>
+                          <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -805,7 +973,7 @@ export default function MahasiswaDetailTiketPage() {
                   Belum ada tanggapan dari staf.
                 </div>
               ) : (
-                riwayat.map((item, idx) => <RiwayatItem key={idx} item={item} onPreview={setPreviewFile} />)
+                riwayat.map((item, idx) => <RiwayatItem key={idx} item={item} />)
               )}
             </div>
 
@@ -909,7 +1077,7 @@ export default function MahasiswaDetailTiketPage() {
                     <button
                       className="mdt-btn-kirim"
                       onClick={handleKirim}
-                      disabled={!balasan.trim() || mengirim}
+                      disabled={(!balasan.trim() && !file) || mengirim}
                     >
                       {mengirim ? "Mengirim..." : "Kirim Balasan ›"}
                     </button>
@@ -974,14 +1142,14 @@ export default function MahasiswaDetailTiketPage() {
                 </div>
                 <div className="mdt-detail-row">
                   <span className="mdt-detail-key">Kategori</span>
-                  <span className="mdt-badge-kategori">{tiket.kategori || "—"}</span>
+                  <span className="mdt-badge-kategori">{tiket.kategori_nama || tiket.kategori || "—"}</span>
                 </div>
-                <div className="mdt-detail-row">
-                  <span className="mdt-detail-key">Prioritas</span>
-                  {isPrioritas
-                    ? <span className="mdt-badge-tinggi">▲ TINGGI</span>
-                    : <span className="mdt-badge-normal">Normal</span>}
-                </div>
+                {tiket.prioritas && tiket.prioritas !== "Normal" && (
+                  <div className="mdt-detail-row">
+                    <span className="mdt-detail-key">Prioritas</span>
+                    <PrioritasPill prioritas={tiket.prioritas} />
+                  </div>
+                )}
                 <div className="mdt-detail-row">
                   <span className="mdt-detail-key">Dibuat</span>
                   <span className="mdt-detail-val" style={{ whiteSpace: "pre-line", textAlign: "right" }}>

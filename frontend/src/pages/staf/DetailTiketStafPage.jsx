@@ -670,11 +670,334 @@ const styles = `
   }
   .dt-btn-hapus-lampiran:hover { background: #fee2e2; }
 
+  /* Gambar inline di riwayat */
+  .dt-lampiran-img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 10px;
+    border: 1.5px solid var(--gray-200);
+    display: block;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .dt-lampiran-img:hover { opacity: 0.9; }
+
+  /* Chip untuk file non-gambar di riwayat */
+  .dt-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--gray-200);
+    background: var(--gray-50);
+    text-decoration: none;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+    transition: all 0.18s;
+    max-width: 300px;
+  }
+  .dt-file-chip:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+  .dt-file-chip-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dt-file-chip-pdf { background: #fee2e2; }
+  .dt-file-chip-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dt-file-chip-ext {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-400);
+    flex-shrink: 0;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 1024px) {
     .dt-body { grid-template-columns: 1fr; }
     .dt-sidebar { order: -1; }
     .dt-main { padding: 24px 20px; }
+  }
+
+  /* ── Panel Konfirmasi Klaim ── */
+  .dt-klaim-panel {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
+  .dt-klaim-panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dt-klaim-panel-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .dt-klaim-panel-desc strong { color: var(--gray-700); font-weight: 600; }
+  .dt-klaim-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .dt-btn-klaim {
+    background: #2563eb;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s;
+  }
+  .dt-btn-klaim:hover:not(:disabled) { background: #1d4ed8; }
+  .dt-btn-klaim:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  .dt-btn-tolak {
+    background: var(--white);
+    color: #dc2626;
+    border: 1.5px solid #fecaca;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s;
+  }
+  .dt-btn-tolak:hover:not(:disabled) { background: #fef2f2; }
+  .dt-btn-tolak:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  /* ── Form Alasan Tolak ── */
+  .dt-tolak-form {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 12px;
+  }
+  .dt-tolak-form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #991b1b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .dt-tolak-textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1.5px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    resize: vertical;
+    box-sizing: border-box;
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .dt-tolak-textarea:focus { border-color: #dc2626; }
+  .dt-tolak-textarea::placeholder { color: #94a3b8; }
+  .dt-tolak-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: flex-end;
+  }
+  .dt-btn-kirim-tolak {
+    background: #dc2626;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s;
+  }
+  .dt-btn-kirim-tolak:hover:not(:disabled) { background: #b91c1c; }
+  .dt-btn-kirim-tolak:disabled { opacity: 0.65; cursor: not-allowed; }
+  .dt-btn-batal-tolak {
+    background: transparent;
+    color: var(--gray-500);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .dt-btn-batal-tolak:hover { background: var(--gray-50); color: var(--gray-700); }
+
+  /* ── Panel Mulai Proses ── */
+  .dt-proses-panel {
+    background: #fefce8;
+    border: 1.5px solid #fde68a;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .dt-proses-panel-info {
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.5;
+  }
+  .dt-proses-panel-info strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #78350f;
+    margin-bottom: 2px;
+  }
+  .dt-btn-mulai-proses {
+    background: #d97706;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    transition: all 0.18s;
+    flex-shrink: 0;
+  }
+  .dt-btn-mulai-proses:hover:not(:disabled) { background: #b45309; }
+  .dt-btn-mulai-proses:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  /* ── Input Waktu (datetime-local) ── */
+  .dt-waktu-row {
+    padding: 10px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-50);
+    flex-wrap: wrap;
+  }
+  .dt-waktu-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .dt-waktu-input {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-700);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .dt-waktu-input:focus { border-color: #2563eb; }
+  .dt-waktu-hint {
+    font-size: 11px;
+    color: var(--gray-400);
+    flex: 1;
+  }
+
+  /* ── Tombol Tandai Selesai ── */
+  .dt-btn-selesai {
+    background: #16a34a;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s;
+  }
+  .dt-btn-selesai:hover:not(:disabled) { background: #15803d; }
+  .dt-btn-selesai:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  /* ── Notice tiket tertutup ── */
+  .dt-closed-notice {
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Error aksi ── */
+  .dt-err-aksi {
+    padding: 10px 16px;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 `;
 
@@ -706,6 +1029,28 @@ function formatTanggalPendek(iso) {
     month: "short",
     year: "numeric",
   }) + "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ─── Helper Prioritas ───────────────────────────────────────────
+const PRIORITAS_STYLE = {
+  Normal:   { bg: "#f0fdf4", color: "#15803d", dot: "#16a34a" },
+  Mendesak: { bg: "#fff7ed", color: "#c2410c", dot: "#ea580c" },
+  Penting:  { bg: "#fef2f2", color: "#dc2626", dot: "#dc2626" },
+};
+
+function PrioritasPill({ prioritas = "Normal" }) {
+  const s = PRIORITAS_STYLE[prioritas] || PRIORITAS_STYLE.Normal;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 10px", borderRadius: 100,
+      background: s.bg, color: s.color,
+      fontSize: 11, fontWeight: 700
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot }} />
+      {prioritas}
+    </span>
+  );
 }
 
 // ─── Parse lampiran dari isi komentar ──────────────────────────────
@@ -855,8 +1200,8 @@ function Stepper({ status }) {
   );
 }
 
-// ─── Satu item riwayat ────────────────────────────────────────
-function RiwayatItem({ item, onPreview }) {
+// ─── Satu item riwayat ──────────────────────────────────────────────
+function RiwayatItem({ item }) {
   // item.tipe: "sistem" | "staf" | "mahasiswa"
   if (item.tipe === "sistem") {
     return (
@@ -874,28 +1219,7 @@ function RiwayatItem({ item, onPreview }) {
 
   const isStaf = item.tipe === "staf";
   const lampiran = parseLampiran(item.isi);
-
-  if (lampiran) {
-    return (
-      <div className="dt-reply-card">
-        <div className="dt-reply-header">
-          <div className="dt-reply-author-row">
-            <div className={`dt-avatar ${isStaf ? "staf" : ""}`}>{getInitials(item.nama)}</div>
-            <div><div className="dt-reply-name">{item.nama}</div></div>
-          </div>
-          <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
-        </div>
-        <div className="dt-lampiran-wrap">
-          <div className="dt-lampiran-label">
-            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
-          </div>
-          <div className="dt-lampiran-list">
-            <LampiranChip nama={lampiran.nama} url={lampiran.url} onPreview={onPreview} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isiTeks = lampiran ? null : item.isi;
 
   return (
     <div className="dt-reply-card">
@@ -910,10 +1234,51 @@ function RiwayatItem({ item, onPreview }) {
         </div>
         <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
       </div>
-      <div className="dt-reply-body">{item.isi}</div>
+
+      {/* Teks balasan (jika bukan komentar file) */}
+      {isiTeks && (
+        <div className="dt-reply-body">{isiTeks}</div>
+      )}
+
+      {/* Lampiran — gambar inline atau chip file */}
+      {lampiran && (
+        <div className="dt-lampiran-wrap">
+          <div className="dt-lampiran-label">
+            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
+          </div>
+          {isImage(lampiran.nama) ? (
+            <img
+              src={lampiran.url}
+              alt={lampiran.nama}
+              className="dt-lampiran-img"
+              onError={(e) => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <a
+              href={lampiran.url}
+              target="_blank"
+              rel="noreferrer"
+              className="dt-file-chip"
+              title={`Buka ${lampiran.nama} di tab baru`}
+            >
+              <div className={`dt-file-chip-icon ${lampiran.nama.toLowerCase().endsWith(".pdf") ? "dt-file-chip-pdf" : ""}`}>
+                <AppIcon
+                  name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
+                  size={15}
+                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"}
+                />
+              </div>
+              <span className="dt-file-chip-name">{lampiran.nama}</span>
+              <span className="dt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
+              <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ─── Komponen utama ───────────────────────────────────────────
 export default function StafDetailTiketPage() {
@@ -937,6 +1302,18 @@ export default function StafDetailTiketPage() {
   const [errKirim, setErrKirim] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
 
+  // ── State baru untuk alur klaim/tolak/proses/selesai ──
+  const [showTolakForm, setShowTolakForm] = useState(false);
+  const [alasanTolak, setAlasanTolak]     = useState("");
+  const [prosesKlaim, setProsesKlaim]     = useState(false);
+  const [prosesTolak, setProsesTolak]     = useState(false);
+  const [prosesProses, setProsesProses]   = useState(false);
+  const [prosesSelesai, setProsesSelesai] = useState(false);
+  const [errAksi, setErrAksi]             = useState(null);
+
+  // Waktu komentar — input datetime-local dari user
+  const [waktuKomentar, setWaktuKomentar] = useState("");
+
   // Fetch data tiket + riwayat
   const fetchData = useCallback(async () => {
     try {
@@ -957,27 +1334,99 @@ export default function StafDetailTiketPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Kirim balasan
+  // ── Handler: Klaim Tiket ──
+  const handleKlaim = async () => {
+    try {
+      setProsesKlaim(true);
+      setErrAksi(null);
+      await ticketService.claimTiket(tiket.id);
+      await fetchData();
+    } catch (err) {
+      setErrAksi(err?.response?.data?.detail || "Gagal mengklaim tiket. Coba lagi.");
+    } finally {
+      setProsesKlaim(false);
+    }
+  };
+
+  // ── Handler: Tolak Tiket ──
+  const handleTolak = async () => {
+    if (!alasanTolak.trim()) {
+      setErrAksi("Alasan penolakan wajib diisi.");
+      return;
+    }
+    try {
+      setProsesTolak(true);
+      setErrAksi(null);
+      await ticketService.tolakTiket(tiket.id, alasanTolak.trim());
+      await fetchData();
+      setShowTolakForm(false);
+      setAlasanTolak("");
+    } catch (err) {
+      setErrAksi(err?.response?.data?.detail || "Gagal menolak tiket. Coba lagi.");
+    } finally {
+      setProsesTolak(false);
+    }
+  };
+
+  // ── Handler: Mulai Proses ──
+  const handleMulaiProses = async () => {
+    try {
+      setProsesProses(true);
+      setErrAksi(null);
+      await ticketService.mulaiProses(tiket.id);
+      await fetchData();
+    } catch (err) {
+      setErrAksi(err?.response?.data?.detail || "Gagal memproses tiket. Coba lagi.");
+    } finally {
+      setProsesProses(false);
+    }
+  };
+
+  // ── Handler: Tandai Selesai ──
+  const handleSelesai = async () => {
+    try {
+      setProsesSelesai(true);
+      setErrAksi(null);
+      await ticketService.updateStatus(tiket.id, {
+        new_status: "SELESAI",
+        catatan: "Tiket telah diselesaikan oleh staf.",
+      });
+      await fetchData();
+    } catch (err) {
+      setErrAksi(err?.response?.data?.detail || "Gagal menandai selesai. Coba lagi.");
+    } finally {
+      setProsesSelesai(false);
+    }
+  };
+
+  // ── Handler: Kirim Balasan (termasuk waktu komentar) ──
   const handleKirim = async () => {
     if (!balasan.trim() && !file) return;
     try {
       setMengirim(true);
       setErrKirim(null);
 
-      // Kirim balasan teks jika ada
-      if (balasan.trim()) {
+      // Sematkan prefix waktu jika staf mengisi datetime
+      const isiDenganWaktu = waktuKomentar
+        ? `[${new Date(waktuKomentar).toLocaleString("id-ID", {
+            day: "2-digit", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          })} WIB]\n${balasan.trim()}`
+        : balasan.trim();
+
+      if (isiDenganWaktu) {
         await ticketService.kirimBalasan(id, {
-          isi: balasan,
+          isi: isiDenganWaktu,
           role: "Staf"
         });
       }
 
-      // Jika ada file, upload sebagai komentar lampiran
       if (file) {
         await ticketService.uploadFile(id, file);
       }
 
       setBalasan("");
+      setWaktuKomentar("");
       clearFile();
       await fetchData();
     } catch {
@@ -1030,7 +1479,6 @@ export default function StafDetailTiketPage() {
   // const stepIndex = getStepIndex(tiket.status);
 
   const statusLabel = tiket.status || "—";
-  const isPrioritas = String(tiket.prioritas || "").toLowerCase() === "tinggi";
 
   return (
     <>
@@ -1061,6 +1509,103 @@ export default function StafDetailTiketPage() {
             {/* Stepper */}
             <Stepper status={tiket.status} />
 
+            {/* ── Panel Konfirmasi Klaim (tampil saat status DIBUAT) ── */}
+            {tiket.status === "DIBUAT" && (
+              <div className="dt-klaim-panel">
+                <div className="dt-klaim-panel-title">
+                  <AppIcon name="ClipboardCheck" variant="sm" />
+                  Konfirmasi Pengambilan Tiket
+                </div>
+                <div className="dt-klaim-panel-desc">
+                  Anda sudah membaca detail tiket ini. Apakah Anda ingin mengklaim dan menangani tiket ini?
+                  Jika diklaim, tiket akan masuk ke <strong>Tugas Saya</strong> dan tidak ada di antrean lagi.
+                </div>
+
+                {errAksi && (
+                  <div className="dt-err-aksi" style={{ marginBottom: 14 }}>
+                    <AppIcon name="AlertCircle" variant="sm" /> {errAksi}
+                  </div>
+                )}
+
+                <div className="dt-klaim-actions">
+                  <button
+                    className="dt-btn-klaim"
+                    onClick={handleKlaim}
+                    disabled={prosesKlaim}
+                  >
+                    <AppIcon name="CheckCircle" variant="sm" />
+                    {prosesKlaim ? "Mengklaim..." : "Ya, Klaim Tiket Ini"}
+                  </button>
+                  <button
+                    className="dt-btn-tolak"
+                    onClick={() => { setShowTolakForm(v => !v); setErrAksi(null); }}
+                    disabled={prosesKlaim || prosesTolak}
+                  >
+                    <AppIcon name="XCircle" variant="sm" />
+                    Tolak Tiket
+                  </button>
+                </div>
+
+                {/* Form alasan penolakan */}
+                {showTolakForm && (
+                  <div className="dt-tolak-form">
+                    <div className="dt-tolak-form-label">Alasan Penolakan *</div>
+                    <textarea
+                      className="dt-tolak-textarea"
+                      placeholder="Jelaskan alasan penolakan tiket ini kepada mahasiswa..."
+                      value={alasanTolak}
+                      onChange={e => { setAlasanTolak(e.target.value); setErrAksi(null); }}
+                      rows={3}
+                    />
+                    {errAksi && (
+                      <div style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>
+                        {errAksi}
+                      </div>
+                    )}
+                    <div className="dt-tolak-actions">
+                      <button
+                        className="dt-btn-batal-tolak"
+                        onClick={() => { setShowTolakForm(false); setAlasanTolak(""); setErrAksi(null); }}
+                        disabled={prosesTolak}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        className="dt-btn-kirim-tolak"
+                        onClick={handleTolak}
+                        disabled={!alasanTolak.trim() || prosesTolak}
+                      >
+                        <AppIcon name="Send" variant="sm" />
+                        {prosesTolak ? "Mengirim..." : "Kirim Penolakan"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Panel Mulai Proses (tampil saat status DIKLAIM) ── */}
+            {tiket.status === "DIKLAIM" && (
+              <div className="dt-proses-panel">
+                <div className="dt-proses-panel-info">
+                  <strong>Tiket sudah Anda klaim</strong>
+                  Siap untuk mulai ditangani? Klik tombol di samping untuk mengubah status menjadi DIPROSES
+                  dan mengaktifkan form tanggapan.
+                </div>
+                {errAksi && (
+                  <div style={{ width: "100%", fontSize: 12, color: "#dc2626" }}>{errAksi}</div>
+                )}
+                <button
+                  className="dt-btn-mulai-proses"
+                  onClick={handleMulaiProses}
+                  disabled={prosesProses}
+                >
+                  <AppIcon name="Play" variant="sm" />
+                  {prosesProses ? "Memproses..." : "Mulai Proses →"}
+                </button>
+              </div>
+            )}
+
             {/* Pesan awal dari mahasiswa */}
             <div className="dt-ticket-card">
               <div className="dt-ticket-meta">
@@ -1073,20 +1618,76 @@ export default function StafDetailTiketPage() {
                 </div>
               </div>
 
-              <div className="dt-ticket-body">{tiket.deskripsi || "—"}</div>
+              {/* ── Badge Topik + Waktu Kejadian ── */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
+                {tiket.kategori_nama && (
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "#eff6ff", color: "#1d4ed8",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: 6, padding: "3px 10px",
+                    fontSize: 12, fontWeight: 700
+                  }}>
+                    <AppIcon name="Tag" variant="xs" />
+                    {tiket.kategori_nama}
+                  </span>
+                )}
+                {tiket.waktu_kejadian && (
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "var(--gray-50)", color: "var(--gray-500)",
+                    border: "1px solid var(--gray-200)",
+                    borderRadius: 6, padding: "3px 10px",
+                    fontSize: 12, fontWeight: 600
+                  }}>
+                    <AppIcon name="Clock" variant="xs" />
+                    Kejadian: {new Date(tiket.waktu_kejadian).toLocaleString("id-ID", {
+                      day: "2-digit", month: "short", year: "numeric",
+                      hour: "2-digit", minute: "2-digit"
+                    })} WIB
+                  </span>
+                )}
+              </div>
 
-              {tiket.lampiran_url && (
-                <>
+              <div className="dt-ticket-body">{tiket.pengajuan?.deskripsi || tiket.deskripsi || "—"}</div>
+
+              {/* Lampiran dari pengajuan awal */}
+              {tiket.pengajuan?.lampiran?.length > 0 && (
+                <div className="dt-lampiran-wrap" style={{ marginTop: 16 }}>
                   <div className="dt-lampiran-label">
                     <AppIcon name="Paperclip" variant="sm" />
-                    LAMPIRAN (1)
+                    LAMPIRAN ({tiket.pengajuan.lampiran.length})
                   </div>
-                  <img
-                    src={tiket.lampiran_url}
-                    alt="lampiran"
-                    className="dt-lampiran-thumb"
-                  />
-                </>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {tiket.pengajuan.lampiran.map((lmp, idx) => {
+                      const url = `${BACKEND_URL}/${lmp.url_file?.replace(/\\/g, "/")}`;
+                      return isImage(lmp.nama_file) ? (
+                        <img
+                          key={idx}
+                          src={url}
+                          alt={lmp.nama_file}
+                          className="dt-lampiran-img"
+                          onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                      ) : (
+                        <a
+                          key={idx}
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="dt-file-chip"
+                        >
+                          <div className={`dt-file-chip-icon ${lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "dt-file-chip-pdf" : ""}`}>
+                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"} />
+                          </div>
+                          <span className="dt-file-chip-name">{lmp.nama_file}</span>
+                          <span className="dt-file-chip-ext">{getFileExt(lmp.nama_file)}</span>
+                          <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -1100,116 +1701,155 @@ export default function StafDetailTiketPage() {
                 </div>
               ) : (
                 riwayat.map((item, idx) => (
-                  <RiwayatItem key={idx} item={item} onPreview={setPreviewFile} />
+                  <RiwayatItem key={idx} item={item} />
                 ))
               )}
             </div>
 
-            {/* Form Tulis Tanggapan */}
-            <div className="dt-form-card">
-              <div className="dt-form-title">Tulis Tanggapan</div>
+            {/* Form Tulis Tanggapan — hanya tampil saat status membolehkan komentar */}
+            {(tiket.status === "DIPROSES" || tiket.status === "REVISI") ? (
+              <div className="dt-form-card">
+                <div className="dt-form-title">Tulis Tanggapan</div>
 
-              {/* Toolbar rich text (visual only — implementasi rich text bisa dikembangkan) */}
-              <div className="dt-form-toolbar">
-                <button className="dt-toolbar-btn" title="Bold"><strong>B</strong></button>
-                <button className="dt-toolbar-btn" title="Italic"><em>I</em></button>
-                <button className="dt-toolbar-btn" title="Underline"><u>U</u></button>
-                <div className="dt-toolbar-divider" />
-                <button className="dt-toolbar-btn" title="Bullet list">
-                  <AppIcon name="List" variant="sm" />
-                </button>
-                <button className="dt-toolbar-btn" title="Link">
-                  <AppIcon name="Link" variant="sm" />
-                </button>
-                <button className="dt-toolbar-btn" title="Gambar">
-                  <AppIcon name="Image" variant="sm" />
-                </button>
-              </div>
+                {/* Toolbar rich text (visual only) */}
+                <div className="dt-form-toolbar">
+                  <button className="dt-toolbar-btn" title="Bold"><strong>B</strong></button>
+                  <button className="dt-toolbar-btn" title="Italic"><em>I</em></button>
+                  <button className="dt-toolbar-btn" title="Underline"><u>U</u></button>
+                  <div className="dt-toolbar-divider" />
+                  <button className="dt-toolbar-btn" title="Bullet list">
+                    <AppIcon name="List" variant="sm" />
+                  </button>
+                  <button className="dt-toolbar-btn" title="Link">
+                    <AppIcon name="Link" variant="sm" />
+                  </button>
+                  <button className="dt-toolbar-btn" title="Gambar">
+                    <AppIcon name="Image" variant="sm" />
+                  </button>
+                </div>
 
-              <textarea
-                className="dt-form-textarea"
-                placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
-                value={balasan}
-                onChange={(e) => setBalasan(e.target.value)}
-              />
+                <textarea
+                  className="dt-form-textarea"
+                  placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
+                  value={balasan}
+                  onChange={(e) => setBalasan(e.target.value)}
+                />
 
-              {/* Upload */}
-              <div className="dt-form-upload-row" onClick={() => fileInputRef.current?.click()}>
-                <AppIcon name="Paperclip" variant="sm" />
-                <span>
-                  Lampirkan file atau{" "}
-                  <span className="dt-form-upload-link">pilih berkas</span>
-                </span>
-                {file && (
-                  <span style={{
-                    marginLeft: "auto", fontSize: 12,
-                    color: "#2563eb", fontWeight: 600,
-                    maxWidth: 160, overflow: "hidden",
-                    textOverflow: "ellipsis", whiteSpace: "nowrap"
-                  }}>
-                    📎 {file.name}
+                {/* Upload */}
+                <div className="dt-form-upload-row" onClick={() => fileInputRef.current?.click()}>
+                  <AppIcon name="Paperclip" variant="sm" />
+                  <span>
+                    Lampirkan file atau{" "}
+                    <span className="dt-form-upload-link">pilih berkas</span>
                   </span>
-                )}
-              </div>
+                  {file && (
+                    <span style={{
+                      marginLeft: "auto", fontSize: 12,
+                      color: "#2563eb", fontWeight: 600,
+                      maxWidth: 160, overflow: "hidden",
+                      textOverflow: "ellipsis", whiteSpace: "nowrap"
+                    }}>
+                      📎 {file.name}
+                    </span>
+                  )}
+                </div>
 
-              {/* ★ BARU — area preview lampiran sebelum dikirim */}
-              {selLmp && (
-                <div className="dt-form-pending-lampiran">
-                  <div className="dt-form-pending-label">
-                    <AppIcon name="Paperclip" variant="sm" />
-                    Lampiran akan dikirim
+                {/* Preview lampiran sebelum dikirim */}
+                {selLmp && (
+                  <div className="dt-form-pending-lampiran">
+                    <div className="dt-form-pending-label">
+                      <AppIcon name="Paperclip" variant="sm" />
+                      Lampiran akan dikirim
+                    </div>
+                    <div className="dt-form-pending-row">
+                      <LampiranChip
+                        nama={selLmp.nama}
+                        url={selLmp.url}
+                        onPreview={setPreviewFile}
+                      />
+                      <button
+                        className="dt-btn-hapus-lampiran"
+                        onClick={clearFile}
+                        title="Hapus lampiran"
+                      >
+                        <AppIcon name="X" size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="dt-form-pending-row">
-                    <LampiranChip
-                      nama={selLmp.nama}
-                      url={selLmp.url}
-                      onPreview={setPreviewFile}
-                    />
+                )}
+
+                {/* Input waktu komentar */}
+                <div className="dt-waktu-row">
+                  <span className="dt-waktu-label">
+                    <AppIcon name="Clock" variant="sm" /> Waktu Respons
+                  </span>
+                  <input
+                    type="datetime-local"
+                    className="dt-waktu-input"
+                    value={waktuKomentar}
+                    onChange={e => setWaktuKomentar(e.target.value)}
+                  />
+                  <span className="dt-waktu-hint">Opsional — kosongkan untuk waktu sekarang</span>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+
+                {errKirim && (
+                  <div style={{ padding: "8px 20px", fontSize: 13, color: "#dc2626" }}>
+                    {errKirim}
+                  </div>
+                )}
+
+                <div className="dt-form-footer">
+                  <div className="dt-status-note">
+                    Tiket akan tetap dalam status <em>'{statusLabel}'</em>
+                  </div>
+                  <div className="dt-form-actions">
                     <button
-                      className="dt-btn-hapus-lampiran"
-                      onClick={clearFile}
-                      title="Hapus lampiran"
+                      className="dt-btn-batal"
+                      onClick={() => { setBalasan(""); clearFile(); setWaktuKomentar(""); }}
                     >
-                      <AppIcon name="X" size={14} />
+                      Batal
+                    </button>
+
+                    {/* Tombol Tandai Selesai — hanya saat DIPROSES */}
+                    {tiket.status === "DIPROSES" && (
+                      <button
+                        className="dt-btn-selesai"
+                        onClick={handleSelesai}
+                        disabled={prosesSelesai || mengirim}
+                      >
+                        <AppIcon name="CheckCircle" variant="sm" />
+                        {prosesSelesai ? "Menyimpan..." : "Tandai Selesai"}
+                      </button>
+                    )}
+
+                    <button
+                      className="dt-btn-kirim"
+                      onClick={handleKirim}
+                      disabled={(!balasan.trim() && !file) || mengirim}
+                    >
+                      {mengirim ? "Mengirim..." : "Kirim Tanggapan ›"}
                     </button>
                   </div>
                 </div>
-              )}
-
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-              />
-
-              {errKirim && (
-                <div style={{ padding: "8px 20px", fontSize: 13, color: "#dc2626" }}>
-                  {errKirim}
-                </div>
-              )}
-
-              <div className="dt-form-footer">
-                <div className="dt-status-note">
-                  Tiket akan tetap dalam status <em>'{statusLabel}'</em>
-                </div>
-                <div className="dt-form-actions">
-                  <button
-                    className="dt-btn-batal"
-                    onClick={() => { setBalasan(""); clearFile(); }}
-                  >
-                    Batal
-                  </button>
-                  <button
-                    className="dt-btn-kirim"
-                    onClick={handleKirim}
-                    disabled={(!balasan.trim() && !file) || mengirim}
-                  >
-                    {mengirim ? "Mengirim..." : "Kirim Tanggapan ›"}
-                  </button>
-                </div>
               </div>
-            </div>
+            ) : tiket.status === "SELESAI" ? (
+              <div className="dt-closed-notice" style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", color: "#15803d" }}>
+                <AppIcon name="CheckCircle" variant="sm" />
+                Tiket ini sudah selesai ditangani.
+              </div>
+            ) : tiket.status === "DITOLAK" ? (
+              <div className="dt-closed-notice" style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626" }}>
+                <AppIcon name="XCircle" variant="sm" />
+                Tiket ini telah ditolak.
+              </div>
+            ) : null /* DIBUAT dan DIKLAIM — panel klaim/proses yang ditampilkan */ }
           </div>
 
           {/* ── Kolom Kanan (Sidebar) ── */}
@@ -1267,18 +1907,26 @@ export default function StafDetailTiketPage() {
               <div className="dt-sidebar-section-title">Detail Tiket</div>
               <div className="dt-detail-rows">
                 <div className="dt-detail-row">
-                  <span className="dt-detail-key">Kategori</span>
-                  <span className="dt-badge-kategori">{tiket.kategori || "—"}</span>
+                  <span className="dt-detail-key">Topik</span>
+                  {tiket.kategori_nama
+                    ? <span style={{ background: "#eff6ff", color: "#1d4ed8", borderRadius: 6, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>
+                        {tiket.kategori_nama}
+                      </span>
+                    : <span style={{ color: "var(--gray-400)" }}>—</span>
+                  }
                 </div>
+                {tiket.waktu_kejadian && (
+                  <div className="dt-detail-row">
+                    <span className="dt-detail-key">Waktu Kejadian</span>
+                    <span style={{ fontWeight: 600, color: "var(--gray-900)", fontSize: 12, textAlign: "right", display: "block" }}>
+                      {new Date(tiket.waktu_kejadian).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}<br/>
+                      {new Date(tiket.waktu_kejadian).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                )}
                 <div className="dt-detail-row">
                   <span className="dt-detail-key">Prioritas</span>
-                  {isPrioritas ? (
-                    <span className="dt-badge-tinggi">
-                      ▲ TINGGI
-                    </span>
-                  ) : (
-                    <span className="dt-badge-normal">Normal</span>
-                  )}
+                  <PrioritasPill prioritas={tiket.prioritas || "Normal"} />
                 </div>
                 <div className="dt-detail-row">
                   <span className="dt-detail-key">Dibuat Pada</span>
