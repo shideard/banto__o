@@ -21,11 +21,13 @@ origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://banto-o.vercel.app",
+    "https://banto--o.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
