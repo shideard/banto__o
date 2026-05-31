@@ -20,7 +20,7 @@ const styles = `
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 44px 52px;
     background: var(--color-brand-darkest);
   }
@@ -103,6 +103,7 @@ const styles = `
     position: relative;
     z-index: 3;
     animation: fadeUp 0.6s 0.08s ease both;
+    margin: auto 0;
   }
   .hero-pill {
     display: inline-flex;
@@ -424,20 +425,20 @@ const styles = `
 `;
 
 export default function LoginPage() {
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [role,     setRole]     = useState("mahasiswa");
-  const [email,    setEmail]    = useState("");
+  const [role, setRole] = useState("mahasiswa");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [loading,  setLoading]  = useState(false);
-  const [errors,   setErrors]   = useState({});
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const validate = () => {
     const e = {};
-    if (!email.trim())           e.email    = "E-mail wajib diisi";
-    if (!password)               e.password = "Kata sandi wajib diisi";
+    if (!email.trim()) e.email = "E-mail wajib diisi";
+    if (!password) e.password = "Kata sandi wajib diisi";
     else if (password.length < 6) e.password = "Minimal 6 karakter";
     return e;
   };
@@ -504,21 +505,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Stats */}
-          <div className="stats">
-            <div className="stat">
-              <div className="stat-num">2.4K+</div>
-              <div className="stat-lbl">Tiket Selesai</div>
-            </div>
-            <div className="stat">
-              <div className="stat-num">&lt; 2 jam</div>
-              <div className="stat-lbl">Rata-rata Respons</div>
-            </div>
-            <div className="stat">
-              <div className="stat-num">98%</div>
-              <div className="stat-lbl">Kepuasan Pengguna</div>
-            </div>
-          </div>
+
         </div>
 
         {/* ── RIGHT PANEL ── */}

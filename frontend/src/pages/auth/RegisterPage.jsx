@@ -204,7 +204,7 @@ const styles = `
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 44px 52px;
     background: var(--color-brand-darkest);
   }
@@ -261,7 +261,7 @@ const styles = `
   }
   .brand-text .prod { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
 
-  .hero { position: relative; z-index: 3; }
+  .hero { position: relative; z-index: 3; margin: auto 0; }
   .hero-pill {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(255,255,255,0.1);
@@ -821,7 +821,9 @@ export default function RegisterPage() {
           <div className="deco deco-blob" />
 
           <div className="brand">
-            <div className="brand-icon">🎓</div>
+            <div className="brand-icon">
+              <AppIcon name="GraduationCap" size={22} color="white" />
+            </div>
             <div className="brand-text">
               <span className="univ">IPB University</span>
               <span className="prod">banto__o</span>
@@ -834,14 +836,7 @@ export default function RegisterPage() {
             <p>{c.desc}</p>
           </div>
 
-          <div className="left-features">
-            {c.features.map(f => (
-              <div className="feat-item" key={f}>
-                <div className="feat-dot" />
-                {f}
-              </div>
-            ))}
-          </div>
+
         </div>
 
         {/* ── RIGHT ── */}

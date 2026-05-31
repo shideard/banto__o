@@ -1202,6 +1202,17 @@ function Stepper({ status }) {
   );
 }
 
+function formatMarkdownLike(text) {
+  if (!text) return { __html: "" };
+  let res = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/__(.*?)__/g, "<u>$1</u>")
+    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>")
+    .replace(/\n/g, "<br />");
+  return { __html: res };
+}
+
 // ─── Satu item riwayat ──────────────────────────────────────────────
 function RiwayatItem({ item }) {
   // item.tipe: "sistem" | "staf" | "mahasiswa"
@@ -1241,7 +1252,7 @@ function RiwayatItem({ item }) {
 
       {/* Teks balasan (jika bukan komentar file) */}
       {isiTeks && (
-        <div className="dt-reply-body">{isiTeks}</div>
+        <div className="dt-reply-body" dangerouslySetInnerHTML={formatMarkdownLike(isiTeks)} />
       )}
 
       {/* Lampiran — gambar inline atau chip file */}
@@ -1290,6 +1301,7 @@ export default function StafDetailTiketPage() {
   const { user } = useAuth(); // UNCOMMENTED
 
   const fileInputRef = useRef(null);
+  const editorRef = useRef(null);
 
   const [tiket, setTiket] = useState(null);
   const [riwayat, setRiwayat] = useState([]);
@@ -1303,6 +1315,30 @@ export default function StafDetailTiketPage() {
   const [mengirim, setMengirim] = useState(false);
   const [errKirim, setErrKirim] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
+
+  const handleFormat = (type) => {
+    if (type === "Gambar") {
+      fileInputRef.current?.click();
+      return;
+    }
+    
+    editorRef.current?.focus();
+    
+    if (type === "Link") {
+      const url = prompt("Masukkan URL link:", "https://");
+      if (url) {
+        document.execCommand("createLink", false, url);
+        setBalasan(editorRef.current?.innerHTML || "");
+      }
+      return;
+    }
+    
+    const cmdMap = { B: "bold", I: "italic", U: "underline", List: "insertUnorderedList" };
+    if (cmdMap[type]) {
+      document.execCommand(cmdMap[type], false, null);
+      setBalasan(editorRef.current?.innerHTML || "");
+    }
+  };
 
   // ── State baru untuk alur klaim/tolak/proses/selesai ──
   const [showTolakForm, setShowTolakForm] = useState(false);
@@ -1430,6 +1466,7 @@ export default function StafDetailTiketPage() {
       }
 
       setBalasan("");
+      if (editorRef.current) editorRef.current.innerHTML = "";
       setWaktuKomentar("");
       clearFile();
       await fetchData();
@@ -1720,26 +1757,28 @@ export default function StafDetailTiketPage() {
 
                 {/* Toolbar rich text (visual only) */}
                 <div className="dt-form-toolbar">
-                  <button className="dt-toolbar-btn" title="Bold"><strong>B</strong></button>
-                  <button className="dt-toolbar-btn" title="Italic"><em>I</em></button>
-                  <button className="dt-toolbar-btn" title="Underline"><u>U</u></button>
+                  <button className="dt-toolbar-btn" title="Bold" onClick={() => handleFormat("B")}><strong>B</strong></button>
+                  <button className="dt-toolbar-btn" title="Italic" onClick={() => handleFormat("I")}><em>I</em></button>
+                  <button className="dt-toolbar-btn" title="Underline" onClick={() => handleFormat("U")}><u>U</u></button>
                   <div className="dt-toolbar-divider" />
-                  <button className="dt-toolbar-btn" title="Bullet list">
+                  <button className="dt-toolbar-btn" title="Bullet list" onClick={() => handleFormat("List")}>
                     <AppIcon name="List" variant="sm" />
                   </button>
-                  <button className="dt-toolbar-btn" title="Link">
+                  <button className="dt-toolbar-btn" title="Link" onClick={() => handleFormat("Link")}>
                     <AppIcon name="Link" variant="sm" />
                   </button>
-                  <button className="dt-toolbar-btn" title="Gambar">
+                  <button className="dt-toolbar-btn" title="Gambar" onClick={() => handleFormat("Gambar")}>
                     <AppIcon name="Image" variant="sm" />
                   </button>
                 </div>
 
-                <textarea
+                <div
+                  ref={editorRef}
                   className="dt-form-textarea"
+                  contentEditable
+                  suppressContentEditableWarning
                   placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
-                  value={balasan}
-                  onChange={(e) => setBalasan(e.target.value)}
+                  onInput={e => setBalasan(e.currentTarget.innerHTML)}
                 />
 
                 {/* Upload */}
@@ -1820,7 +1859,12 @@ export default function StafDetailTiketPage() {
                   <div className="dt-form-actions">
                     <button
                       className="dt-btn-batal"
-                      onClick={() => { setBalasan(""); clearFile(); setWaktuKomentar(""); }}
+                      onClick={() => { 
+                        setBalasan(""); 
+                        if (editorRef.current) editorRef.current.innerHTML = "";
+                        clearFile(); 
+                        setWaktuKomentar(""); 
+                      }}
                     >
                       Batal
                     </button>
