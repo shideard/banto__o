@@ -66,6 +66,10 @@ npm run dev
 ```
 Frontend akan berjalan di `http://localhost:5173`.
 
+## 🔗 Deployment Links
+- Frontend: https://banto--o.vercel.app
+- Backend: https://bantoo-production.up.railway.app
+
 ## 🔐 Akun Testing / Demo
 
 Untuk keperluan uji coba, kamu dapat login menggunakan akun berikut:
