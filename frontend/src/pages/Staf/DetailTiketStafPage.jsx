@@ -1214,8 +1214,7 @@ function formatMarkdownLike(text) {
     .replace(/__(.*?)__/g, "<u>$1</u>")
     .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>");
     
-  res = res.replace(/^[*-]\s+(.*)$/gm, "<li>$1</li>");
-  res = res.replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, "<ul style='padding-left:20px;margin:8px 0'>$1</ul>");
+  res = res.replace(/^[*-]\s+(.*)$/gm, "<ul style='padding-left:20px;margin:0'><li>$1</li></ul>");
   res = res.replace(/\n/g, "<br />");
   return { __html: res };
 }
