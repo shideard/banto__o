@@ -1013,22 +1013,24 @@ function getInitials(nama = "") {
 // ─── Helper: format tanggal ───────────────────────────────────
 function formatTanggal(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }) + ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
+  return (
+    d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
+    ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
+  );
 }
 
 function formatTanggalPendek(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }) + "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
+  return (
+    d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
+    "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 // ─── Helper Prioritas ───────────────────────────────────────────
@@ -1226,10 +1228,12 @@ function RiwayatItem({ item }) {
       <div className="dt-reply-header">
         <div className="dt-reply-author-row">
           <div className={`dt-avatar ${isStaf ? "staf" : ""}`}>
-            {getInitials(item.nama)}
+            {getInitials(item.nama_penulis || item.role)}
           </div>
           <div>
-            <div className="dt-reply-name">{item.nama}</div>
+            <div className="dt-reply-name">
+            {item.nama_penulis || item.role} <span style={{ fontSize: 12, fontWeight: "normal", color: "var(--gray-500)" }}>({item.role === "Staff Administrasi" ? "Staf" : "Mahasiswa"})</span>
+          </div>
           </div>
         </div>
         <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
@@ -1952,16 +1956,16 @@ export default function StafDetailTiketPage() {
             </div>
 
             {/* Petugas */}
-            {tiket.nama_staf && (
+            {(tiket.staf_nama || tiket.staf?.nama) && (
               <div className="dt-sidebar-card">
                 <div className="dt-sidebar-section-title">Petugas</div>
                 <div className="dt-petugas-row">
                   <div className="dt-petugas-avatar">
-                    {getInitials(tiket.nama_staf)}
+                    {getInitials(tiket.staf_nama || tiket.staf?.nama)}
                   </div>
                   <div>
-                    <div className="dt-petugas-name">{tiket.nama_staf}</div>
-                    <div className="dt-petugas-role">{tiket.jabatan_staf || "Staf Akademik"}</div>
+                    <div className="dt-petugas-name">{tiket.staf_nama || tiket.staf?.nama}</div>
+                    <div className="dt-petugas-role">{tiket.jabatan_staf || "Staf Administrasi"}</div>
                   </div>
                 </div>
               </div>

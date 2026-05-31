@@ -29,7 +29,7 @@ class TicketRepository:
     def _get_ticket_options(self):
         return [
             joinedload(TiketORM.pengajuan).selectinload(PengajuanORM.lampiran),
-            selectinload(TiketORM.komentar),
+            selectinload(TiketORM.komentar).joinedload(KomentarORM.penulis),
             joinedload(TiketORM.mahasiswa),
             joinedload(TiketORM.staf),
         ]

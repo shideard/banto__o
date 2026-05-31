@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 from datetime import datetime
 from typing import Optional, List
 
@@ -33,6 +33,21 @@ class KomentarResponse(BaseModel):
     isi: str
     waktu: datetime
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_nama_penulis(cls, data):
+        # Jika data adalah dictionary (misal saat insert manual)
+        if isinstance(data, dict):
+            return data
+        
+        # Jika data adalah ORM object, kita ubah ke dictionary untuk menghindari AttributeError pada property
+        d = {col.name: getattr(data, col.name) for col in data.__table__.columns}
+        if hasattr(data, "penulis") and getattr(data, "penulis", None):
+            d["nama_penulis"] = data.penulis.nama
+        else:
+            d["nama_penulis"] = getattr(data, "nama_penulis", None)
+        return d
 
 
 # ── Lampiran ─────────────────────────────────────────────────────────────────

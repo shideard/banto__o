@@ -463,7 +463,9 @@ function getInitials(nama = "") {
 
 function formatTanggal(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
   return (
     d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
     ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
@@ -472,7 +474,9 @@ function formatTanggal(iso) {
 
 function formatTanggalPendek(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
   return (
     d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
     "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
@@ -696,8 +700,10 @@ function RiwayatItem({ item }) {
     <div className={`mdt-reply-card ${isStaf ? "from-staf" : ""}`}>
       <div className="mdt-reply-header">
         <div className="mdt-reply-author-row">
-          <div className={`mdt-avatar ${isStaf ? "staf" : ""}`}>{getInitials(item.nama)}</div>
-          <div className="mdt-reply-name">{item.nama}</div>
+          <div className={`mdt-avatar ${isStaf ? "staf" : ""}`}>{getInitials(item.nama_penulis || item.role)}</div>
+          <div className="mdt-reply-name">
+            {item.nama_penulis || item.role} <span style={{ fontSize: 12, fontWeight: "normal", color: "var(--gray-500)" }}>({item.role === "Staff Administrasi" ? "Staf" : "Mahasiswa"})</span>
+          </div>
         </div>
         <div className="mdt-reply-time">{formatTanggal(item.waktu)}</div>
       </div>
@@ -1271,13 +1277,13 @@ export default function MahasiswaDetailTiketPage() {
 
             <div className="mdt-sidebar-card">
               <div className="mdt-sidebar-section-title">Petugas</div>
-              {tiket.nama_staf ? (
+              {(tiket.staf_nama || tiket.staf?.nama) ? (
                 <div className="mdt-petugas-row">
-                  <div className="mdt-petugas-avatar">{getInitials(tiket.nama_staf)}</div>
+                  <div className="mdt-petugas-avatar">{getInitials(tiket.staf_nama || tiket.staf?.nama)}</div>
                   <div>
-                    <div className="mdt-petugas-name">{tiket.nama_staf}</div>
+                    <div className="mdt-petugas-name">{tiket.staf_nama || tiket.staf?.nama}</div>
                     <div className="mdt-petugas-role">
-                      {tiket.jabatan_staf || "Staf Akademik"}
+                      {tiket.jabatan_staf || "Staf Administrasi"}
                     </div>
                   </div>
                 </div>
