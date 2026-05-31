@@ -14,18 +14,18 @@ const styles = `
     max-width: 1100px;
     width: 100%;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
   .profil-breadcrumb {
     font-size: 13px;
-    color: #64748b;
+    color: var(--gray-500);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .profil-breadcrumb a { color: #64748b; text-decoration: none; transition: color 0.2s; }
-  .profil-breadcrumb a:hover { color: #2563eb; }
+  .profil-breadcrumb a { color: var(--gray-500); text-decoration: none; transition: color 0.2s; }
+  .profil-breadcrumb a:hover { color: var(--color-brand); }
   .profil-breadcrumb span { color: #cbd5e1; }
 
   .profil-grid {
@@ -36,15 +36,15 @@ const styles = `
   }
 
   .profil-card {
-    background: #fff;
-    border: 1.5px solid #e2e8f0;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
     border-radius: 18px;
     overflow: hidden;
     margin-bottom: 20px;
   }
   .profil-card-header {
     padding: 18px 22px 14px;
-    border-bottom: 1.5px solid #f1f5f9;
+    border-bottom: 1.5px solid var(--gray-100);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -52,7 +52,7 @@ const styles = `
   .profil-card-title {
     font-size: 11px;
     font-weight: 800;
-    color: #94a3b8;
+    color: var(--gray-400);
     text-transform: uppercase;
     letter-spacing: 1.2px;
   }
@@ -73,10 +73,10 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 900;
-    color: #fff;
+    color: var(--white);
     margin-bottom: 16px;
     box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
     position: relative;
@@ -87,14 +87,14 @@ const styles = `
     bottom: 2px; right: 2px;
     width: 22px; height: 22px;
     background: #10b981;
-    border: 3px solid #fff;
+    border: 3px solid var(--white);
     border-radius: 50%;
   }
   .profil-nama {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--gray-900);
     margin-bottom: 4px;
   }
   .profil-role-badge {
@@ -103,7 +103,7 @@ const styles = `
     gap: 5px;
     padding: 4px 12px;
     background: #eff6ff;
-    color: #2563eb;
+    color: var(--color-brand);
     border-radius: 100px;
     font-size: 11px;
     font-weight: 700;
@@ -112,7 +112,7 @@ const styles = `
   .profil-divider {
     width: 100%;
     height: 1px;
-    background: #f1f5f9;
+    background: var(--gray-100);
     margin-bottom: 20px;
   }
 
@@ -132,7 +132,7 @@ const styles = `
     width: 34px;
     height: 34px;
     border-radius: 9px;
-    background: #f1f5f9;
+    background: var(--gray-100);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,7 +142,7 @@ const styles = `
   .profil-info-label {
     font-size: 11px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--gray-400);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 2px;
@@ -153,7 +153,7 @@ const styles = `
     font-weight: 600;
     word-break: break-word;
   }
-  .profil-info-val.muted { color: #94a3b8; font-weight: 500; font-style: italic; }
+  .profil-info-val.muted { color: var(--gray-400); font-weight: 500; font-style: italic; }
 
   /* ── Statistik tiket ── */
   .stat-row {
@@ -163,8 +163,8 @@ const styles = `
     margin-bottom: 20px;
   }
   .stat-box {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
     border-radius: 14px;
     padding: 18px 16px;
     text-align: center;
@@ -175,13 +175,13 @@ const styles = `
   .stat-box.proses { border-color: #fed7aa; background: #fff7ed; }
   .stat-box.selesai{ border-color: #bbf7d0; background: #f0fdf4; }
   .stat-box-num {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 36px;
     font-weight: 900;
     line-height: 1;
     margin-bottom: 6px;
   }
-  .stat-box.total   .stat-box-num { color: #2563eb; }
+  .stat-box.total   .stat-box-num { color: var(--color-brand); }
   .stat-box.proses  .stat-box-num { color: #c2410c; }
   .stat-box.selesai .stat-box-num { color: #15803d; }
   .stat-box-label {
@@ -189,7 +189,7 @@ const styles = `
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.7px;
-    color: #64748b;
+    color: var(--gray-500);
   }
 
   .tiket-list-mini { display: flex; flex-direction: column; gap: 10px; }
@@ -198,14 +198,14 @@ const styles = `
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: var(--gray-50);
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--gray-200);
     text-decoration: none;
     transition: background 0.18s;
   }
   .tiket-mini-item:hover { background: #eff6ff; border-color: #bfdbfe; }
-  .tiket-mini-id { font-size: 12px; font-weight: 700; color: #94a3b8; }
+  .tiket-mini-id { font-size: 12px; font-weight: 700; color: var(--gray-400); }
   .tiket-mini-subj {
     font-size: 13px; font-weight: 600; color: #1e293b;
     flex: 1; margin: 0 12px;
@@ -217,7 +217,7 @@ const styles = `
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
   .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .tiket-mini-empty { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; }
+  .tiket-mini-empty { text-align: center; padding: 24px; color: var(--gray-400); font-size: 13px; }
 
   /* ── Form edit ── */
   .form-group { margin-bottom: 18px; }
@@ -228,21 +228,21 @@ const styles = `
     margin-bottom: 7px;
   }
   .form-input {
-    width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px;
     padding: 10px 14px; font-size: 14px; color: #1e293b;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    outline: none; background: #f8fafc;
+    font-family: var(--font-sans);
+    outline: none; background: var(--gray-50);
     transition: border-color 0.18s, background 0.18s;
     box-sizing: border-box;
   }
-  .form-input:focus { border-color: #2563eb; background: #fff; }
-  .form-input:disabled { color: #94a3b8; cursor: not-allowed; }
-  .form-input.readonly { color: #64748b; background: #f8fafc; cursor: default; }
+  .form-input:focus { border-color: var(--color-brand); background: var(--white); }
+  .form-input:disabled { color: var(--gray-400); cursor: not-allowed; }
+  .form-input.readonly { color: var(--gray-500); background: var(--gray-50); cursor: default; }
   .form-select {
-    width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px;
     padding: 10px 14px; font-size: 14px; color: #1e293b;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    outline: none; background: #f8fafc; cursor: pointer;
+    font-family: var(--font-sans);
+    outline: none; background: var(--gray-50); cursor: pointer;
     transition: border-color 0.18s; box-sizing: border-box;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -250,32 +250,32 @@ const styles = `
     background-position: right 14px center;
     padding-right: 36px;
   }
-  .form-select:focus { border-color: #2563eb; background-color: #fff; }
-  .form-hint { font-size: 11px; color: #94a3b8; margin-top: 5px; }
+  .form-select:focus { border-color: var(--color-brand); background-color: var(--white); }
+  .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 5px; }
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .btn-primary-sm {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; background: #2563eb; color: #fff;
+    padding: 9px 18px; background: var(--color-brand); color: var(--white);
     border: none; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer; font-family: var(--font-sans);
     transition: background 0.18s;
   }
   .btn-primary-sm:hover { background: #1d4ed8; }
   .btn-primary-sm:disabled { background: #93c5fd; cursor: not-allowed; }
   .btn-outline-sm {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; background: #fff; color: #334155;
-    border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    padding: 9px 18px; background: var(--white); color: var(--gray-700);
+    border: 1.5px solid var(--gray-200); border-radius: 9px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: var(--font-sans);
     transition: all 0.18s;
   }
-  .btn-outline-sm:hover { background: #f8fafc; border-color: #cbd5e1; }
+  .btn-outline-sm:hover { background: var(--gray-50); border-color: #cbd5e1; }
   .btn-danger-sm {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px; background: #fef2f2; color: #dc2626;
     border: 1.5px solid #fecaca; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer; font-family: var(--font-sans);
     transition: all 0.18s;
   }
   .btn-danger-sm:hover { background: #fee2e2; }
@@ -299,7 +299,7 @@ const styles = `
     padding: 20px;
   }
   .modal-box {
-    background: #fff; border-radius: 20px; padding: 32px;
+    background: var(--white); border-radius: 20px; padding: 32px;
     width: 100%; max-width: 440px;
     box-shadow: 0 24px 64px rgba(0,0,0,0.18);
     animation: modalIn 0.22s ease;
@@ -309,14 +309,14 @@ const styles = `
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   .modal-title {
-    font-family: 'Fraunces', serif;
-    font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 6px;
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px;
   }
-  .modal-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+  .modal-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 24px; line-height: 1.5; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 
   .skeleton {
-    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
     border-radius: 8px;
@@ -566,7 +566,7 @@ export default function ProfilPage() {
         <div className="modal-overlay" onClick={() => setShowPwModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-title" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <AppIcon name="KeyRound" size={22} color="#2563eb" /> Ganti Password
+              <AppIcon name="KeyRound" size={22} color="var(--color-brand)" /> Ganti Password
             </div>
             <div className="modal-sub">
               Masukkan password lama kamu untuk verifikasi, lalu buat password baru.
@@ -618,7 +618,7 @@ export default function ProfilPage() {
         <div className="profil-breadcrumb">
           <Link to="/dashboard">Dashboard</Link>
           <span>›</span>
-          <strong style={{ color: "#334155" }}>Profil Saya</strong>
+          <strong style={{ color: "var(--gray-700)" }}>Profil Saya</strong>
         </div>
 
         <div className="profil-grid">
@@ -643,7 +643,7 @@ export default function ProfilPage() {
                   {/* Email */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="Mail" size={16} color="#64748b" />
+                      <AppIcon name="Mail" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">Email</div>
@@ -654,7 +654,7 @@ export default function ProfilPage() {
                   {/* NIM */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="CreditCard" size={16} color="#64748b" />
+                      <AppIcon name="CreditCard" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">NIM</div>
@@ -667,7 +667,7 @@ export default function ProfilPage() {
                   {/* Telepon — ✅ BARU */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="Phone" size={16} color="#64748b" />
+                      <AppIcon name="Phone" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">Telepon</div>
@@ -680,7 +680,7 @@ export default function ProfilPage() {
                   {/* Fakultas — ✅ BARU */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="Building2" size={16} color="#64748b" />
+                      <AppIcon name="Building2" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">Fakultas</div>
@@ -693,7 +693,7 @@ export default function ProfilPage() {
                   {/* Departemen — ✅ BARU */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="BookOpen" size={16} color="#64748b" />
+                      <AppIcon name="BookOpen" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">Departemen</div>
@@ -706,7 +706,7 @@ export default function ProfilPage() {
                   {/* Institusi */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">
-                      <AppIcon name="GraduationCap" size={16} color="#64748b" />
+                      <AppIcon name="GraduationCap" size={16} color="var(--gray-500)" />
                     </div>
                     <div>
                       <div className="profil-info-label">Institusi</div>
@@ -749,7 +749,7 @@ export default function ProfilPage() {
             <div className="profil-card">
               <div className="profil-card-header">
                 <span className="profil-card-title">Statistik Tiket</span>
-                <Link to="/tiket/saya" style={{ fontSize: 12, fontWeight: 700, color: "#2563eb", textDecoration: "none" }}>
+                <Link to="/tiket/saya" style={{ fontSize: 12, fontWeight: 700, color: "var(--color-brand)", textDecoration: "none" }}>
                   Lihat Semua →
                 </Link>
               </div>
@@ -778,7 +778,7 @@ export default function ProfilPage() {
                 )}
 
                 <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
                     Tiket Terbaru
                   </div>
                   {loadingTiket ? (
@@ -958,10 +958,10 @@ export default function ProfilPage() {
                 <span className="profil-card-title">Keamanan Akun</span>
               </div>
               <div className="profil-card-body">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid #f1f5f9" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--gray-100)" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Password</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Terakhir diubah: tidak diketahui</div>
+                    <div style={{ fontSize: 12, color: "var(--gray-400)" }}>Terakhir diubah: tidak diketahui</div>
                   </div>
                   <button className="btn-outline-sm" onClick={() => setShowPwModal(true)}>
                     <AppIcon name="KeyRound" variant="sm" /> Ganti Password
@@ -970,7 +970,7 @@ export default function ProfilPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 0" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Status Akun</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Akun aktif dan terverifikasi</div>
+                    <div style={{ fontSize: 12, color: "var(--gray-400)" }}>Akun aktif dan terverifikasi</div>
                   </div>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", background: "#f0fdf4", color: "#15803d", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
                     ● Aktif

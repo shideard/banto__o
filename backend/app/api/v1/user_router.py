@@ -4,7 +4,10 @@ from sqlalchemy.orm import Session
 from app.persistence.database import get_db
 from app.services.user_service import UserService
 from app.persistence.repositories.user_repository import UserRepository
-from app.schemas.user_schema import UserResponse, UserCreate, NotifikasiResponse, PasswordUpdate, UserUpdate
+from app.schemas.user_schema import (
+    UserResponse, UserCreate, NotifikasiResponse, PasswordUpdate, UserUpdate,
+    DivisiStafResponse,
+)
 from app.persistence.user_orm import UserORM, NotifikasiORM
 from typing import Annotated
 
@@ -85,6 +88,15 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="User tidak ditemukan.")
     return user
+
+
+@router.get("/divisi", response_model=list[DivisiStafResponse])
+def get_all_divisi(
+    current_user: Annotated[UserORM, Depends(get_current_user)],
+    user_service: UserService = Depends(get_user_service),
+):
+    """Daftar semua divisi staf — untuk dropdown di form profil."""
+    return user_service.get_all_divisi()
 
 
 @router.get("/me", response_model=UserResponse)

@@ -16,8 +16,18 @@ class UserService {
     return res.data;
   }
 
+  async getDivisi() {
+    const res = await apiClient.get("/divisi");
+    return res.data;
+  }
+
   async markNotifRead(notifId) {
     const res = await apiClient.patch(`/auth/notifikasi/${notifId}/baca`);
+    return res.data;
+  }
+
+  async getDivisi() {
+    const res = await apiClient.get("/auth/divisi");
     return res.data;
   }
 }

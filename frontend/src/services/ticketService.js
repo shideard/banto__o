@@ -1,38 +1,29 @@
 import apiClient from "./ApiClient";
 
 class TicketService {
-  constructor() {
-    this._allTiketRequest = null;
-  }
-
   async getKategori() {
     const res = await apiClient.get("/kategori");
     return res.data;
   }
 
   async getMyTickets() {
-    const all = await this.getAllTiket();
-    return all;
+    const res = await apiClient.get("/tiket");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getAllTiket() {
-    if (this._allTiketRequest) {
-      return this._allTiketRequest;
-    }
-
-    this._allTiketRequest = apiClient.get("/tiket").then((res) => {
-      return Array.isArray(res.data) ? res.data : [];
-    }).finally(() => {
-      this._allTiketRequest = null;
-    });
-
-    return this._allTiketRequest;
+    const res = await apiClient.get("/tiket");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getUnclaimedTickets() {
-    const res = await apiClient.get("/tiket");
-    const all = Array.isArray(res.data) ? res.data : [];
-    return all.filter(t => !t.staf_id);
+    const res = await apiClient.get("/tiket/antrean");
+    return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getMyTasks() {
+    const res = await apiClient.get("/tiket/tugas-saya");
+    return Array.isArray(res.data) ? res.data : [];
   }
 
   async getTiketById(tiketId) {
@@ -80,9 +71,12 @@ class TicketService {
     return res.data;
   }
 
-  async uploadFile(tiketId, file) {
+  async uploadFile(tiketId, file, waktu) {
     const formData = new FormData();
     formData.append("file", file);
+    if (waktu) {
+      formData.append("waktu", waktu);
+    }
     const res = await apiClient.post(`/tiket/${tiketId}/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -90,13 +84,17 @@ class TicketService {
   }
 
   async getRiwayat(tiketId) {
-    const res = await apiClient.get(`/tiket/${tiketId}`);
-    const tiket = res.data;
-    return Array.isArray(tiket.komentar) ? tiket.komentar : [];
+    const tiket = await this.getTiketById(tiketId);
+    return tiket.komentar || [];
   }
 
   async kirimBalasan(tiketId, payload) {
     const res = await apiClient.post(`/tiket/${tiketId}/komentar`, payload);
+    return res.data;
+  }
+
+  async askChatbot(tanya) {
+    const res = await apiClient.post("/chatbot", { tanya });
     return res.data;
   }
 }

@@ -3,9 +3,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
+import { BACKEND_URL } from "../../utils/constants";
 import { useAuth } from "../../hooks/useAuth";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 const styles = `
   /* ─── Layout utama ─── */
@@ -14,7 +13,7 @@ const styles = `
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* ─── Breadcrumb ─── */
@@ -30,7 +29,7 @@ const styles = `
     color: var(--gray-500);
     text-decoration: none;
   }
-  .dt-breadcrumb a:hover { color: #2563eb; }
+  .dt-breadcrumb a:hover { color: var(--color-brand); }
   .dt-breadcrumb strong { color: var(--gray-700); }
   .dt-breadcrumb span { color: var(--gray-400); }
 
@@ -39,7 +38,7 @@ const styles = `
     margin-bottom: 24px;
   }
   .dt-page-header h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 28px;
     font-weight: 800;
     color: var(--gray-900);
@@ -95,14 +94,14 @@ const styles = `
     transition: all 0.2s;
   }
   .dt-step-circle.done {
-    background: #2563eb;
-    border-color: #2563eb;
+    background: var(--color-brand);
+    border-color: var(--color-brand);
     color: white;
   }
   .dt-step-circle.active {
     background: white;
-    border-color: #2563eb;
-    color: #2563eb;
+    border-color: var(--color-brand);
+    color: var(--color-brand);
     box-shadow: 0 0 0 4px #dbeafe;
   }
   .dt-step-label {
@@ -111,8 +110,8 @@ const styles = `
     color: var(--gray-400);
     text-align: center;
   }
-  .dt-step-label.done { color: #2563eb; }
-  .dt-step-label.active { color: #2563eb; font-weight: 700; }
+  .dt-step-label.done { color: var(--color-brand); }
+  .dt-step-label.active { color: var(--color-brand); font-weight: 700; }
 
   /* Garis penghubung */
   .dt-step-line {
@@ -123,7 +122,7 @@ const styles = `
     position: relative;
     z-index: 0;
   }
-  .dt-step-line.done { background: #2563eb; }
+  .dt-step-line.done { background: var(--color-brand); }
 
   /* ─── Pesan awal tiket ─── */
   .dt-ticket-card {
@@ -143,7 +142,7 @@ const styles = `
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     font-size: 13px;
     font-weight: 700;
@@ -308,7 +307,7 @@ const styles = `
     font-size: 13px;
     font-weight: 700;
     color: var(--gray-500);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     transition: all 0.15s;
   }
   .dt-toolbar-btn:hover {
@@ -328,12 +327,16 @@ const styles = `
     border: none;
     outline: none;
     resize: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     color: var(--gray-700);
     line-height: 1.7;
     box-sizing: border-box;
   }
+  .dt-form-textarea ul, .dt-reply-body ul { list-style-type: disc; padding-left: 20px; margin: 8px 0; }
+  .dt-form-textarea ol, .dt-reply-body ol { list-style-type: decimal; padding-left: 20px; margin: 8px 0; }
+  .dt-form-textarea li, .dt-reply-body li { margin-bottom: 4px; display: list-item; }
+  .dt-form-textarea[contenteditable]:empty:before { content: attr(placeholder); color: var(--gray-400); cursor: text; }
   .dt-form-textarea::placeholder { color: var(--gray-400); }
   .dt-form-upload-row {
     padding: 10px 20px;
@@ -347,7 +350,7 @@ const styles = `
     transition: background 0.15s;
   }
   .dt-form-upload-row:hover { background: var(--gray-50); }
-  .dt-form-upload-link { color: #2563eb; font-weight: 600; text-decoration: none; }
+  .dt-form-upload-link { color: var(--color-brand); font-weight: 600; text-decoration: none; }
   .dt-form-footer {
     padding: 14px 20px;
     border-top: 1.5px solid var(--gray-200);
@@ -366,7 +369,7 @@ const styles = `
   .dt-btn-batal {
     background: transparent;
     border: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     color: var(--gray-500);
@@ -378,14 +381,14 @@ const styles = `
   .dt-btn-batal:hover { color: var(--gray-700); background: var(--gray-100); }
 
   .dt-btn-kirim {
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     border: none;
     border-radius: 8px;
     padding: 8px 18px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -425,7 +428,7 @@ const styles = `
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--color-brand);
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -511,7 +514,7 @@ const styles = `
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #e2e8f0;
+    background: var(--gray-200);
     color: var(--gray-700);
     font-size: 12px;
     font-weight: 700;
@@ -570,7 +573,7 @@ const styles = `
   .dt-lampiran-chip-type { font-size: 11px; color: var(--gray-400); }
   .dt-lampiran-chip-dl {
     width: 26px; height: 26px; border-radius: 6px;
-    background: #2563eb; color: white;
+    background: var(--color-brand); color: white;
     border: none; cursor: pointer; display: flex;
     align-items: center; justify-content: center;
     flex-shrink: 0; transition: background 0.15s;
@@ -585,7 +588,7 @@ const styles = `
     padding: 20px;
   }
   .dt-preview-box {
-    background: #fff; border-radius: 16px; overflow: hidden;
+    background: var(--white); border-radius: 16px; overflow: hidden;
     max-width: 90vw; max-height: 90vh;
     display: flex; flex-direction: column;
     box-shadow: 0 24px 80px rgba(0,0,0,0.4);
@@ -611,14 +614,14 @@ const styles = `
     color: var(--gray-700); cursor: pointer; transition: all 0.15s; text-decoration: none;
   }
   .dt-preview-btn:hover { background: var(--gray-50); }
-  .dt-preview-btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .dt-preview-btn.primary { background: var(--color-brand); color: white; border-color: var(--color-brand); }
   .dt-preview-btn.primary:hover { background: #1d4ed8; }
   .dt-preview-btn.close { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
   .dt-preview-btn.close:hover { background: #fee2e2; }
   .dt-preview-body {
     flex: 1; overflow: auto;
     display: flex; align-items: center; justify-content: center;
-    padding: 20px; background: #f8fafc; min-height: 200px;
+    padding: 20px; background: var(--gray-50); min-height: 200px;
   }
   .dt-preview-body img {
     max-width: 100%; max-height: 70vh;
@@ -644,7 +647,7 @@ const styles = `
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #2563eb;
+    color: var(--color-brand);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -768,14 +771,14 @@ const styles = `
     flex-wrap: wrap;
   }
   .dt-btn-klaim {
-    background: #2563eb;
+    background: var(--color-brand);
     color: var(--white);
     border: none;
     border-radius: 8px;
     padding: 9px 20px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -793,7 +796,7 @@ const styles = `
     padding: 9px 20px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -825,7 +828,7 @@ const styles = `
     border: 1.5px solid #fecaca;
     border-radius: 8px;
     padding: 10px 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--gray-700);
     line-height: 1.6;
@@ -836,7 +839,7 @@ const styles = `
     transition: border-color 0.2s;
   }
   .dt-tolak-textarea:focus { border-color: #dc2626; }
-  .dt-tolak-textarea::placeholder { color: #94a3b8; }
+  .dt-tolak-textarea::placeholder { color: var(--gray-400); }
   .dt-tolak-actions {
     display: flex;
     gap: 8px;
@@ -851,7 +854,7 @@ const styles = `
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -868,7 +871,7 @@ const styles = `
     padding: 8px 14px;
     font-size: 13px;
     font-weight: 600;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     transition: all 0.18s;
   }
@@ -906,7 +909,7 @@ const styles = `
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -943,7 +946,7 @@ const styles = `
     border: 1.5px solid var(--gray-200);
     border-radius: 8px;
     padding: 6px 12px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     color: var(--gray-700);
     background: var(--white);
@@ -951,7 +954,7 @@ const styles = `
     transition: border-color 0.2s;
     cursor: pointer;
   }
-  .dt-waktu-input:focus { border-color: #2563eb; }
+  .dt-waktu-input:focus { border-color: var(--color-brand); }
   .dt-waktu-hint {
     font-size: 11px;
     color: var(--gray-400);
@@ -967,7 +970,7 @@ const styles = `
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -1014,22 +1017,24 @@ function getInitials(nama = "") {
 // ─── Helper: format tanggal ───────────────────────────────────
 function formatTanggal(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }) + ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
+  return (
+    d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
+    ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
+  );
 }
 
 function formatTanggalPendek(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }) + "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  let dateStr = iso;
+  if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+  const d = new Date(dateStr);
+  return (
+    d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) +
+    "\n" + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 // ─── Helper Prioritas ───────────────────────────────────────────
@@ -1105,7 +1110,7 @@ function LampiranChip({ nama, url, onPreview }) {
   return (
     <div className="dt-lampiran-chip" onClick={() => onPreview({ nama, url })} title={`Preview: ${nama}`}>
       <div className={`dt-lampiran-chip-icon ${img ? "dt-lampiran-chip-img-icon" : ""}`}>
-        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "#2563eb"} />
+        <AppIcon name={img ? "Image" : "FileText"} size={16} color={img ? "#16a34a" : "var(--color-brand)"} />
       </div>
       <div className="dt-lampiran-chip-info">
         <div className="dt-lampiran-chip-name">{nama}</div>
@@ -1201,6 +1206,19 @@ function Stepper({ status }) {
   );
 }
 
+function formatMarkdownLike(text) {
+  if (!text) return { __html: "" };
+  let res = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/__(.*?)__/g, "<u>$1</u>")
+    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>");
+    
+  res = res.replace(/^[*-]\s+(.*)$/gm, "<ul style='padding-left:20px;margin:0'><li>$1</li></ul>");
+  res = res.replace(/\n/g, "<br />");
+  return { __html: res };
+}
+
 // ─── Satu item riwayat ──────────────────────────────────────────────
 function RiwayatItem({ item }) {
   // item.tipe: "sistem" | "staf" | "mahasiswa"
@@ -1227,10 +1245,12 @@ function RiwayatItem({ item }) {
       <div className="dt-reply-header">
         <div className="dt-reply-author-row">
           <div className={`dt-avatar ${isStaf ? "staf" : ""}`}>
-            {getInitials(item.nama)}
+            {getInitials(item.nama_penulis || item.role)}
           </div>
           <div>
-            <div className="dt-reply-name">{item.nama}</div>
+            <div className="dt-reply-name">
+            {item.nama_penulis || item.role} <span style={{ fontSize: 12, fontWeight: "normal", color: "var(--gray-500)" }}>({item.role === "Staff Administrasi" ? "Staf" : "Mahasiswa"})</span>
+          </div>
           </div>
         </div>
         <div className="dt-reply-time">{formatTanggal(item.waktu)}</div>
@@ -1238,7 +1258,7 @@ function RiwayatItem({ item }) {
 
       {/* Teks balasan (jika bukan komentar file) */}
       {isiTeks && (
-        <div className="dt-reply-body">{isiTeks}</div>
+        <div className="dt-reply-body" dangerouslySetInnerHTML={formatMarkdownLike(isiTeks)} />
       )}
 
       {/* Lampiran — gambar inline atau chip file */}
@@ -1266,12 +1286,12 @@ function RiwayatItem({ item }) {
                 <AppIcon
                   name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
                   size={15}
-                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"}
+                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"}
                 />
               </div>
               <span className="dt-file-chip-name">{lampiran.nama}</span>
               <span className="dt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
-              <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+              <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
             </a>
           )}
         </div>
@@ -1284,9 +1304,10 @@ function RiwayatItem({ item }) {
 // ─── Komponen utama ───────────────────────────────────────────
 export default function StafDetailTiketPage() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user } = useAuth(); // UNCOMMENTED
 
   const fileInputRef = useRef(null);
+  const editorRef = useRef(null);
 
   const [tiket, setTiket] = useState(null);
   const [riwayat, setRiwayat] = useState([]);
@@ -1300,6 +1321,30 @@ export default function StafDetailTiketPage() {
   const [mengirim, setMengirim] = useState(false);
   const [errKirim, setErrKirim] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
+
+  const handleFormat = (type) => {
+    if (type === "Gambar") {
+      fileInputRef.current?.click();
+      return;
+    }
+    
+    editorRef.current?.focus();
+    
+    if (type === "Link") {
+      const url = prompt("Masukkan URL link:", "https://");
+      if (url) {
+        document.execCommand("createLink", false, url);
+        setBalasan(editorRef.current?.innerHTML || "");
+      }
+      return;
+    }
+    
+    const cmdMap = { B: "bold", I: "italic", U: "underline", List: "insertUnorderedList" };
+    if (cmdMap[type]) {
+      document.execCommand(cmdMap[type], false, null);
+      setBalasan(editorRef.current?.innerHTML || "");
+    }
+  };
 
   // ── State baru untuk alur klaim/tolak/proses/selesai ──
   const [showTolakForm, setShowTolakForm] = useState(false);
@@ -1318,9 +1363,17 @@ export default function StafDetailTiketPage() {
     try {
       setLoading(true);
       setError(null);
-      const dataTiket = await ticketService.getTiketById(id);
+      const [dataTiket, dataRiwayat] = await Promise.all([
+        ticketService.getTiketById(id),
+        ticketService.getRiwayat(id),
+      ]);
       setTiket(dataTiket);
-      setRiwayat(Array.isArray(dataTiket.komentar) ? dataTiket.komentar : []);
+      if (Array.isArray(dataRiwayat)) {
+         dataRiwayat.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
+         setRiwayat(dataRiwayat);
+      } else {
+         setRiwayat([]);
+      }
     } catch {
       setError("Gagal memuat data tiket. Coba muat ulang halaman.");
     } finally {
@@ -1332,15 +1385,12 @@ export default function StafDetailTiketPage() {
 
   // ── Handler: Klaim Tiket ──
   const handleKlaim = async () => {
-    if (!user?.id) {
-      setErrAksi("Data staf tidak tersedia. Silakan login ulang.");
-      return;
-    }
-
     try {
       setProsesKlaim(true);
       setErrAksi(null);
       await ticketService.claimTiket(tiket.id, { staf_id: user.id });
+      // Otomatis lanjut ke DIPROSES agar staf tidak perlu klik dua kali
+      await ticketService.mulaiProses(tiket.id);
       await fetchData();
     } catch (err) {
       setErrAksi(err?.response?.data?.detail || "Gagal mengklaim tiket. Coba lagi.");
@@ -1427,6 +1477,7 @@ export default function StafDetailTiketPage() {
       }
 
       setBalasan("");
+      if (editorRef.current) editorRef.current.innerHTML = "";
       setWaktuKomentar("");
       clearFile();
       await fetchData();
@@ -1610,11 +1661,11 @@ export default function StafDetailTiketPage() {
             {/* Pesan awal dari mahasiswa */}
             <div className="dt-ticket-card">
               <div className="dt-ticket-meta">
-                <div className="dt-avatar">{getInitials(tiket.nama_pelapor || "")}</div>
+                <div className="dt-avatar">{getInitials(tiket.mahasiswa?.nama || tiket.nama_pelapor || "")}</div>
                 <div>
-                  <div className="dt-ticket-author">{tiket.nama_pelapor || "Mahasiswa"}</div>
+                  <div className="dt-ticket-author">Pengirim: {tiket.mahasiswa?.nama || tiket.nama_pelapor || "Mahasiswa"}</div>
                   <div className="dt-ticket-time">
-                    {tiket.nim || "—"} &bull; {formatTanggal(tiket.tanggal_dibuat)}
+                    {tiket.mahasiswa?.nim || tiket.nim || "—"} &bull; {formatTanggal(tiket.tanggal_dibuat)}
                   </div>
                 </div>
               </div>
@@ -1655,9 +1706,12 @@ export default function StafDetailTiketPage() {
               {/* Lampiran dari pengajuan awal */}
               {tiket.pengajuan?.lampiran?.length > 0 && (
                 <div className="dt-lampiran-wrap" style={{ marginTop: 16 }}>
-                  <div className="dt-lampiran-label">
-                    <AppIcon name="Paperclip" variant="sm" />
-                    LAMPIRAN ({tiket.pengajuan.lampiran.length})
+                  <div style={{ display: "flex", alignItems: "center", margin: "24px 0 16px" }}>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
+                    <div style={{ padding: "0 16px", fontSize: 11, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Lampiran dari {tiket.mahasiswa?.nama || tiket.nama_pelapor || "Mahasiswa"}
+                    </div>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {tiket.pengajuan.lampiran.map((lmp, idx) => {
@@ -1679,11 +1733,11 @@ export default function StafDetailTiketPage() {
                           className="dt-file-chip"
                         >
                           <div className={`dt-file-chip-icon ${lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "dt-file-chip-pdf" : ""}`}>
-                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "#2563eb"} />
+                            <AppIcon name="FileText" size={15} color={lmp.nama_file?.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"} />
                           </div>
                           <span className="dt-file-chip-name">{lmp.nama_file}</span>
                           <span className="dt-file-chip-ext">{getFileExt(lmp.nama_file)}</span>
-                          <AppIcon name="ExternalLink" size={13} color="#94a3b8" />
+                          <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
                         </a>
                       );
                     })}
@@ -1714,26 +1768,28 @@ export default function StafDetailTiketPage() {
 
                 {/* Toolbar rich text (visual only) */}
                 <div className="dt-form-toolbar">
-                  <button className="dt-toolbar-btn" title="Bold"><strong>B</strong></button>
-                  <button className="dt-toolbar-btn" title="Italic"><em>I</em></button>
-                  <button className="dt-toolbar-btn" title="Underline"><u>U</u></button>
+                  <button className="dt-toolbar-btn" title="Bold" onClick={() => handleFormat("B")}><strong>B</strong></button>
+                  <button className="dt-toolbar-btn" title="Italic" onClick={() => handleFormat("I")}><em>I</em></button>
+                  <button className="dt-toolbar-btn" title="Underline" onClick={() => handleFormat("U")}><u>U</u></button>
                   <div className="dt-toolbar-divider" />
-                  <button className="dt-toolbar-btn" title="Bullet list">
+                  <button className="dt-toolbar-btn" title="Bullet list" onClick={() => handleFormat("List")}>
                     <AppIcon name="List" variant="sm" />
                   </button>
-                  <button className="dt-toolbar-btn" title="Link">
+                  <button className="dt-toolbar-btn" title="Link" onClick={() => handleFormat("Link")}>
                     <AppIcon name="Link" variant="sm" />
                   </button>
-                  <button className="dt-toolbar-btn" title="Gambar">
+                  <button className="dt-toolbar-btn" title="Gambar" onClick={() => handleFormat("Gambar")}>
                     <AppIcon name="Image" variant="sm" />
                   </button>
                 </div>
 
-                <textarea
+                <div
+                  ref={editorRef}
                   className="dt-form-textarea"
+                  contentEditable
+                  suppressContentEditableWarning
                   placeholder="Ketik pesan atau minta informasi tambahan ke mahasiswa..."
-                  value={balasan}
-                  onChange={(e) => setBalasan(e.target.value)}
+                  onInput={e => setBalasan(e.currentTarget.innerHTML)}
                 />
 
                 {/* Upload */}
@@ -1746,7 +1802,7 @@ export default function StafDetailTiketPage() {
                   {file && (
                     <span style={{
                       marginLeft: "auto", fontSize: 12,
-                      color: "#2563eb", fontWeight: 600,
+                      color: "var(--color-brand)", fontWeight: 600,
                       maxWidth: 160, overflow: "hidden",
                       textOverflow: "ellipsis", whiteSpace: "nowrap"
                     }}>
@@ -1788,6 +1844,7 @@ export default function StafDetailTiketPage() {
                     type="datetime-local"
                     className="dt-waktu-input"
                     value={waktuKomentar}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     onChange={e => setWaktuKomentar(e.target.value)}
                   />
                   <span className="dt-waktu-hint">Opsional — kosongkan untuk waktu sekarang</span>
@@ -1813,7 +1870,12 @@ export default function StafDetailTiketPage() {
                   <div className="dt-form-actions">
                     <button
                       className="dt-btn-batal"
-                      onClick={() => { setBalasan(""); clearFile(); setWaktuKomentar(""); }}
+                      onClick={() => { 
+                        setBalasan(""); 
+                        if (editorRef.current) editorRef.current.innerHTML = "";
+                        clearFile(); 
+                        setWaktuKomentar(""); 
+                      }}
                     >
                       Batal
                     </button>
@@ -1841,14 +1903,20 @@ export default function StafDetailTiketPage() {
                 </div>
               </div>
             ) : tiket.status === "SELESAI" ? (
-              <div className="dt-closed-notice" style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", color: "#15803d" }}>
-                <AppIcon name="CheckCircle" variant="sm" />
-                Tiket ini sudah selesai ditangani.
+              <div className="dt-closed-notice" style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", color: "#15803d", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <AppIcon name="CheckCircle" variant="sm" />
+                  Tiket ini sudah selesai ditangani.
+                </div>
+                <Link to="/staff/dashboard" style={{ fontSize: 13, fontWeight: 600, color: "#15803d", textDecoration: "underline" }}>Kembali ke Dashboard</Link>
               </div>
             ) : tiket.status === "DITOLAK" ? (
-              <div className="dt-closed-notice" style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626" }}>
-                <AppIcon name="XCircle" variant="sm" />
-                Tiket ini telah ditolak.
+              <div className="dt-closed-notice" style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <AppIcon name="XCircle" variant="sm" />
+                  Tiket ini telah ditolak.
+                </div>
+                <Link to="/staff/dashboard" style={{ fontSize: 13, fontWeight: 600, color: "#dc2626", textDecoration: "underline" }}>Kembali ke Dashboard</Link>
               </div>
             ) : null /* DIBUAT dan DIKLAIM — panel klaim/proses yang ditampilkan */ }
           </div>
@@ -1943,16 +2011,16 @@ export default function StafDetailTiketPage() {
             </div>
 
             {/* Petugas */}
-            {tiket.nama_staf && (
+            {(tiket.staf_nama || tiket.staf?.nama) && (
               <div className="dt-sidebar-card">
                 <div className="dt-sidebar-section-title">Petugas</div>
                 <div className="dt-petugas-row">
                   <div className="dt-petugas-avatar">
-                    {getInitials(tiket.nama_staf)}
+                    {getInitials(tiket.staf_nama || tiket.staf?.nama)}
                   </div>
                   <div>
-                    <div className="dt-petugas-name">{tiket.nama_staf}</div>
-                    <div className="dt-petugas-role">{tiket.jabatan_staf || "Staf Akademik"}</div>
+                    <div className="dt-petugas-name">{tiket.staf_nama || tiket.staf?.nama}</div>
+                    <div className="dt-petugas-role">{tiket.jabatan_staf || "Staf Administrasi"}</div>
                   </div>
                 </div>
               </div>

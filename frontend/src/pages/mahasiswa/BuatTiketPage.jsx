@@ -28,7 +28,7 @@ const styles = `
   .bt-breadcrumb a:hover { color: rgba(255,255,255,0.9); }
   .bt-breadcrumb span { color: rgba(255,255,255,0.9); font-weight: 600; }
   
-  .bt-header h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; margin-bottom: 6px; }
+  .bt-header h1 { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; margin-bottom: 6px; }
   .bt-header p { font-size: 14px; color: rgba(255,255,255,0.65); }
 
   .bt-alert { max-width: 1200px; margin: -20px auto 0; padding: 0 40px; position: relative; z-index: 2; }
@@ -39,7 +39,7 @@ const styles = `
   .bt-form-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
   .bt-form-card-header { padding: 20px 24px; border-bottom: 1.5px solid var(--gray-200); display: flex; align-items: center; gap: 10px; }
   .bt-form-card-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .bt-form-card-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
+  .bt-form-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
   .bt-form-card-body { padding: 24px; }
 
   .bt-user-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 24px; padding: 14px 16px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 10px; }
@@ -50,7 +50,7 @@ const styles = `
   .bt-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 7px; }
   .bt-label .required { color: var(--error); margin-left: 3px; }
 
-  .bt-select, .bt-input, .bt-textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--gray-900); background: var(--white); outline: none; transition: all 0.2s ease; }
+  .bt-select, .bt-input, .bt-textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: var(--font-sans); font-size: 14px; color: var(--gray-900); background: var(--white); outline: none; transition: all 0.2s ease; }
   .bt-select { height: 46px; padding: 0 14px; cursor: pointer; }
   .bt-input { height: 46px; padding: 0 14px; }
   .bt-textarea { padding: 12px 14px; resize: vertical; min-height: 120px; line-height: 1.6; }
@@ -70,15 +70,15 @@ const styles = `
   .bt-file-remove:hover { color: var(--error); }
 
   .bt-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1.5px solid var(--gray-200); margin-top: 8px; }
-  .bt-btn-cancel { padding: 10px 20px; border: 1.5px solid var(--gray-200); border-radius: 9px; background: var(--white); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.18s; }
+  .bt-btn-cancel { padding: 10px 20px; border: 1.5px solid var(--gray-200); border-radius: 9px; background: var(--white); font-family: var(--font-sans); font-size: 13.5px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.18s; }
   .bt-btn-cancel:hover { background: var(--gray-50); border-color: var(--gray-400); }
-  .bt-btn-submit { padding: 10px 24px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.18s; box-shadow: 0 2px 10px rgba(37,99,235,0.28); display: flex; align-items: center; gap: 7px; }
+  .bt-btn-submit { padding: 10px 24px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); font-family: var(--font-sans); font-size: 13.5px; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.18s; box-shadow: 0 2px 10px rgba(37,99,235,0.28); display: flex; align-items: center; gap: 7px; }
   .bt-btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.38); }
   .bt-btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
 
   .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
-  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
+  .chatbot-avatar { width: 70px; height: 70px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
   .chatbot-header-name { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 3px; }
   .chatbot-header-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255,255,255,0.65); }
   .chatbot-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.6); animation: pulse 2s infinite; }
@@ -86,7 +86,7 @@ const styles = `
   .bt-chatbot-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--gray-50); }
   .chat-msg { display: flex; gap: 8px; animation: fadeIn 0.2s ease both; }
   .chat-msg.user { flex-direction: row-reverse; }
-  .chat-msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .chat-msg-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
   .chat-msg.bot .chat-msg-avatar { background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); }
   .chat-msg.user .chat-msg-avatar { background: var(--gray-200); }
   .chat-msg-bubble { max-width: 78%; padding: 10px 13px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
@@ -97,7 +97,7 @@ const styles = `
   .chat-msg.user .chat-msg-time { text-align: right; }
 
   .chat-quick-replies { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-  .chat-quick-btn { padding: 5px 10px; border: 1.5px solid var(--ipb-blue-lite); border-radius: 100px; background: rgba(59,130,246,0.06); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ipb-blue-mid); cursor: pointer; transition: all 0.15s; }
+  .chat-quick-btn { padding: 5px 10px; border: 1.5px solid var(--ipb-blue-lite); border-radius: 100px; background: rgba(59,130,246,0.06); font-family: var(--font-sans); font-size: 11.5px; font-weight: 600; color: var(--ipb-blue-mid); cursor: pointer; transition: all 0.15s; }
   .chat-quick-btn:hover { background: var(--ipb-blue-mid); color: var(--white); border-color: var(--ipb-blue-mid); }
 
   .chat-typing { display: flex; gap: 4px; padding: 10px 13px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 4px 12px 12px 12px; width: fit-content; }
@@ -106,7 +106,7 @@ const styles = `
   .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
 
   .bt-chatbot-input { padding: 12px 14px; border-top: 1.5px solid var(--gray-200); display: flex; gap: 8px; align-items: flex-end; background: var(--white); }
-  .chatbot-input-field { flex: 1; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 9px 13px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--gray-900); outline: none; resize: none; line-height: 1.5; max-height: 80px; transition: border-color 0.2s; }
+  .chatbot-input-field { flex: 1; border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 9px 13px; font-family: var(--font-sans); font-size: 13px; color: var(--gray-900); outline: none; resize: none; line-height: 1.5; max-height: 80px; transition: border-color 0.2s; }
   .chatbot-input-field:focus { border-color: var(--ipb-blue-lite); }
   .chatbot-input-field::placeholder { color: var(--gray-400); }
   .chatbot-send-btn { width: 36px; height: 36px; border: none; border-radius: 9px; background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.18s; box-shadow: 0 2px 8px rgba(37,99,235,0.28); }
@@ -126,7 +126,7 @@ const styles = `
     background: rgba(59,130,246,0.07); color: #1d4ed8;
     border: 1px solid rgba(59,130,246,0.25);
     border-radius: 6px; padding: 4px 10px;
-    font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px; font-weight: 600; font-family: var(--font-sans);
     text-decoration: none; transition: background .15s;
   }
   .chat-cb-link-btn:hover { background: #dbeafe; }
@@ -156,6 +156,14 @@ const CATEGORY_ITEMS = faqCategories.map((c) => ({
   icon: c.icon,
 }));
 
+const INITIAL_BUTTONS = {
+  type: "category",
+  items: [
+    { id: "analyze-ticket", label: "Bantu tentukan topik dari tiketku", icon: "🔍" },
+    ...CATEGORY_ITEMS
+  ]
+};
+
 export default function BuatTiketPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -175,7 +183,7 @@ export default function BuatTiketPage() {
   const [cbMessages, setCbMessages] = useState([
     { id: "greeting", from: "bot", text: GREETING },
   ]);
-  const [cbButtons, setCbButtons]   = useState({ type: "category", items: CATEGORY_ITEMS });
+  const [cbButtons, setCbButtons]   = useState(INITIAL_BUTTONS);
   const [cbTyping, setCbTyping]     = useState(false);
   const [cbCategory, setCbCategory] = useState(null);
   const messagesEndRef = useRef(null);
@@ -258,14 +266,48 @@ export default function BuatTiketPage() {
       setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Kembali ke menu utama" }]);
       botReply(
         "Tentu! Ada hal lain yang bisa aku bantu? Silakan pilih kategori:",
-        { type: "category", items: CATEGORY_ITEMS }
+        INITIAL_BUTTONS
       );
+    }
+  }
+
+  async function handleAnalyzeTicket() {
+    if (!subjek.trim() && !deskripsi.trim()) {
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "🔍 Bantu tentukan topik dari tiketku" }]);
+      botReply("Oops! Kamu belum mengisi Subjek dan Deskripsi Masalah. Silakan isi dulu ya, nanti aku bantu analisis topiknya! 😉", INITIAL_BUTTONS);
+      return;
+    }
+
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "🔍 Bantu tentukan topik dari tiketku" }]);
+    setCbTyping(true);
+    setCbButtons(null);
+
+    try {
+      const query = `${subjek}. ${deskripsi}`;
+      const response = await ticketService.askChatbot(query);
+      const reco = response.rekomendasi_kategori;
+      
+      const match = kategoriList.find(k => k.nama_kategori.toLowerCase() === reco.toLowerCase());
+      
+      let msg = `Berdasarkan isi tiketmu, sepertinya kategori yang paling cocok adalah **${reco}**.`;
+      
+      if (match) {
+        setTopik(match.id.toString());
+        msg += "\nAku sudah bantu memilihkan topik tersebut di formulir untukmu! ✅";
+      } else {
+        msg += "\nSilakan pilih topik yang paling mendekati di formulir ya!";
+      }
+      
+      botReply(msg, INITIAL_BUTTONS, 1000);
+    } catch (err) {
+      botReply("Maaf, aku sedang kesulitan menganalisis tiketmu saat ini. Silakan pilih topik secara manual ya.", INITIAL_BUTTONS);
     }
   }
 
   function handleCbPick(item) {
     if (!cbButtons || cbTyping) return;
-    if (cbButtons.type === "category") handleCbCategory(item);
+    if (item.id === "analyze-ticket") handleAnalyzeTicket();
+    else if (cbButtons.type === "category") handleCbCategory(item);
     else if (cbButtons.type === "question") handleCbQuestion(item);
     else if (cbButtons.type === "followup") handleCbFollowUp(item);
   }
@@ -286,7 +328,7 @@ export default function BuatTiketPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
@@ -382,7 +424,7 @@ export default function BuatTiketPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} noValidate>
+              <div className="bt-form-fields">
                 <div className="bt-field">
                   <label className="bt-label">Topik Bantuan <span className="required">*</span></label>
                   <select
@@ -432,6 +474,7 @@ export default function BuatTiketPage() {
                     type="datetime-local"
                     className={`bt-input ${errors.waktuKejadian ? "has-error" : ""}`}
                     value={waktuKejadian}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     onChange={(e) => {
                       setWaktuKejadian(e.target.value);
                       setErrors(p => ({ ...p, waktuKejadian: "" }));
@@ -457,7 +500,7 @@ export default function BuatTiketPage() {
                   >
                     <input type="file" multiple onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                     <div className="bt-upload-icon">
-                      <AppIcon name="Paperclip" size={26} color="#94a3b8" />
+                      <AppIcon name="Paperclip" size={26} color="var(--gray-400)" />
                     </div>
                     <div className="bt-upload-text">Drag & drop atau klik untuk upload</div>
                     <div className="bt-upload-sub">PDF, DOC, JPG, PNG — Maks. 10MB per file</div>
@@ -476,19 +519,19 @@ export default function BuatTiketPage() {
 
                 <div className="bt-actions">
                   <button type="button" className="bt-btn-cancel" onClick={() => window.history.back()}>Batal</button>
-                  <button type="submit" className="bt-btn-submit" disabled={submitting}>
+                  <button type="button" className="bt-btn-submit" disabled={submitting} onClick={handleSubmit}>
                     {submitting ? <><div className="spinner" /> Mengirim...</> : <><AppIcon name="Ticket" variant="sm" /> Buat Tiket</>}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
 
           {/* Chatbot — FAQ-based (sama seperti ChatbotPage) */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
-              <div className="chatbot-avatar">
-                <AppIcon name="Bot" size={18} color="white" />
+              <div className="chatbot-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: 'none' }}>
+                <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div className="chatbot-header-info">
                 <div className="chatbot-header-name">BantO__O Assistant</div>
@@ -503,7 +546,7 @@ export default function BuatTiketPage() {
               {cbMessages.map(msg =>
                 msg.from === "bot" ? (
                   <div key={msg.id} className="chat-msg bot">
-                    <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                    <div className="chat-msg-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}><img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                     <div className="chat-msg-bubble" style={{ whiteSpace: "pre-wrap" }}>
                       {msg.node
                         ? msg.node
@@ -522,7 +565,7 @@ export default function BuatTiketPage() {
               {/* typing indicator */}
               {cbTyping && (
                 <div className="chat-msg bot">
-                  <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                  <div className="chat-msg-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}><img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="chat-typing"><span /><span /><span /></div>
                 </div>
               )}
@@ -531,7 +574,7 @@ export default function BuatTiketPage() {
               {!cbTyping && cbButtons && (
                 <div className="chat-msg bot">
                   <div className="chat-msg-avatar" style={{ opacity: 0 }} aria-hidden>
-                    <AppIcon name="Bot" variant="sm" />
+                    <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <div className="chat-quick-replies">
                     {cbButtons.items.map(item => (

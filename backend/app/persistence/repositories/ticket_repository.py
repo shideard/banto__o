@@ -1,5 +1,5 @@
 # backend/app/persistence/repositories/ticket_repository.py
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from typing import List, Optional
 from app.persistence.ticket_orm import TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM, LampiranORM
 from app.persistence.user_orm import NotifikasiORM, UserORM
@@ -26,26 +26,53 @@ class TicketRepository:
         self.db.refresh(tiket)
         return tiket
 
+    def _get_ticket_options(self):
+        return [
+            joinedload(TiketORM.pengajuan).selectinload(PengajuanORM.lampiran),
+            selectinload(TiketORM.komentar).joinedload(KomentarORM.penulis),
+            joinedload(TiketORM.mahasiswa),
+            joinedload(TiketORM.staf),
+        ]
+
     def get_tiket_by_id(self, tiket_id: int) -> Optional[TiketORM]:
         return (
             self.db.query(TiketORM)
-            .options(
-                joinedload(TiketORM.pengajuan).joinedload(PengajuanORM.lampiran),
-                joinedload(TiketORM.komentar),
-                joinedload(TiketORM.mahasiswa),
-                joinedload(TiketORM.staf),
-            )
+            .options(*self._get_ticket_options())
             .filter(TiketORM.id == tiket_id)
             .first()
         )
 
     def get_all_tiket(self) -> List[TiketORM]:
-        return self.db.query(TiketORM).order_by(TiketORM.tanggal_dibuat.desc()).all()
+        return self.db.query(TiketORM).options(*self._get_ticket_options()).order_by(TiketORM.tanggal_dibuat.desc()).all()
 
     def get_tiket_by_mahasiswa_id(self, mahasiswa_id: int) -> List[TiketORM]:
         return (
             self.db.query(TiketORM)
+            .options(*self._get_ticket_options())
             .filter(TiketORM.mahasiswa_id == mahasiswa_id)
+            .order_by(TiketORM.tanggal_dibuat.desc())
+            .all()
+        )
+
+    def get_tiket_by_staf(self, staf_id: int) -> List[TiketORM]:
+        """Ambil semua tiket yang diklaim oleh staf tertentu."""
+        return (
+            self.db.query(TiketORM)
+            .options(*self._get_ticket_options())
+            .filter(TiketORM.staf_id == staf_id)
+            .order_by(TiketORM.tanggal_dibuat.desc())
+            .all()
+        )
+
+    def get_tiket_unclaimed(self) -> List[TiketORM]:
+        """Ambil tiket dengan status DIBUAT dan staf_id NULL."""
+        return (
+            self.db.query(TiketORM)
+            .options(*self._get_ticket_options())
+            .filter(
+                TiketORM.status == "DIBUAT",
+                TiketORM.staf_id.is_(None),
+            )
             .order_by(TiketORM.tanggal_dibuat.desc())
             .all()
         )
