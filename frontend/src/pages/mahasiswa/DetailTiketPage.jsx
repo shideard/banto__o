@@ -161,6 +161,9 @@ const styles = `
     overflow-y: auto;
     background: var(--white);
   }
+  .mdt-form-textarea ul, .mdt-reply-body ul { list-style-type: disc; padding-left: 20px; margin: 8px 0; }
+  .mdt-form-textarea ol, .mdt-reply-body ol { list-style-type: decimal; padding-left: 20px; margin: 8px 0; }
+  .mdt-form-textarea li, .mdt-reply-body li { margin-bottom: 4px; display: list-item; }
   .mdt-form-textarea[contenteditable]:empty:before {
     content: attr(placeholder);
     color: var(--gray-400);
@@ -673,8 +676,11 @@ function formatMarkdownLike(text) {
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/__(.*?)__/g, "<u>$1</u>")
-    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>")
-    .replace(/\n/g, "<br />");
+    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>");
+    
+  res = res.replace(/^[*-]\s+(.*)$/gm, "<li>$1</li>");
+  res = res.replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, "<ul style='padding-left:20px;margin:8px 0'>$1</ul>");
+  res = res.replace(/\n/g, "<br />");
   return { __html: res };
 }
 
@@ -802,7 +808,7 @@ export default function MahasiswaDetailTiketPage() {
       return;
     }
     
-    const cmdMap = { B: "bold", I: "italic", U: "underline" };
+    const cmdMap = { B: "bold", I: "italic", U: "underline", List: "insertUnorderedList" };
     if (cmdMap[type]) {
       document.execCommand(cmdMap[type], false, null);
       setBalasan(editorRef.current?.innerHTML || "");
@@ -819,40 +825,23 @@ export default function MahasiswaDetailTiketPage() {
       ]);
       setTiket(dataTiket);
       
-      let grouped = [];
+      let ungrouped = [];
       if (Array.isArray(dataRiwayat)) {
+        dataRiwayat.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
         for (const item of dataRiwayat) {
           item.nama = item.nama_penulis || item.role;
           item.tipe = item.role === "Staff Administrasi" ? "staf" : item.role === "Mahasiswa" ? "user" : "sistem";
           
           const lmp = parseLampiran(item.isi);
-          
-          if (grouped.length > 0) {
-            const last = grouped[grouped.length - 1];
-            if (last.penulis_id === item.penulis_id && last.tipe === item.tipe && last.tipe !== "sistem") {
-              if (lmp) {
-                 if (!last.lampiran_list) last.lampiran_list = [];
-                 last.lampiran_list.push(lmp);
-              } else {
-                 if (last.isi && !last.isi.startsWith("[FILE]")) {
-                   last.isi += "\n\n" + item.isi;
-                 } else {
-                   last.isi = item.isi;
-                 }
-              }
-              continue;
-            }
-          }
-          
           const newItem = { ...item, lampiran_list: lmp ? [lmp] : [] };
           if (lmp) {
              newItem.isi = null;
           }
-          grouped.push(newItem);
+          ungrouped.push(newItem);
         }
       }
       
-      setRiwayat(grouped);
+      setRiwayat(ungrouped);
     } catch {
       setError("Gagal memuat data tiket. Coba muat ulang halaman.");
     } finally {
@@ -1088,6 +1077,9 @@ export default function MahasiswaDetailTiketPage() {
                   <button className="mdt-toolbar-btn" title="Italic" onClick={() => handleFormat("I")}><em>I</em></button>
                   <button className="mdt-toolbar-btn" title="Underline" onClick={() => handleFormat("U")}><u>U</u></button>
                   <div className="mdt-toolbar-divider" />
+                  <button className="mdt-toolbar-btn" title="Bullet list" onClick={() => handleFormat("List")}>
+                    <AppIcon name="List" variant="sm" />
+                  </button>
                   <button className="mdt-toolbar-btn" title="Link" onClick={() => handleFormat("Link")}>
                     <AppIcon name="Link" variant="sm" />
                   </button>

@@ -449,7 +449,7 @@ export default function LoginPage() {
     setErrors({});
     setLoading(true);
     try {
-      const data = await login(email, password);
+      const data = await login(email, password, role);
       if (data.role === "mahasiswa") navigate("/dashboard");
       else if (data.role === "staf") navigate("/staff/dashboard");
       else navigate("/login");

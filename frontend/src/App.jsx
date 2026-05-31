@@ -55,8 +55,6 @@ import AntreanTiketPage from "./pages/Staf/AntreanTiketPage";
 
 import DetailTiketStafPage from "./pages/Staf/DetailTiketStafPage";
 
-import BuatTiketStafPage from "./pages/Staf/BuatTiketStafPage";
-
 import ProfilStafPage from "./pages/Staf/ProfilStafPage";
 
 
@@ -168,8 +166,6 @@ function AppRoutes() {
         <Route path="/staff/tugas-saya" element={<TugasSayaPage />} />
 
         <Route path="/staff/antrean-tiket" element={<AntreanTiketPage />} />
-
-        <Route path="/staff/buat-tiket" element={<BuatTiketStafPage />} />
 
         <Route path="/staff/tiket/:id" element={<DetailTiketStafPage />} />
 

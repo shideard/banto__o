@@ -333,6 +333,10 @@ const styles = `
     line-height: 1.7;
     box-sizing: border-box;
   }
+  .dt-form-textarea ul, .dt-reply-body ul { list-style-type: disc; padding-left: 20px; margin: 8px 0; }
+  .dt-form-textarea ol, .dt-reply-body ol { list-style-type: decimal; padding-left: 20px; margin: 8px 0; }
+  .dt-form-textarea li, .dt-reply-body li { margin-bottom: 4px; display: list-item; }
+  .dt-form-textarea[contenteditable]:empty:before { content: attr(placeholder); color: var(--gray-400); cursor: text; }
   .dt-form-textarea::placeholder { color: var(--gray-400); }
   .dt-form-upload-row {
     padding: 10px 20px;
@@ -1208,8 +1212,11 @@ function formatMarkdownLike(text) {
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/__(.*?)__/g, "<u>$1</u>")
-    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>")
-    .replace(/\n/g, "<br />");
+    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>");
+    
+  res = res.replace(/^[*-]\s+(.*)$/gm, "<li>$1</li>");
+  res = res.replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, "<ul style='padding-left:20px;margin:8px 0'>$1</ul>");
+  res = res.replace(/\n/g, "<br />");
   return { __html: res };
 }
 
@@ -1362,7 +1369,12 @@ export default function StafDetailTiketPage() {
         ticketService.getRiwayat(id),
       ]);
       setTiket(dataTiket);
-      setRiwayat(Array.isArray(dataRiwayat) ? dataRiwayat : []);
+      if (Array.isArray(dataRiwayat)) {
+         dataRiwayat.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
+         setRiwayat(dataRiwayat);
+      } else {
+         setRiwayat([]);
+      }
     } catch {
       setError("Gagal memuat data tiket. Coba muat ulang halaman.");
     } finally {

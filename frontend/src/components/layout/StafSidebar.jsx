@@ -6,7 +6,6 @@ import ticketService from "../../services/ticketService";
 const MENU_ITEMS = [
   { to: "/staff/dashboard",     icon: "LayoutDashboard", label: "Dashboard" },
   { to: "/staff/tugas-saya",    icon: "Ticket",          label: "Tiket Saya", badgeKey: "myTickets" },
-  { to: "/staff/buat-tiket",    icon: "PlusCircle",      label: "Buat Tiket" },
   { to: "/staff/antrean-tiket", icon: "ClipboardList",   label: "Antrean Tiket", badgeKey: "unclaimedTickets", badgeClass: "orange" },
 ];
 
