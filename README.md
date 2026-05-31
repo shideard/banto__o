@@ -3,8 +3,8 @@
 **BantO__O** adalah sebuah Sistem Layanan Tiket Pengaduan dan Bantuan Akademik untuk mahasiswa IPB University. Aplikasi ini dirancang untuk memfasilitasi komunikasi antara mahasiswa dan staf administrasi kampus dalam menyelesaikan permasalahan akademik maupun non-akademik.
 
 ## Oleh:
-- Mutia Saniya Rahma (G6401231002): Project Manager, Frontend Developer, UI/UX Designer
-- Tiska Walida Nafisa (G6401231008): UI/UX Designer, Frontend Developer
+- Mutia Saniya Rahma (G6401231002): Project Manager 2, Frontend Developer, UI/UX Designer
+- Tiska Walida Nafisa (G6401231008): Project Manager 1, UI/UX Designer, Frontend Developer
 - Deshi Ardiani (G6401231018): Backend Developer, Database
 
 ## ✨ Fitur Utama
