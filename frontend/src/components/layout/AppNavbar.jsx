@@ -192,12 +192,7 @@ export default function AppNavbar({ onToggleSidebar }) {
                     <button className="user-menu-item" onClick={() => { navigate(role === 'staf' ? '/staff/profil' : '/profil'); setUserOpen(false); }}>
                       <AppIcon name="UserCircle" variant="sm" /> Profil Saya
                     </button>
-                    <button className="user-menu-item" onClick={() => { navigate(role === 'staf' ? '/staff/profil' : '/profil'); setUserOpen(false); }}>
-                      <AppIcon name="Settings"   variant="sm" /> Pengaturan
-                    </button>
-                    <button className="user-menu-item" onClick={() => { navigate('/chatbot'); setUserOpen(false); }}>
-                      <AppIcon name="HelpCircle" variant="sm" /> Bantuan
-                    </button>
+
                     <div className="user-menu-divider" />
                     <button className="user-menu-item danger" onClick={handleLogout}>
                       <AppIcon name="LogOut" variant="sm" /> Keluar

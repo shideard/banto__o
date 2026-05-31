@@ -247,19 +247,7 @@ const styles = `
     color: var(--color-gray-700);
   }
 
-  /* Lupa kata sandi */
-  .forgot {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-brand);
-    padding: 0;
-    transition: color 0.15s;
-  }
-  .forgot:hover { color: var(--color-brand-dark); }
+
 
   /* Input wrapper */
   .input-wrap { position: relative; }
@@ -605,9 +593,6 @@ export default function LoginPage() {
               <div className="field">
                 <div className="field-lbl">
                   <span>Kata Sandi</span>
-                  <button type="button" className="forgot">
-                    Lupa kata sandi?
-                  </button>
                 </div>
                 <div className="input-wrap">
                   <span className="input-icon">
