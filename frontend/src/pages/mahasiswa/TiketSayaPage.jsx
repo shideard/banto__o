@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
+import { TOKEN_KEY } from "../../utils/constants";
 
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
@@ -267,7 +268,7 @@ export default function TiketSayaPage() {
   const [selectedTicket, setSelectedTicket] = useState(null);
 
   // Perbaikan error warning: Cek token di awal sebelum render, lalu set nilai awal state loading
-  const hasToken = Boolean(localStorage.getItem("banto_token"));
+  const hasToken = Boolean(localStorage.getItem(TOKEN_KEY));
   const [loading, setLoading] = useState(hasToken);
 
   useEffect(() => {
