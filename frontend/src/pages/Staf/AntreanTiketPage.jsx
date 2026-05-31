@@ -31,13 +31,16 @@ const styles = `
   .antrean-search input { border: none; background: transparent; font-size: 13px; color: var(--gray-700); outline: none; font-family: var(--font-sans); width: 100%; }
   .antrean-search input::placeholder { color: var(--gray-400); }
 
+  .antrean-table-scroll { overflow-x: auto; }
   .antrean-table-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 14px; overflow: hidden; }
-  table.antrean-table { width: 100%; border-collapse: collapse; text-align: left; }
-  table.antrean-table th { padding: 12px 20px; font-size: 11px; font-weight: 700; color: var(--gray-500); background: var(--gray-50); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid var(--gray-200); }
+  table.antrean-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+  table.antrean-table th { padding: 12px 20px; font-size: 11px; font-weight: 700; color: var(--gray-500); background: var(--gray-50); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid var(--gray-200); white-space: nowrap; }
   table.antrean-table td { padding: 14px 20px; font-size: 13.5px; color: var(--gray-900); border-bottom: 1.5px solid var(--gray-100); vertical-align: middle; }
   table.antrean-table tr:last-child td { border-bottom: none; }
   .antrean-ticket-id { font-weight: 700; color: var(--color-brand); font-size: 13px; text-decoration: none; }
   .antrean-ticket-id:hover { text-decoration: underline; }
+
+  .tugas-label { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
   .staf-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
   .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
@@ -175,11 +178,13 @@ export default function AntreanTiketPage() {
 
         {/* Table */}
         <div className="antrean-table-card">
+          <div className="antrean-table-scroll">
           <table className="antrean-table">
             <thead>
               <tr>
                 <th>ID Tiket</th>
-                <th>Subjek</th>
+                <th>Subjek & Topik</th>
+                <th>Prioritas</th>
                 <th>Status</th>
                 <th>Dibuat</th>
                 <th>Aksi</th>
@@ -187,12 +192,12 @@ export default function AntreanTiketPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr className="state-row"><td colSpan="5" style={{ color: "var(--gray-400)" }}>⏳ Memuat data...</td></tr>
+                <tr className="state-row"><td colSpan="6" style={{ color: "var(--gray-400)" }}>⏳ Memuat data...</td></tr>
               ) : error ? (
-                <tr className="state-row"><td colSpan="5" style={{ color: "#dc2626" }}>{error}</td></tr>
+                <tr className="state-row"><td colSpan="6" style={{ color: "#dc2626" }}>{error}</td></tr>
               ) : paginated.length === 0 ? (
                 <tr className="state-row">
-                  <td colSpan="5" style={{ color: "var(--gray-400)" }}>
+                  <td colSpan="6" style={{ color: "var(--gray-400)" }}>
                     {tab === "belum" ? "✅ Semua tiket sudah diklaim." : "Tidak ada tiket ditemukan."}
                   </td>
                 </tr>
@@ -201,11 +206,25 @@ export default function AntreanTiketPage() {
                   <td>
                     <Link to={`/staff/tiket/${t.id}`} className="antrean-ticket-id">#{t.id}</Link>
                   </td>
-                  <td style={{ fontWeight: 600 }}>{t.subjek}</td>
+                  <td>
+                    <div style={{ fontWeight: 600, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {t.subjek}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{t.kategori_nama || "Tanpa Topik"} &bull; {t.mahasiswa?.nama || t.nama_pelapor || "Mahasiswa"}</div>
+                  </td>
+                  <td>
+                    <span className="tugas-label" style={{ 
+                      background: t.prioritas === 'Penting' ? '#fef2f2' : t.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                      color: t.prioritas === 'Penting' ? '#dc2626' : t.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                      border: `1px solid ${t.prioritas === 'Penting' ? '#fecaca' : t.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`
+                    }}>
+                      {t.prioritas || "Normal"}
+                    </span>
+                  </td>
                   <td>
                     <span className={`staf-status-pill pill-${t.status}`}>{t.status}</span>
                   </td>
-                  <td style={{ fontSize: 13, color: "var(--gray-500)" }}>
+                  <td style={{ fontSize: 13, color: "var(--gray-500)", whiteSpace: "nowrap" }}>
                     {t.tanggal_dibuat
                       ? new Date(t.tanggal_dibuat).toLocaleDateString("id-ID")
                       : "—"}
@@ -224,6 +243,7 @@ export default function AntreanTiketPage() {
               ))}
             </tbody>
           </table>
+          </div>
 
           <div className="antrean-table-footer">
             <span>Menampilkan {paginated.length} dari {filtered.length} tiket</span>

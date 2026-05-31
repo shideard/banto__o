@@ -24,8 +24,8 @@ function parseText(text) {
 function BotBubble({ children }) {
   return (
     <div className="cb-msg-row cb-bot">
-      <div className="cb-avatar-sm">
-        <AppIcon name="Bot" variant="md" />
+      <div className="cb-avatar-sm" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+        <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div className="cb-bubble cb-bubble-bot">{children}</div>
     </div>
@@ -82,7 +82,7 @@ export default function ChatbotPage() {
     type: "category",
     items: CATEGORY_ITEMS,
   });
-  const [typing, setTyping]               = useState(false);
+  const [typing, setTyping] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
   const bottomRef = useRef(null);
 
@@ -149,7 +149,7 @@ export default function ChatbotPage() {
     const followUpBtns = {
       type: "followup",
       items: [
-        { id: "more-same",     label: "Pertanyaan lain di kategori ini" },
+        { id: "more-same", label: "Pertanyaan lain di kategori ini" },
         { id: "back-category", label: "Kembali ke menu utama" },
       ],
     };
@@ -204,8 +204,8 @@ export default function ChatbotPage() {
 
         {/* HEADER */}
         <div className="cb-header">
-          <div className="cb-header-avatar">
-            <AppIcon name="Bot" size={22} />
+          <div className="cb-header-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+            <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <div className="cb-header-name">BantO__O Assistant</div>
@@ -233,8 +233,8 @@ export default function ChatbotPage() {
           {/* typing indicator */}
           {typing && (
             <div className="cb-msg-row cb-bot">
-              <div className="cb-avatar-sm">
-                <AppIcon name="Bot" variant="md" />
+              <div className="cb-avatar-sm" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+                <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div className="cb-typing">
                 <span /><span /><span />
@@ -247,7 +247,7 @@ export default function ChatbotPage() {
             <div className="cb-msg-row cb-bot">
               {/* spacer agar tombol sejajar dengan bubble */}
               <div className="cb-avatar-sm" style={{ opacity: 0 }} aria-hidden>
-                <AppIcon name="Bot" variant="md" />
+                <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <QuickBtns
                 items={activeButtons.items}
@@ -296,7 +296,7 @@ const CSS = `
     box-shadow: var(--shadow-sm);
   }
   .cb-header-avatar {
-    width: 46px; height: 46px;
+    width: 60px; height: 60px;
     background: linear-gradient(135deg, var(--color-brand-darkest), var(--color-brand));
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -326,7 +326,7 @@ const CSS = `
 
   /* AVATARS */
   .cb-avatar-sm {
-    width: 34px; height: 34px; flex-shrink: 0;
+    width: 70px; height: 70px; flex-shrink: 0;
     background: var(--color-info-bg);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;

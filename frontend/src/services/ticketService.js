@@ -71,9 +71,12 @@ class TicketService {
     return res.data;
   }
 
-  async uploadFile(tiketId, file) {
+  async uploadFile(tiketId, file, waktu) {
     const formData = new FormData();
     formData.append("file", file);
+    if (waktu) {
+      formData.append("waktu", waktu);
+    }
     const res = await apiClient.post(`/tiket/${tiketId}/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -87,6 +90,11 @@ class TicketService {
 
   async kirimBalasan(tiketId, payload) {
     const res = await apiClient.post(`/tiket/${tiketId}/komentar`, payload);
+    return res.data;
+  }
+
+  async askChatbot(tanya) {
+    const res = await apiClient.post("/chatbot", { tanya });
     return res.data;
   }
 }

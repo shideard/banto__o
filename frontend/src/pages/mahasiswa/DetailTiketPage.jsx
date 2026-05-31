@@ -158,8 +158,14 @@ const styles = `
     border: none; outline: none; resize: none;
     font-family: var(--font-sans);
     font-size: 14px; color: var(--gray-700); line-height: 1.7; box-sizing: border-box;
+    overflow-y: auto;
+    background: var(--white);
   }
-  .mdt-form-textarea::placeholder { color: var(--gray-400); }
+  .mdt-form-textarea[contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: var(--gray-400);
+    cursor: text;
+  }
   .mdt-form-upload-row {
     padding: 10px 20px; border-top: 1.5px solid var(--gray-200);
     display: flex; align-items: center; gap: 8px;
@@ -657,6 +663,17 @@ function PreviewModal({ file, onClose }) {
   );
 }
 
+function formatMarkdownLike(text) {
+  if (!text) return { __html: "" };
+  let res = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/__(.*?)__/g, "<u>$1</u>")
+    .replace(/\[(.*?)\]\((.*?)\)/g, "<a href='$2' target='_blank' rel='noreferrer'>$1</a>")
+    .replace(/\n/g, "<br />");
+  return { __html: res };
+}
+
 // ─── Item riwayat ──────────────────────────────────────────────
 function RiwayatItem({ item }) {
   if (item.tipe === "sistem") {
@@ -674,8 +691,6 @@ function RiwayatItem({ item }) {
   }
 
   const isStaf = item.tipe === "staf";
-  const lampiran = parseLampiran(item.isi);
-  const isiTeks = lampiran ? null : item.isi;
 
   return (
     <div className={`mdt-reply-card ${isStaf ? "from-staf" : ""}`}>
@@ -687,44 +702,54 @@ function RiwayatItem({ item }) {
         <div className="mdt-reply-time">{formatTanggal(item.waktu)}</div>
       </div>
 
-      {/* Teks balasan (jika bukan komentar file) */}
-      {isiTeks && (
-        <div className="mdt-reply-body">{isiTeks}</div>
+      {/* Teks balasan */}
+      {item.isi && (
+        <div className="mdt-reply-body" dangerouslySetInnerHTML={formatMarkdownLike(item.isi)} />
       )}
 
       {/* Lampiran — gambar inline atau chip file */}
-      {lampiran && (
+      {item.lampiran_list && item.lampiran_list.length > 0 && (
         <div className="mdt-lampiran-wrap">
           <div className="mdt-lampiran-label">
-            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN
+            <AppIcon name="Paperclip" variant="sm" /> LAMPIRAN ({item.lampiran_list.length})
           </div>
-          {isImage(lampiran.nama) ? (
-            <img
-              src={lampiran.url}
-              alt={lampiran.nama}
-              className="mdt-lampiran-img"
-              onError={(e) => { e.target.style.display = "none"; }}
-            />
-          ) : (
-            <a
-              href={lampiran.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mdt-file-chip"
-              title={`Buka ${lampiran.nama} di tab baru`}
-            >
-              <div className={`mdt-file-chip-icon ${lampiran.nama.toLowerCase().endsWith(".pdf") ? "mdt-file-chip-pdf" : ""}`}>
-                <AppIcon
-                  name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
-                  size={15}
-                  color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"}
-                />
-              </div>
-              <span className="mdt-file-chip-name">{lampiran.nama}</span>
-              <span className="mdt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
-              <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
-            </a>
-          )}
+          <div className="mdt-lampiran-list">
+            {item.lampiran_list.map((lampiran, i) => {
+              if (isImage(lampiran.nama)) {
+                return (
+                  <img
+                    key={i}
+                    src={lampiran.url}
+                    alt={lampiran.nama}
+                    className="mdt-lampiran-img"
+                    onError={(e) => { e.target.style.display = "none"; }}
+                  />
+                )
+              } else {
+                return (
+                  <a
+                    key={i}
+                    href={lampiran.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mdt-file-chip"
+                    title={`Buka ${lampiran.nama} di tab baru`}
+                  >
+                    <div className={`mdt-file-chip-icon ${lampiran.nama.toLowerCase().endsWith(".pdf") ? "mdt-file-chip-pdf" : ""}`}>
+                      <AppIcon
+                        name={lampiran.nama.toLowerCase().endsWith(".pdf") ? "FileText" : "File"}
+                        size={15}
+                        color={lampiran.nama.toLowerCase().endsWith(".pdf") ? "#dc2626" : "var(--color-brand)"}
+                      />
+                    </div>
+                    <span className="mdt-file-chip-name">{lampiran.nama}</span>
+                    <span className="mdt-file-chip-ext">{getFileExt(lampiran.nama)}</span>
+                    <AppIcon name="ExternalLink" size={13} color="var(--gray-400)" />
+                  </a>
+                )
+              }
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -736,6 +761,7 @@ export default function MahasiswaDetailTiketPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const fileInputRef = useRef(null);
+  const editorRef = useRef(null);
 
   const [tiket, setTiket]       = useState(null);
   const [riwayat, setRiwayat]   = useState([]);
@@ -744,6 +770,7 @@ export default function MahasiswaDetailTiketPage() {
 
   const [balasan, setBalasan]   = useState("");
   const [file, setFile]         = useState(null);
+  const [waktuBalasan, setWaktuBalasan] = useState("");
   // ★ BARU — menyimpan { nama, url } untuk preview sebelum kirim
   const [selLmp, setSelLmp]     = useState(null);
   const [mengirim, setMengirim] = useState(false);
@@ -751,6 +778,30 @@ export default function MahasiswaDetailTiketPage() {
 
   // State untuk preview modal
   const [previewFile, setPreviewFile] = useState(null);
+
+  const handleFormat = (type) => {
+    if (type === "Gambar") {
+      fileInputRef.current?.click();
+      return;
+    }
+    
+    editorRef.current?.focus();
+    
+    if (type === "Link") {
+      const url = prompt("Masukkan URL link:", "https://");
+      if (url) {
+        document.execCommand("createLink", false, url);
+        setBalasan(editorRef.current?.innerHTML || "");
+      }
+      return;
+    }
+    
+    const cmdMap = { B: "bold", I: "italic", U: "underline" };
+    if (cmdMap[type]) {
+      document.execCommand(cmdMap[type], false, null);
+      setBalasan(editorRef.current?.innerHTML || "");
+    }
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -761,7 +812,41 @@ export default function MahasiswaDetailTiketPage() {
         ticketService.getRiwayat(id),
       ]);
       setTiket(dataTiket);
-      setRiwayat(Array.isArray(dataRiwayat) ? dataRiwayat : []);
+      
+      let grouped = [];
+      if (Array.isArray(dataRiwayat)) {
+        for (const item of dataRiwayat) {
+          item.nama = item.nama_penulis || item.role;
+          item.tipe = item.role === "Staff Administrasi" ? "staf" : item.role === "Mahasiswa" ? "user" : "sistem";
+          
+          const lmp = parseLampiran(item.isi);
+          
+          if (grouped.length > 0) {
+            const last = grouped[grouped.length - 1];
+            if (last.penulis_id === item.penulis_id && last.tipe === item.tipe && last.tipe !== "sistem") {
+              if (lmp) {
+                 if (!last.lampiran_list) last.lampiran_list = [];
+                 last.lampiran_list.push(lmp);
+              } else {
+                 if (last.isi && !last.isi.startsWith("[FILE]")) {
+                   last.isi += "\n\n" + item.isi;
+                 } else {
+                   last.isi = item.isi;
+                 }
+              }
+              continue;
+            }
+          }
+          
+          const newItem = { ...item, lampiran_list: lmp ? [lmp] : [] };
+          if (lmp) {
+             newItem.isi = null;
+          }
+          grouped.push(newItem);
+        }
+      }
+      
+      setRiwayat(grouped);
     } catch {
       setError("Gagal memuat data tiket. Coba muat ulang halaman.");
     } finally {
@@ -777,16 +862,19 @@ export default function MahasiswaDetailTiketPage() {
       setMengirim(true);
       setErrKirim(null);
 
-      // Pisahkan: kirim teks dulu (jika ada), lalu upload file (jika ada)
+      const isoWaktu = waktuBalasan ? new Date(waktuBalasan).toISOString() : null;
+
       if (balasan.trim()) {
-        await ticketService.kirimBalasan(id, { isi: balasan });
+        await ticketService.kirimBalasan(id, { isi: balasan, waktu: isoWaktu });
       }
 
       if (file) {
-        await ticketService.uploadFile(id, file);
+        await ticketService.uploadFile(id, file, isoWaktu);
       }
 
       setBalasan("");
+      if (editorRef.current) editorRef.current.innerHTML = "";
+      setWaktuBalasan("");
       clearFile();
       await fetchData();
     } catch (err) {
@@ -927,9 +1015,12 @@ export default function MahasiswaDetailTiketPage() {
               {/* Lampiran dari pengajuan awal */}
               {tiket.pengajuan?.lampiran?.length > 0 && (
                 <div className="mdt-lampiran-wrap" style={{ marginTop: 16 }}>
-                  <div className="mdt-lampiran-label">
-                    <AppIcon name="Paperclip" variant="sm" />
-                    LAMPIRAN ({tiket.pengajuan.lampiran.length})
+                  <div style={{ display: "flex", alignItems: "center", margin: "24px 0 16px" }}>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
+                    <div style={{ padding: "0 16px", fontSize: 11, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Lampiran dari {namaPelapor}
+                    </div>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {tiket.pengajuan.lampiran.map((lmp, idx) => {
@@ -987,26 +1078,42 @@ export default function MahasiswaDetailTiketPage() {
                 <div className="mdt-form-title">Tulis Balasan</div>
 
                 <div className="mdt-form-toolbar">
-                  <button className="mdt-toolbar-btn" title="Bold"><strong>B</strong></button>
-                  <button className="mdt-toolbar-btn" title="Italic"><em>I</em></button>
-                  <button className="mdt-toolbar-btn" title="Underline"><u>U</u></button>
+                  <button className="mdt-toolbar-btn" title="Bold" onClick={() => handleFormat("B")}><strong>B</strong></button>
+                  <button className="mdt-toolbar-btn" title="Italic" onClick={() => handleFormat("I")}><em>I</em></button>
+                  <button className="mdt-toolbar-btn" title="Underline" onClick={() => handleFormat("U")}><u>U</u></button>
                   <div className="mdt-toolbar-divider" />
-                  <button className="mdt-toolbar-btn" title="Bullet list">
-                    <AppIcon name="List" variant="sm" />
-                  </button>
-                  <button className="mdt-toolbar-btn" title="Link">
+                  <button className="mdt-toolbar-btn" title="Link" onClick={() => handleFormat("Link")}>
                     <AppIcon name="Link" variant="sm" />
                   </button>
-                  <button className="mdt-toolbar-btn" title="Gambar">
+                  <button className="mdt-toolbar-btn" title="Gambar" onClick={() => handleFormat("Gambar")}>
                     <AppIcon name="Image" variant="sm" />
                   </button>
                 </div>
 
-                <textarea
+                <div style={{ padding: "12px 20px 0" }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "var(--gray-500)", display: "block", marginBottom: 6 }}>
+                    Waktu Komentar (Opsional)
+                  </label>
+                  <input 
+                    type="datetime-local" 
+                    value={waktuBalasan}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                    onChange={e => setWaktuBalasan(e.target.value)}
+                    style={{ 
+                      padding: "8px 12px", border: "1.5px solid var(--gray-200)", 
+                      borderRadius: 8, fontSize: 13, color: "var(--gray-700)", outline: "none",
+                      fontFamily: "var(--font-sans)", width: "100%", boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div
+                  ref={editorRef}
                   className="mdt-form-textarea"
+                  contentEditable
+                  suppressContentEditableWarning
                   placeholder="Tambahkan informasi atau lampiran tambahan untuk staf..."
-                  value={balasan}
-                  onChange={e => setBalasan(e.target.value)}
+                  onInput={e => setBalasan(e.currentTarget.innerHTML)}
                 />
 
                 <div className="mdt-form-upload-row" onClick={() => fileInputRef.current?.click()}>
@@ -1140,7 +1247,7 @@ export default function MahasiswaDetailTiketPage() {
                   <span className={`mdt-status-pill ${pillClass}`}>{tiket.status}</span>
                 </div>
                 <div className="mdt-detail-row">
-                  <span className="mdt-detail-key">Kategori</span>
+                  <span className="mdt-detail-key">Topik Bantuan</span>
                   <span className="mdt-badge-kategori">{tiket.kategori_nama || tiket.kategori || "—"}</span>
                 </div>
                 {tiket.prioritas && tiket.prioritas !== "Normal" && (

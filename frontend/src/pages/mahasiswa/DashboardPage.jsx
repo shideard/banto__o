@@ -282,8 +282,8 @@ export default function DashboardPage() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Subjek</th>
-                <th>Kategori</th>
+                <th>Subjek & Topik</th>
+                <th>Prioritas</th>
                 <th>Status</th>
                 <th>Dibuat</th>
               </tr>
@@ -292,12 +292,21 @@ export default function DashboardPage() {
               {tickets.length > 0 ? (
                 tickets.slice(0, 4).map((ticket, idx) => (
                   <tr key={idx}>
-                    <td className="td-id">{ticket.id}</td>
+                    <td className="td-id">#{ticket.id}</td>
                     <td className="td-subjek">
-                      <p>{ticket.subjek}</p>
-                      <span>{String(ticket.kategori_id || "").split(" & ")[0]}</span>
+                      <p style={{ margin: 0 }}>{ticket.subjek}</p>
+                      <span style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{ticket.kategori_nama || "Tanpa Topik"}</span>
                     </td>
-                    <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori_id || "—"}</td>
+                    <td>
+                      <span className="tugas-label" style={{ 
+                        background: ticket.prioritas === 'Penting' ? '#fef2f2' : ticket.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                        color: ticket.prioritas === 'Penting' ? '#dc2626' : ticket.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                        border: `1px solid ${ticket.prioritas === 'Penting' ? '#fecaca' : ticket.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`,
+                        padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                      }}>
+                        {ticket.prioritas || "Normal"}
+                      </span>
+                    </td>
                     <td>
                       <span className={`status-pill ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
                     </td>

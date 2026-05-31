@@ -17,9 +17,15 @@ app = FastAPI(title="Banto__o API - IPB Help Center")
 ticket_orm.Base.metadata.create_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://banto-o.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -78,7 +78,7 @@ const styles = `
 
   .bt-chatbot { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); position: sticky; top: 20px; display: flex; flex-direction: column; height: 560px; }
   .bt-chatbot-header { padding: 16px 18px; background: linear-gradient(135deg, var(--ipb-blue-dark), var(--ipb-blue-mid)); display: flex; align-items: center; gap: 10px; }
-  .chatbot-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
+  .chatbot-avatar { width: 70px; height: 70px; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
   .chatbot-header-name { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 3px; }
   .chatbot-header-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255,255,255,0.65); }
   .chatbot-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,0.6); animation: pulse 2s infinite; }
@@ -86,7 +86,7 @@ const styles = `
   .bt-chatbot-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--gray-50); }
   .chat-msg { display: flex; gap: 8px; animation: fadeIn 0.2s ease both; }
   .chat-msg.user { flex-direction: row-reverse; }
-  .chat-msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .chat-msg-avatar { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
   .chat-msg.bot .chat-msg-avatar { background: linear-gradient(135deg, var(--ipb-blue), var(--ipb-sky)); }
   .chat-msg.user .chat-msg-avatar { background: var(--gray-200); }
   .chat-msg-bubble { max-width: 78%; padding: 10px 13px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
@@ -156,6 +156,14 @@ const CATEGORY_ITEMS = faqCategories.map((c) => ({
   icon: c.icon,
 }));
 
+const INITIAL_BUTTONS = {
+  type: "category",
+  items: [
+    { id: "analyze-ticket", label: "Bantu tentukan topik dari tiketku", icon: "🔍" },
+    ...CATEGORY_ITEMS
+  ]
+};
+
 export default function BuatTiketPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -175,7 +183,7 @@ export default function BuatTiketPage() {
   const [cbMessages, setCbMessages] = useState([
     { id: "greeting", from: "bot", text: GREETING },
   ]);
-  const [cbButtons, setCbButtons]   = useState({ type: "category", items: CATEGORY_ITEMS });
+  const [cbButtons, setCbButtons]   = useState(INITIAL_BUTTONS);
   const [cbTyping, setCbTyping]     = useState(false);
   const [cbCategory, setCbCategory] = useState(null);
   const messagesEndRef = useRef(null);
@@ -258,14 +266,48 @@ export default function BuatTiketPage() {
       setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "Kembali ke menu utama" }]);
       botReply(
         "Tentu! Ada hal lain yang bisa aku bantu? Silakan pilih kategori:",
-        { type: "category", items: CATEGORY_ITEMS }
+        INITIAL_BUTTONS
       );
+    }
+  }
+
+  async function handleAnalyzeTicket() {
+    if (!subjek.trim() && !deskripsi.trim()) {
+      setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "🔍 Bantu tentukan topik dari tiketku" }]);
+      botReply("Oops! Kamu belum mengisi Subjek dan Deskripsi Masalah. Silakan isi dulu ya, nanti aku bantu analisis topiknya! 😉", INITIAL_BUTTONS);
+      return;
+    }
+
+    setCbMessages(prev => [...prev, { id: Date.now(), from: "user", text: "🔍 Bantu tentukan topik dari tiketku" }]);
+    setCbTyping(true);
+    setCbButtons(null);
+
+    try {
+      const query = `${subjek}. ${deskripsi}`;
+      const response = await ticketService.askChatbot(query);
+      const reco = response.rekomendasi_kategori;
+      
+      const match = kategoriList.find(k => k.nama_kategori.toLowerCase() === reco.toLowerCase());
+      
+      let msg = `Berdasarkan isi tiketmu, sepertinya kategori yang paling cocok adalah **${reco}**.`;
+      
+      if (match) {
+        setTopik(match.id.toString());
+        msg += "\nAku sudah bantu memilihkan topik tersebut di formulir untukmu! ✅";
+      } else {
+        msg += "\nSilakan pilih topik yang paling mendekati di formulir ya!";
+      }
+      
+      botReply(msg, INITIAL_BUTTONS, 1000);
+    } catch (err) {
+      botReply("Maaf, aku sedang kesulitan menganalisis tiketmu saat ini. Silakan pilih topik secara manual ya.", INITIAL_BUTTONS);
     }
   }
 
   function handleCbPick(item) {
     if (!cbButtons || cbTyping) return;
-    if (cbButtons.type === "category") handleCbCategory(item);
+    if (item.id === "analyze-ticket") handleAnalyzeTicket();
+    else if (cbButtons.type === "category") handleCbCategory(item);
     else if (cbButtons.type === "question") handleCbQuestion(item);
     else if (cbButtons.type === "followup") handleCbFollowUp(item);
   }
@@ -432,6 +474,7 @@ export default function BuatTiketPage() {
                     type="datetime-local"
                     className={`bt-input ${errors.waktuKejadian ? "has-error" : ""}`}
                     value={waktuKejadian}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     onChange={(e) => {
                       setWaktuKejadian(e.target.value);
                       setErrors(p => ({ ...p, waktuKejadian: "" }));
@@ -487,8 +530,8 @@ export default function BuatTiketPage() {
           {/* Chatbot — FAQ-based (sama seperti ChatbotPage) */}
           <div className="bt-chatbot">
             <div className="bt-chatbot-header">
-              <div className="chatbot-avatar">
-                <AppIcon name="Bot" size={18} color="white" />
+              <div className="chatbot-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: 'none' }}>
+                <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div className="chatbot-header-info">
                 <div className="chatbot-header-name">BantO__O Assistant</div>
@@ -503,7 +546,7 @@ export default function BuatTiketPage() {
               {cbMessages.map(msg =>
                 msg.from === "bot" ? (
                   <div key={msg.id} className="chat-msg bot">
-                    <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                    <div className="chat-msg-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}><img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                     <div className="chat-msg-bubble" style={{ whiteSpace: "pre-wrap" }}>
                       {msg.node
                         ? msg.node
@@ -522,7 +565,7 @@ export default function BuatTiketPage() {
               {/* typing indicator */}
               {cbTyping && (
                 <div className="chat-msg bot">
-                  <div className="chat-msg-avatar"><AppIcon name="Bot" variant="sm" /></div>
+                  <div className="chat-msg-avatar" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}><img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                   <div className="chat-typing"><span /><span /><span /></div>
                 </div>
               )}
@@ -531,7 +574,7 @@ export default function BuatTiketPage() {
               {!cbTyping && cbButtons && (
                 <div className="chat-msg bot">
                   <div className="chat-msg-avatar" style={{ opacity: 0 }} aria-hidden>
-                    <AppIcon name="Bot" variant="sm" />
+                    <img src="/mascot.png" alt="BantO__O" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <div className="chat-quick-replies">
                     {cbButtons.items.map(item => (

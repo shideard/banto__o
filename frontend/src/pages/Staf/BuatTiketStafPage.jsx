@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
@@ -11,7 +10,7 @@ const styles = `
   .staf-breadcrumb a:hover { color: var(--color-brand); }
   .staf-breadcrumb strong { color: var(--gray-700); }
 
-  .buat-tiket-card { padding: 32px 36px; }
+  .buat-tiket-card { padding: 32px 36px; background: var(--white); border-radius: 16px; border: 1.5px solid var(--gray-200); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
   .buat-tiket-card h1 { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; }
   .buat-tiket-card .subtitle { font-size: 14px; color: var(--gray-500); margin-bottom: 28px; line-height: 1.5; }
   .buat-tiket-divider { height: 1.5px; background: var(--gray-100); margin: 24px 0; }
@@ -47,30 +46,22 @@ const styles = `
 
 export default function BuatTiketStafPage() {
   const navigate = useNavigate();
-  // const { user } = useAuth(); // tidak dipakai (sudah disesuaikan oleh backend/JWT)
 
-  const [kategoriList, setKategoriList] = useState([]);
   const [form, setForm] = useState({
     nim: "",
     subjek: "",
-    kategori_id: "",
+    departemen_tujuan: "",
     deskripsi: "",
   });
   const [errors, setErrors]   = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg]     = useState("");
-
-  // Load kategori dari backend
-  useEffect(() => {
-    ticketService.getKategori()
-      .then(res => setKategoriList(Array.isArray(res) ? res : []))
-      .catch(() => {});
-  }, []);
 
   const validate = () => {
     const e = {};
-    if (!form.subjek.trim())    e.subjek    = "Subjek tiket wajib diisi.";
+    if (!form.nim.trim())       e.nim = "NIM Mahasiswa wajib diisi.";
+    if (!form.subjek.trim())    e.subjek = "Subjek wajib diisi.";
+    if (!form.departemen_tujuan) e.departemen_tujuan = "Pilih departemen tujuan.";
     if (!form.deskripsi.trim()) e.deskripsi = "Deskripsi wajib diisi.";
     return e;
   };
@@ -79,28 +70,15 @@ export default function BuatTiketStafPage() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
 
-    try {
-      setSubmitting(true);
-      setErrorMsg("");
-      setSuccessMsg("");
+    setSubmitting(true);
+    setSuccessMsg("");
 
-      const payload = {
-        subjek: form.subjek.trim(),
-        deskripsi: form.deskripsi.trim(),
-        kategori_id: form.kategori_id ? Number(form.kategori_id) : null,
-        // mahasiswa_id diisi dari JWT di backend (current_user.id)
-        // Jika staf membuat atas nama mahasiswa, perlu endpoint berbeda
-        // Untuk sementara, tiket dibuat atas nama staf yang login
-      };
-
-      await ticketService.createTicketByStaf(payload);
-      setSuccessMsg("Tiket berhasil dibuat! Mengalihkan ke dashboard...");
-      setTimeout(() => navigate("/staff/dashboard"), 1500);
-    } catch (err) {
-      setErrorMsg(err?.response?.data?.detail || "Gagal membuat tiket. Coba lagi.");
-    } finally {
+    // Simulate sending data to another department
+    setTimeout(() => {
+      setSuccessMsg(`Tiket keluhan/permintaan dari mahasiswa (${form.nim}) berhasil diteruskan ke ${form.departemen_tujuan}.`);
       setSubmitting(false);
-    }
+      setTimeout(() => navigate("/staff/dashboard"), 2500);
+    }, 1200);
   };
 
   const handleChange = (field, val) => {
@@ -114,69 +92,72 @@ export default function BuatTiketStafPage() {
       <main className="staf-main">
         <div className="staf-breadcrumb">
           <Link to="/staff/dashboard">Dashboard</Link><span>›</span>
-          <strong>Buat Tiket Baru</strong>
+          <strong>Teruskan Tiket</strong>
         </div>
 
         <div className="buat-tiket-card">
-          <h1>Buat Tiket</h1>
+          <h1>Teruskan Keluhan Mahasiswa</h1>
           <div className="subtitle">
-            Buat tiket permintaan layanan atau keluhan.<br />
-            Tiket akan diproses oleh tim staf yang tersedia.
+            Form ini digunakan untuk meneruskan keluhan atau permintaan mahasiswa yang membutuhkan tindak lanjut lebih lanjut seperti pembuatan surat, persetujuan dekanat, atau penanganan bagian terkait.
           </div>
 
-          {successMsg && <div className="success-banner">✅ {successMsg}</div>}
-          {errorMsg   && <div className="error-banner">❌ {errorMsg}</div>}
+          {successMsg && <div className="success-banner"><AppIcon name="CheckCircle" variant="sm" /> {successMsg}</div>}
 
-          {/* NIM (opsional - untuk referensi) */}
+          {/* NIM */}
           <div className="form-group">
-            <label className="form-label">NIM Mahasiswa <span style={{ color: "var(--gray-400)", fontWeight: 400 }}>(opsional)</span></label>
+            <label className="form-label">NIM Mahasiswa *</label>
             <div className="form-nim-wrap">
-              <span className="search-icon"><AppIcon name="Search" variant="sm" color="var(--gray-400)" /></span>
+              <span className="search-icon"><AppIcon name="User" variant="sm" color="var(--gray-400)" /></span>
               <input
-                className="form-input with-icon"
-                placeholder="Masukkan NIM jika mewakili mahasiswa (Misal: G64190...)"
+                className={`form-input with-icon ${errors.nim ? "error-border" : ""}`}
+                placeholder="Masukkan NIM Mahasiswa yang mengajukan keluhan"
                 value={form.nim}
                 onChange={e => handleChange("nim", e.target.value)}
               />
             </div>
-            <div className="form-hint">ⓘ Kosongkan jika tiket untuk keperluan staf sendiri.</div>
+            {errors.nim && <div className="form-error">{errors.nim}</div>}
           </div>
 
           <div className="buat-tiket-divider" />
 
-          {/* Subjek */}
-          <div className="form-group">
-            <label className="form-label">Subjek Tiket</label>
-            <input
-              className={`form-input ${errors.subjek ? "error-border" : ""}`}
-              placeholder="Tuliskan ringkasan masalah secara singkat"
-              value={form.subjek}
-              onChange={e => handleChange("subjek", e.target.value)}
-            />
-            {errors.subjek && <div className="form-error">{errors.subjek}</div>}
-          </div>
+          <div className="form-row">
+            {/* Subjek */}
+            <div className="form-group">
+              <label className="form-label">Subjek / Topik Utama *</label>
+              <input
+                className={`form-input ${errors.subjek ? "error-border" : ""}`}
+                placeholder="Misal: Permohonan Surat Izin Penelitian"
+                value={form.subjek}
+                onChange={e => handleChange("subjek", e.target.value)}
+              />
+              {errors.subjek && <div className="form-error">{errors.subjek}</div>}
+            </div>
 
-          {/* Kategori */}
-          <div className="form-group">
-            <label className="form-label">Kategori</label>
-            <select
-              className="form-select"
-              value={form.kategori_id}
-              onChange={e => handleChange("kategori_id", e.target.value)}
-            >
-              <option value="">Pilih Kategori</option>
-              {kategoriList.map(k => (
-                <option key={k.id} value={k.id}>{k.nama_kategori}</option>
-              ))}
-            </select>
+            {/* Departemen Tujuan */}
+            <div className="form-group">
+              <label className="form-label">Departemen / Bagian Tujuan *</label>
+              <select
+                className={`form-select ${errors.departemen_tujuan ? "error-border" : ""}`}
+                value={form.departemen_tujuan}
+                onChange={e => handleChange("departemen_tujuan", e.target.value)}
+              >
+                <option value="">Pilih Tujuan</option>
+                <option value="Fakultas / Dekanat">Fakultas / Dekanat</option>
+                <option value="Departemen Akademik">Departemen Akademik</option>
+                <option value="Direktorat Kemahasiswaan">Direktorat Kemahasiswaan</option>
+                <option value="Direktorat Keuangan">Direktorat Keuangan</option>
+                <option value="Tim IT Support">Tim IT Support</option>
+              </select>
+              {errors.departemen_tujuan && <div className="form-error">{errors.departemen_tujuan}</div>}
+            </div>
           </div>
 
           {/* Deskripsi */}
           <div className="form-group">
-            <label className="form-label">Deskripsi Detail</label>
+            <label className="form-label">Deskripsi & Catatan Tindak Lanjut *</label>
             <textarea
               className={`form-textarea ${errors.deskripsi ? "error-border" : ""}`}
-              placeholder="Jelaskan detail permasalahan secara lengkap..."
+              placeholder="Jelaskan kebutuhan mahasiswa dan tindak lanjut yang diperlukan oleh bagian tujuan..."
               value={form.deskripsi}
               onChange={e => handleChange("deskripsi", e.target.value)}
             />
@@ -184,9 +165,9 @@ export default function BuatTiketStafPage() {
           </div>
 
           <div className="buat-tiket-actions">
-            <button className="btn-batal" onClick={() => navigate(-1)}>Batal</button>
+            <button className="btn-batal" onClick={() => navigate(-1)}>Kembali</button>
             <button className="btn-buat" disabled={submitting} onClick={handleSubmit}>
-              {submitting ? "Membuat..." : "▷ Buat Tiket"}
+              {submitting ? "Meneruskan..." : "Teruskan Tiket ▷"}
             </button>
           </div>
         </div>

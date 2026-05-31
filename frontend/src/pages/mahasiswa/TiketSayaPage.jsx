@@ -125,6 +125,7 @@ const styles = `
   .table-scroll-area {
     max-height: 500px;
     overflow-y: auto;
+    overflow-x: auto;
   }
 
   .table-scroll-area::-webkit-scrollbar { width: 6px; }
@@ -135,6 +136,7 @@ const styles = `
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    min-width: 800px;
   }
   
   thead th {
@@ -357,8 +359,8 @@ export default function TiketSayaPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Subjek</th>
-                  <th>Kategori</th>
+                  <th>Subjek & Topik</th>
+                  <th>Prioritas</th>
                   <th>Status</th>
                   <th>Dibuat</th>
                   <th>Aksi</th>
@@ -376,10 +378,18 @@ export default function TiketSayaPage() {
                     <tr key={ticket.id} onClick={() => setSelectedTicket(ticket)}>
                       <td className="td-id">#{ticket.id}</td>
                       <td className="td-subjek">
-                        <p>{ticket.subjek}</p>
+                        <p style={{ margin: 0 }}>{ticket.subjek}</p>
+                        <span style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{ticket.kategori_nama || "Tanpa Topik"}</span>
                       </td>
-                      <td style={{ color: "var(--gray-500)", fontSize: 13 }}>
-                        {ticket.kategori_id || "—"}
+                      <td>
+                        <span className="tugas-label" style={{ 
+                          background: ticket.prioritas === 'Penting' ? '#fef2f2' : ticket.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                          color: ticket.prioritas === 'Penting' ? '#dc2626' : ticket.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                          border: `1px solid ${ticket.prioritas === 'Penting' ? '#fecaca' : ticket.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`,
+                          padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                        }}>
+                          {ticket.prioritas || "Normal"}
+                        </span>
                       </td>
                       <td>
                         <span className={`status-pill ${getStatusClass(ticket.status)}`}>
@@ -445,8 +455,8 @@ export default function TiketSayaPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
               <div className="detail-group">
-                <div className="detail-label">Kategori</div>
-                <div className="detail-value">{selectedTicket.kategori_id || "—"}</div>
+                <div className="detail-label">Topik Bantuan</div>
+                <div className="detail-value">{selectedTicket.kategori_nama || "—"}</div>
               </div>
               <div className="detail-group">
                 <div className="detail-label">Waktu Dibuat</div>

@@ -206,15 +206,37 @@ const styles = `
     flex-direction: column;
     justify-content: space-between;
     padding: 44px 52px;
-    background: linear-gradient(150deg, #0a1f5c 0%, #1a3a8a 55%, var(--color-brand) 100%);
+    background: var(--color-brand-darkest);
   }
+
+  /* IPB campus photo background */
+  .pg-left-img {
+    position: absolute;
+    inset: 0;
+    background-image: url('/ipb-bg.jpg');
+    background-size: cover;
+    background-position: center 60%;
+    opacity: 0.22;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Gradient overlay — keeps brand colors + readability */
   .pg-left::before {
     content: '';
     position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background: linear-gradient(
+      150deg,
+      rgba(10, 31, 92, 0.92) 0%,
+      rgba(26, 58, 138, 0.84) 55%,
+      rgba(37, 99, 235, 0.78) 100%
+    );
     pointer-events: none;
+    z-index: 1;
   }
-  .deco { position: absolute; border-radius: 50%; pointer-events: none; }
+
+  /* Decorative circles — z-index 2 above overlay */
+  .deco { position: absolute; border-radius: 50%; pointer-events: none; z-index: 2; }
   .deco-c1 { width: 500px; height: 500px; top: -180px; right: -140px; border: 1px solid rgba(255,255,255,0.06); }
   .deco-c2 { width: 280px; height: 280px; bottom: -60px; left: -60px; border: 1px solid rgba(255,255,255,0.06); }
   .deco-blob {
@@ -223,7 +245,7 @@ const styles = `
     bottom: -60px; right: -60px;
   }
 
-  .brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+  .brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 3; }
   .brand-icon {
     width: 48px; height: 48px; border-radius: 12px;
     background: rgba(255,255,255,0.14);
@@ -239,7 +261,7 @@ const styles = `
   }
   .brand-text .prod { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
 
-  .hero { position: relative; z-index: 1; }
+  .hero { position: relative; z-index: 3; }
   .hero-pill {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(255,255,255,0.1);
@@ -259,7 +281,8 @@ const styles = `
     font-size: 13.5px; line-height: 1.75; max-width: 300px;
   }
 
-  .left-features { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+  .left-features { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 10px; }
+
   .feat-item {
     display: flex; align-items: center; gap: 10px;
     color: rgba(255,255,255,0.65); font-size: 12.5px;
@@ -790,6 +813,9 @@ export default function RegisterPage() {
       <div className="pg">
         {/* ── LEFT ── */}
         <div className="pg-left">
+          {/* IPB campus photo — sits behind everything */}
+          <div className="pg-left-img" />
+
           <div className="deco deco-c1" />
           <div className="deco deco-c2" />
           <div className="deco deco-blob" />

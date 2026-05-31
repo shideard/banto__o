@@ -194,7 +194,8 @@ export default function StafDashboardPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Subjek</th>
+                  <th>Subjek & Topik</th>
+                  <th>Prioritas</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
@@ -213,8 +214,20 @@ export default function StafDashboardPage() {
                     <td>
                       <Link to={`/staff/tiket/${t.id}`} className="td-ticket-id">#{t.id}</Link>
                     </td>
-                    <td style={{ fontWeight: 600, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {t.subjek}
+                    <td>
+                      <div style={{ fontWeight: 600, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {t.subjek}
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{t.kategori_nama || "Tanpa Topik"} &bull; {t.mahasiswa?.nama || t.nama_pelapor || "Mahasiswa"}</div>
+                    </td>
+                    <td>
+                      <span className="tugas-label" style={{ 
+                        background: t.prioritas === 'Penting' ? '#fef2f2' : t.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                        color: t.prioritas === 'Penting' ? '#dc2626' : t.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                        border: `1px solid ${t.prioritas === 'Penting' ? '#fecaca' : t.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`
+                      }}>
+                        {t.prioritas || "Normal"}
+                      </span>
                     </td>
                     <td>
                       <span className={`staf-status-pill pill-${t.status}`}>{t.status}</span>
@@ -258,7 +271,8 @@ export default function StafDashboardPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Subjek</th>
+                  <th>Subjek & Topik</th>
+                  <th>Prioritas</th>
                   <th>Tanggal</th>
                   <th>Aksi</th>
                 </tr>
@@ -279,8 +293,20 @@ export default function StafDashboardPage() {
                     <td>
                       <Link to={`/staff/tiket/${t.id}`} className="td-ticket-id">#{t.id}</Link>
                     </td>
-                    <td style={{ fontWeight: 600, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {t.subjek}
+                    <td>
+                      <div style={{ fontWeight: 600, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {t.subjek}
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{t.kategori_nama || "Tanpa Topik"} &bull; {t.mahasiswa?.nama || t.nama_pelapor || "Mahasiswa"}</div>
+                    </td>
+                    <td>
+                      <span className="tugas-label" style={{ 
+                        background: t.prioritas === 'Penting' ? '#fef2f2' : t.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                        color: t.prioritas === 'Penting' ? '#dc2626' : t.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                        border: `1px solid ${t.prioritas === 'Penting' ? '#fecaca' : t.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`
+                      }}>
+                        {t.prioritas || "Normal"}
+                      </span>
                     </td>
                     <td style={{ fontSize: 12, color: "var(--gray-500)" }}>
                       {t.tanggal_dibuat

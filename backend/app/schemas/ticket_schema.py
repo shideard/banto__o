@@ -22,11 +22,13 @@ class KomentarCreate(BaseModel):
     isi: str
     penulis_id: Optional[int] = None
     role: str = "Mahasiswa"
+    waktu: Optional[datetime] = None
 
 class KomentarResponse(BaseModel):
     id: int
     tiket_id: int
     penulis_id: Optional[int] = None
+    nama_penulis: Optional[str] = None
     role: str
     isi: str
     waktu: datetime

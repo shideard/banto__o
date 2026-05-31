@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -163,6 +163,7 @@ def update_status(
 async def upload_file_komentar(
     tiket_id: int,
     file: UploadFile = File(...),
+    waktu: Optional[datetime] = Form(None),
     current_user: Annotated[UserORM, Depends(get_current_user)] = None,
     svc: TicketService = Depends(get_ticket_service),
 ):
@@ -174,6 +175,7 @@ async def upload_file_komentar(
             role=role,
             nama_file=file.filename,
             file_obj=file.file,
+            waktu=waktu,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

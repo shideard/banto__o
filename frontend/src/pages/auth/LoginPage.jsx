@@ -6,9 +6,14 @@ import AppIcon from "../../components/ui/AppIcon";
 const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .pg { min-height: 100vh; display: flex; font-family: var(--font-sans); }
+  /* ── Root page ── */
+  .pg {
+    min-height: 100vh;
+    display: flex;
+    font-family: var(--font-sans);
+  }
 
-  /* ── LEFT ── */
+  /* ── LEFT PANEL ── */
   .pg-left {
     width: 48%;
     position: relative;
@@ -17,20 +22,38 @@ const styles = `
     flex-direction: column;
     justify-content: space-between;
     padding: 44px 52px;
-    background: linear-gradient(150deg, var(--color-brand-darkest) 0%, var(--color-brand-dark) 55%, var(--color-brand) 100%);
+    background: var(--color-brand-darkest);
   }
 
-  /* noise texture */
+  /* IPB campus photo background */
+  .pg-left-img {
+    position: absolute;
+    inset: 0;
+    background-image: url('/ipb-bg.jpg');
+    background-size: cover;
+    background-position: center 60%;
+    opacity: 0.22;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Gradient overlay — keeps brand colors + readability */
   .pg-left::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background: linear-gradient(
+      150deg,
+      rgba(10, 31, 92, 0.92) 0%,
+      rgba(26, 79, 173, 0.82) 55%,
+      rgba(37, 99, 235, 0.78) 100%
+    );
     pointer-events: none;
+    z-index: 1;
   }
 
-  /* decorative circles */
-  .deco { position: absolute; border-radius: 50%; pointer-events: none; }
+  /* Decorative circles — z-index 2 to sit above ::before overlay */
+  .deco { position: absolute; border-radius: 50%; pointer-events: none; z-index: 2; }
   .deco-c1 { width: 520px; height: 520px; top: -200px; right: -160px; border: 1px solid rgba(255,255,255,0.06); }
   .deco-c2 { width: 300px; height: 300px; bottom: -80px; left: -80px;  border: 1px solid rgba(255,255,255,0.06); }
   .deco-c3 { width: 160px; height: 160px; bottom: 100px; left: 60px;   border: 1px solid rgba(255,255,255,0.09); }
@@ -40,159 +63,303 @@ const styles = `
     bottom: -80px; right: -80px;
   }
 
+  /* Brand logo row */
   .brand {
-    display: flex; align-items: center; gap: 14px;
-    position: relative; z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 3;
     animation: fadeDown 0.5s ease both;
   }
   .brand-icon {
-    width: 48px; height: 48px; border-radius: 12px;
+    width: 48px; height: 48px;
+    border-radius: var(--radius-lg);
     background: rgba(255,255,255,0.14);
     border: 1.5px solid rgba(255,255,255,0.22);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px; backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
   }
-  .brand-text { color: var(--white); }
+  .brand-text { color: var(--color-white); }
   .brand-text .univ {
-    font-size: 10px; font-weight: 600;
-    letter-spacing: 2.5px; text-transform: uppercase;
-    opacity: 0.65; display: block; margin-bottom: 1px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    display: block;
+    margin-bottom: 1px;
+    font-family: var(--font-sans);
   }
   .brand-text .prod {
-    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    font-family: var(--font-sans);
   }
 
-  .hero { position: relative; z-index: 1; animation: fadeUp 0.6s 0.08s ease both; }
+  /* Hero block */
+  .hero {
+    position: relative;
+    z-index: 3;
+    animation: fadeUp 0.6s 0.08s ease both;
+  }
   .hero-pill {
-    display: inline-flex; align-items: center; gap: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 100px; padding: 5px 14px;
-    font-size: 11.5px; font-weight: 500;
-    color: rgba(255,255,255,0.8); margin-bottom: 22px;
+    border-radius: var(--radius-full);
+    padding: 5px 14px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 22px;
+    font-family: var(--font-sans);
   }
+  /* h1 uses Fraunces per design system */
   .hero h1 {
+    font-family: var(--font-display);
     font-size: clamp(30px, 3.2vw, 44px);
-    font-weight: 800; color: var(--white);
-    line-height: 1.12; letter-spacing: -1.2px;
+    font-weight: 800;
+    color: var(--color-white);
+    line-height: 1.12;
+    letter-spacing: -1.2px;
     margin-bottom: 18px;
   }
-  .hero h1 em { font-style: italic; font-weight: 300; opacity: 0.7; }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    opacity: 0.7;
+  }
   .hero p {
+    font-family: var(--font-sans);
     color: rgba(255,255,255,0.55);
-    font-size: 14px; line-height: 1.75; max-width: 320px;
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 320px;
     margin-bottom: 38px;
   }
 
-  .stats { display: flex; gap: 28px; }
+  /* Stats row */
+  .stats { display: flex; gap: 28px; position: relative; z-index: 3; }
   .stat { animation: fadeUp 0.5s ease both; }
   .stat:nth-child(1) { animation-delay: 0.28s; }
   .stat:nth-child(2) { animation-delay: 0.36s; }
   .stat:nth-child(3) { animation-delay: 0.44s; }
   .stat-num {
-    font-size: 26px; font-weight: 800; color: var(--white);
-    letter-spacing: -1px; line-height: 1; margin-bottom: 3px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--color-white);
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 3px;
   }
   .stat-lbl {
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.45);
-    text-transform: uppercase; letter-spacing: 1px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
-  /* ── RIGHT ── */
+  /* ── RIGHT PANEL ── */
   .pg-right {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 48px 40px; background: var(--white);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    background: var(--color-white);
     animation: fadeIn 0.4s ease both;
   }
-  .form-box { width: 100%; max-width: 388px; }
+  .form-box {
+    width: 100%;
+    max-width: 388px;
+  }
 
+  /* Form header */
   .form-head { margin-bottom: 28px; }
   .form-head h2 {
-    font-size: 26px; font-weight: 800;
-    color: var(--gray-900); letter-spacing: -0.6px;
-    margin-bottom: 5px;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-gray-900);
+    letter-spacing: -0.6px;
+    margin-bottom: 6px;
   }
-  .form-head p { font-size: 13.5px; color: var(--gray-500); line-height: 1.55; }
+  .form-head p {
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    color: var(--color-gray-500);
+    line-height: 1.55;
+  }
 
-  /* role tabs */
+  /* Role tabs */
   .role-tabs {
-    display: flex; background: var(--gray-100);
-    border: 1.5px solid var(--gray-200);
-    border-radius: 12px; padding: 4px;
-    margin-bottom: 24px; gap: 4px;
+    display: flex;
+    background: var(--color-gray-100);
+    border: 1.5px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    margin-bottom: 24px;
+    gap: 4px;
   }
   .role-tab {
-    flex: 1; padding: 9px 10px;
-    border: none; border-radius: 9px;
+    flex: 1;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 9px;
     background: transparent;
-    font-family: var(--font); font-size: 13px; font-weight: 600;
-    color: var(--gray-500); cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-gray-500);
+    cursor: pointer;
     transition: all 0.18s ease;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
   .role-tab.on {
-    background: var(--color-white); color: var(--color-brand);
+    background: var(--color-white);
+    color: var(--color-brand);
     box-shadow: 0 1px 6px rgba(0,0,0,0.07), 0 0 0 1px rgba(37,99,235,0.15);
   }
 
-  /* fields */
+  /* Form fields */
   .field { margin-bottom: 15px; }
   .field-lbl {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 6px;
   }
-  .field-lbl span { font-size: 12.5px; font-weight: 600; color: var(--gray-600); }
+  .field-lbl span {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-gray-700);
+  }
+
+  /* Lupa kata sandi */
   .forgot {
-    background: none; border: none; cursor: pointer;
-    font-family: var(--font); font-size: 12px; font-weight: 600;
-    color: var(--blue-600); padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-brand);
+    padding: 0;
     transition: color 0.15s;
   }
-  .forgot:hover { color: var(--blue-400); }
+  .forgot:hover { color: var(--color-brand-dark); }
 
+  /* Input wrapper */
   .input-wrap { position: relative; }
   .input-icon {
-    position: absolute; left: 13px; top: 50%;
+    position: absolute;
+    left: 13px;
+    top: 50%;
     transform: translateY(-50%);
-    color: var(--gray-400); font-size: 15px; pointer-events: none;
-    display: flex; align-items: center; justify-content: center;
+    color: var(--color-gray-400);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+
+  /* Field input */
   .fi {
-    width: 100%; height: 46px;
+    width: 100%;
+    height: 46px;
     padding: 0 13px 0 40px;
-    border: 1.5px solid var(--gray-200); border-radius: 10px;
-    font-family: var(--font); font-size: 13.5px; color: var(--gray-900);
-    background: var(--white); outline: none;
+    border: 1.5px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    color: var(--color-gray-900);
+    background: var(--color-gray-50);
+    outline: none;
     transition: all 0.18s ease;
   }
-  .fi::placeholder { color: var(--gray-400); }
-  .fi:focus { border-color: var(--blue-400); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-  .fi.err { border-color: var(--error); box-shadow: 0 0 0 3px rgba(220,38,38,0.07); }
+  .fi::placeholder { color: var(--color-gray-400); }
+  .fi:focus {
+    border-color: var(--color-brand-light);
+    background: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  .fi.err {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.07);
+  }
+
+  /* Eye toggle */
   .eye {
-    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer;
-    color: var(--gray-400); font-size: 15px; padding: 0;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-gray-400);
+    padding: 0;
+    display: flex;
+    align-items: center;
     transition: color 0.15s;
   }
-  .eye:hover { color: var(--gray-600); }
-  .ferr { margin-top: 4px; font-size: 11.5px; color: var(--error); }
+  .eye:hover { color: var(--color-gray-700); }
 
-  /* submit */
+  /* Field error message */
+  .ferr {
+    margin-top: 5px;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--color-danger);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Submit button — Primary variant */
   .btn-submit {
-    width: 100%; height: 48px; margin-top: 6px;
-    border: none; border-radius: 10px;
-    font-family: var(--font); font-size: 14px; font-weight: 700;
-    color: var(--white); cursor: pointer;
-    background: linear-gradient(130deg, var(--color-brand-dark) 0%, var(--color-brand) 60%, #0ea5e9 100%);
+    width: 100%;
+    height: 48px;
+    margin-top: 6px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-white);
+    cursor: pointer;
+    background: linear-gradient(
+      130deg,
+      var(--color-brand-dark) 0%,
+      var(--color-brand) 60%,
+      var(--color-brand-sky) 100%
+    );
     box-shadow: 0 4px 18px rgba(37,99,235,0.28);
     transition: all 0.2s ease;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    position: relative; overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
   }
+  /* Shimmer effect on hover */
   .btn-submit::after {
     content: '';
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background: linear-gradient(to right, transparent, rgba(255,255,255,0.09), transparent);
     transform: translateX(-100%);
     transition: transform 0.5s ease;
@@ -204,30 +371,49 @@ const styles = `
   }
   .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
+  /* Loading spinner */
   .spin {
     width: 15px; height: 15px;
     border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white; border-radius: 50%;
+    border-top-color: white;
+    border-radius: 50%;
     animation: spin 0.6s linear infinite;
   }
 
+  /* Divider */
   .divider {
-    display: flex; align-items: center; gap: 10px;
-    margin: 20px 0 16px; font-size: 11.5px; color: var(--gray-400);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0 16px;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--color-gray-400);
   }
   .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-gray-200);
   }
 
+  /* Footer note */
   .footer-note {
-    margin-top: 24px; font-size: 12.5px;
-    color: var(--gray-500); text-align: center; line-height: 1.9;
+    margin-top: 24px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    color: var(--color-gray-500);
+    text-align: center;
+    line-height: 1.9;
   }
   .footer-note a {
-    color: var(--blue-600); font-weight: 700; text-decoration: none;
+    color: var(--color-brand);
+    font-weight: 700;
+    text-decoration: none;
   }
   .footer-note a:hover { text-decoration: underline; }
 
+  /* Animations */
   @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-14px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -239,33 +425,36 @@ const styles = `
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes spin   { to { transform: rotate(360deg); } }
 
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .pg-left { width: 44%; padding: 36px 40px; }
+  }
   @media (max-width: 820px) {
-    .pg-left { display: none; }
+    .pg-left  { display: none; }
     .pg-right { padding: 32px 20px; }
   }
 `;
 
 export default function LoginPage() {
-  const navigate   = useNavigate();
-  const { login }  = useAuth();
+  const navigate  = useNavigate();
+  const { login } = useAuth();
 
-  const [role,       setRole]       = useState("mahasiswa");
-  const [email,      setEmail]      = useState("");
-  const [password,   setPassword]   = useState("");
-  const [showPass,   setShowPass]   = useState(false);
-  const [loading,    setLoading]    = useState(false);
-  const [errors,     setErrors]     = useState({});
+  const [role,     setRole]     = useState("mahasiswa");
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [errors,   setErrors]   = useState({});
 
   const validate = () => {
     const e = {};
-    if (!email.trim())    e.email    = "E-mail wajib diisi";
-    if (!password)        e.password = "Kata sandi wajib diisi";
+    if (!email.trim())           e.email    = "E-mail wajib diisi";
+    if (!password)               e.password = "Kata sandi wajib diisi";
     else if (password.length < 6) e.password = "Minimal 6 karakter";
     return e;
   };
 
-  const handleSubmit = async (ev) => {
-    ev?.preventDefault?.();
+  const handleSubmit = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
@@ -282,18 +471,26 @@ export default function LoginPage() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSubmit();
+  };
+
   return (
     <>
       <style>{styles}</style>
       <div className="pg">
 
-        {/* ── LEFT ── */}
+        {/* ── LEFT PANEL ── */}
         <div className="pg-left">
+          {/* IPB campus photo — sits behind everything */}
+          <div className="pg-left-img" />
+
           <div className="deco deco-c1" />
           <div className="deco deco-c2" />
           <div className="deco deco-c3" />
           <div className="deco deco-blob" />
 
+          {/* Brand */}
           <div className="brand">
             <div className="brand-icon">
               <AppIcon name="GraduationCap" size={22} color="white" />
@@ -304,89 +501,176 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Hero copy */}
           <div className="hero">
-            <div className="hero-pill">⊙ Layanan Akademik Terpadu</div>
-            <h1>Satu tempat<br />untuk semua<br /><em>bantuan</em> akademik.</h1>
-            <p>Ajukan tiket, pantau status, dan dapatkan respons cepat dari tim administrasi IPB - kapan saja, di mana saja.</p>
+            <div className="hero-pill">
+              <AppIcon name="Sparkles" size={12} color="rgba(255,255,255,0.8)" />
+              Layanan Akademik Terpadu
+            </div>
+            <h1>
+              Satu tempat<br />untuk semua<br /><em>bantuan</em> akademik.
+            </h1>
+            <p>
+              Ajukan tiket, pantau status, dan dapatkan respons cepat
+              dari tim administrasi IPB — kapan saja, di mana saja.
+            </p>
+          </div>
+
+          {/* Stats */}
+          <div className="stats">
+            <div className="stat">
+              <div className="stat-num">2.4K+</div>
+              <div className="stat-lbl">Tiket Selesai</div>
+            </div>
+            <div className="stat">
+              <div className="stat-num">&lt; 2 jam</div>
+              <div className="stat-lbl">Rata-rata Respons</div>
+            </div>
+            <div className="stat">
+              <div className="stat-num">98%</div>
+              <div className="stat-lbl">Kepuasan Pengguna</div>
+            </div>
           </div>
         </div>
 
-        {/* ── RIGHT ── */}
+        {/* ── RIGHT PANEL ── */}
         <div className="pg-right">
           <div className="form-box">
+
+            {/* Header */}
             <div className="form-head">
               <h2>Masuk ke akun IPB</h2>
               <p>Gunakan e-mail IPB kamu untuk melanjutkan.</p>
             </div>
 
-            {/* Role selector — hanya UI, role asli dari backend */}
+            {/* Role selector */}
             <div className="role-tabs">
-              <button type="button"
+              <button
+                type="button"
                 className={`role-tab ${role === "mahasiswa" ? "on" : ""}`}
-                onClick={() => setRole("mahasiswa")}>
-                <AppIcon name="GraduationCap" variant="sm" /> Mahasiswa
+                onClick={() => setRole("mahasiswa")}
+              >
+                <AppIcon name="GraduationCap" variant="sm" />
+                Mahasiswa
               </button>
-              <button type="button"
+              <button
+                type="button"
                 className={`role-tab ${role === "staf" ? "on" : ""}`}
-                onClick={() => setRole("staf")}>
-                <AppIcon name="Building2" variant="sm" /> Staf Admin
+                onClick={() => setRole("staf")}
+              >
+                <AppIcon name="Building2" variant="sm" />
+                Staf Admin
               </button>
             </div>
 
+            {/* Fields */}
             <div className="login-fields">
+
               {/* E-mail */}
               <div className="field">
-                <div className="field-lbl"><span>E-mail</span></div>
+                <div className="field-lbl">
+                  <span>E-mail</span>
+                </div>
                 <div className="input-wrap">
-                  <span className="input-icon"><AppIcon name="Mail" variant="sm" /></span>
+                  <span className="input-icon">
+                    <AppIcon name="Mail" variant="sm" />
+                  </span>
                   <input
                     type="email"
+                    id="login-email"
                     className={`fi ${errors.email ? "err" : ""}`}
-                    placeholder={role === "mahasiswa" ? "username@apps.ipb.ac.id" : "username@ipb.ac.id"}
+                    placeholder={
+                      role === "mahasiswa"
+                        ? "username@apps.ipb.ac.id"
+                        : "username@ipb.ac.id"
+                    }
                     value={email}
-                    onChange={e => { setEmail(e.target.value); setErrors(p => ({...p, email: ""})); }}
+                    onChange={e => {
+                      setEmail(e.target.value);
+                      setErrors(p => ({ ...p, email: "" }));
+                    }}
+                    onKeyDown={handleKeyDown}
                     autoComplete="email"
                   />
                 </div>
-                {errors.email && <div className="ferr"><AppIcon name="AlertCircle" variant="xs" /> {errors.email}</div>}
+                {errors.email && (
+                  <div className="ferr">
+                    <AppIcon name="AlertCircle" variant="xs" />
+                    {errors.email}
+                  </div>
+                )}
               </div>
 
               {/* Kata Sandi */}
               <div className="field">
                 <div className="field-lbl">
                   <span>Kata Sandi</span>
-                  <button type="button" className="forgot">Lupa kata sandi?</button>
+                  <button type="button" className="forgot">
+                    Lupa kata sandi?
+                  </button>
                 </div>
                 <div className="input-wrap">
-                  <span className="input-icon"><AppIcon name="Lock" variant="sm" /></span>
+                  <span className="input-icon">
+                    <AppIcon name="Lock" variant="sm" />
+                  </span>
                   <input
                     type={showPass ? "text" : "password"}
+                    id="login-password"
                     className={`fi ${errors.password ? "err" : ""}`}
                     placeholder="Masukkan kata sandi"
                     value={password}
-                    onChange={e => { setPassword(e.target.value); setErrors(p => ({...p, password: ""})); }}
+                    onChange={e => {
+                      setPassword(e.target.value);
+                      setErrors(p => ({ ...p, password: "" }));
+                    }}
+                    onKeyDown={handleKeyDown}
                     autoComplete="current-password"
                     style={{ paddingRight: 42 }}
                   />
-                  <button type="button" className="eye" onClick={() => setShowPass(!showPass)}>
-                    {showPass ? <AppIcon name="EyeOff" variant="sm" /> : <AppIcon name="Eye" variant="sm" />}
+                  <button
+                    type="button"
+                    className="eye"
+                    onClick={() => setShowPass(!showPass)}
+                    aria-label={showPass ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  >
+                    {showPass
+                      ? <AppIcon name="EyeOff" variant="sm" />
+                      : <AppIcon name="Eye" variant="sm" />
+                    }
                   </button>
                 </div>
-                {errors.password && <div className="ferr"><AppIcon name="AlertCircle" variant="xs" /> {errors.password}</div>}
+                {errors.password && (
+                  <div className="ferr">
+                    <AppIcon name="AlertCircle" variant="xs" />
+                    {errors.password}
+                  </div>
+                )}
               </div>
 
-              <button className="btn-submit" type="button" disabled={loading} onClick={handleSubmit}>
-                {loading ? <><div className="spin" /> Memverifikasi...</> : "Masuk →"}
+              {/* Submit */}
+              <button
+                id="btn-login-submit"
+                className="btn-submit"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmit}
+              >
+                {loading
+                  ? <><div className="spin" /> Memverifikasi...</>
+                  : <>Masuk <AppIcon name="ArrowRight" size={15} color="white" /></>
+                }
               </button>
             </div>
 
             <div className="divider">atau</div>
 
             <div className="footer-note">
-              Belum punya akun? <Link to="/register">Buat akun baru</Link><br />
+              Belum punya akun?{" "}
+              <Link to="/register">Buat akun baru</Link>
             </div>
           </div>
         </div>
+
       </div>
     </>
   );

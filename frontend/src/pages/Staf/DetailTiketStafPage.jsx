@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 import { BACKEND_URL } from "../../utils/constants";
+import { useAuth } from "../../hooks/useAuth";
 
 const styles = `
   /* ─── Layout utama ─── */
@@ -1282,9 +1283,7 @@ function RiwayatItem({ item }) {
 // ─── Komponen utama ───────────────────────────────────────────
 export default function StafDetailTiketPage() {
   const { id } = useParams();
-  // const navigate = useNavigate();
-  // const { user } = useAuth();
-
+  const { user } = useAuth(); // UNCOMMENTED
 
   const fileInputRef = useRef(null);
 
@@ -1338,7 +1337,9 @@ export default function StafDetailTiketPage() {
     try {
       setProsesKlaim(true);
       setErrAksi(null);
-      await ticketService.claimTiket(tiket.id);
+      await ticketService.claimTiket(tiket.id, { staf_id: user.id });
+      // Otomatis lanjut ke DIPROSES agar staf tidak perlu klik dua kali
+      await ticketService.mulaiProses(tiket.id);
       await fetchData();
     } catch (err) {
       setErrAksi(err?.response?.data?.detail || "Gagal mengklaim tiket. Coba lagi.");
@@ -1608,11 +1609,11 @@ export default function StafDetailTiketPage() {
             {/* Pesan awal dari mahasiswa */}
             <div className="dt-ticket-card">
               <div className="dt-ticket-meta">
-                <div className="dt-avatar">{getInitials(tiket.nama_pelapor || "")}</div>
+                <div className="dt-avatar">{getInitials(tiket.mahasiswa?.nama || tiket.nama_pelapor || "")}</div>
                 <div>
-                  <div className="dt-ticket-author">{tiket.nama_pelapor || "Mahasiswa"}</div>
+                  <div className="dt-ticket-author">Pengirim: {tiket.mahasiswa?.nama || tiket.nama_pelapor || "Mahasiswa"}</div>
                   <div className="dt-ticket-time">
-                    {tiket.nim || "—"} &bull; {formatTanggal(tiket.tanggal_dibuat)}
+                    {tiket.mahasiswa?.nim || tiket.nim || "—"} &bull; {formatTanggal(tiket.tanggal_dibuat)}
                   </div>
                 </div>
               </div>
@@ -1653,9 +1654,12 @@ export default function StafDetailTiketPage() {
               {/* Lampiran dari pengajuan awal */}
               {tiket.pengajuan?.lampiran?.length > 0 && (
                 <div className="dt-lampiran-wrap" style={{ marginTop: 16 }}>
-                  <div className="dt-lampiran-label">
-                    <AppIcon name="Paperclip" variant="sm" />
-                    LAMPIRAN ({tiket.pengajuan.lampiran.length})
+                  <div style={{ display: "flex", alignItems: "center", margin: "24px 0 16px" }}>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
+                    <div style={{ padding: "0 16px", fontSize: 11, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Lampiran dari {tiket.mahasiswa?.nama || tiket.nama_pelapor || "Mahasiswa"}
+                    </div>
+                    <div style={{ flex: 1, height: "1px", background: "var(--gray-200)" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {tiket.pengajuan.lampiran.map((lmp, idx) => {
@@ -1786,6 +1790,7 @@ export default function StafDetailTiketPage() {
                     type="datetime-local"
                     className="dt-waktu-input"
                     value={waktuKomentar}
+                    max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     onChange={e => setWaktuKomentar(e.target.value)}
                   />
                   <span className="dt-waktu-hint">Opsional — kosongkan untuk waktu sekarang</span>
@@ -1839,14 +1844,20 @@ export default function StafDetailTiketPage() {
                 </div>
               </div>
             ) : tiket.status === "SELESAI" ? (
-              <div className="dt-closed-notice" style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", color: "#15803d" }}>
-                <AppIcon name="CheckCircle" variant="sm" />
-                Tiket ini sudah selesai ditangani.
+              <div className="dt-closed-notice" style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", color: "#15803d", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <AppIcon name="CheckCircle" variant="sm" />
+                  Tiket ini sudah selesai ditangani.
+                </div>
+                <Link to="/staff/dashboard" style={{ fontSize: 13, fontWeight: 600, color: "#15803d", textDecoration: "underline" }}>Kembali ke Dashboard</Link>
               </div>
             ) : tiket.status === "DITOLAK" ? (
-              <div className="dt-closed-notice" style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626" }}>
-                <AppIcon name="XCircle" variant="sm" />
-                Tiket ini telah ditolak.
+              <div className="dt-closed-notice" style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <AppIcon name="XCircle" variant="sm" />
+                  Tiket ini telah ditolak.
+                </div>
+                <Link to="/staff/dashboard" style={{ fontSize: 13, fontWeight: 600, color: "#dc2626", textDecoration: "underline" }}>Kembali ke Dashboard</Link>
               </div>
             ) : null /* DIBUAT dan DIKLAIM — panel klaim/proses yang ditampilkan */ }
           </div>
