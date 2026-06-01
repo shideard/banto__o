@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     return localStorage.getItem(TOKEN_KEY) || null;
   });
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, expectedRole) => {
     try {
       const formData = new URLSearchParams();
       formData.append("username", identifier);
@@ -22,6 +22,10 @@ export function AuthProvider({ children }) {
       const response = await apiClient.post("/auth/login", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
+
+      if (expectedRole && response.data.role !== expectedRole) {
+        throw { detail: `Akun ini terdaftar sebagai ${response.data.role === "staf" ? "Staf Admin" : "Mahasiswa"}. Harap pilih menu login yang sesuai.` };
+      }
 
       const data = {
         access_token: response.data.access_token,

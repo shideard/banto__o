@@ -25,6 +25,11 @@ class UserService {
     const res = await apiClient.patch(`/auth/notifikasi/${notifId}/baca`);
     return res.data;
   }
+
+  async getDivisi() {
+    const res = await apiClient.get("/auth/divisi");
+    return res.data;
+  }
 }
 
 const userService = new UserService();

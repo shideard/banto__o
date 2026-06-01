@@ -1,11 +1,10 @@
 // frontend/src/pages/staf/ProfilStafPage.jsx
-// ✅ UPDATED: divisi pakai nama string (konsisten dengan RegisterPage), bukan ID numerik
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import ticketService from "../../services/ticketService";
-import apiClient from "../../services/ApiClient";
 import userService from "../../services/UserService";
+import apiClient from "../../services/ApiClient";
 
 // ─────────────────────────── STYLES ───────────────────────────────────────────
 const styles = `
@@ -14,18 +13,18 @@ const styles = `
     max-width: 1100px;
     width: 100%;
     margin: 0 auto;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
   .profil-breadcrumb {
     font-size: 13px;
-    color: #64748b;
+    color: var(--gray-500);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .profil-breadcrumb a { color: #64748b; text-decoration: none; transition: color 0.2s; }
-  .profil-breadcrumb a:hover { color: #2563eb; }
+  .profil-breadcrumb a { color: var(--gray-500); text-decoration: none; transition: color 0.2s; }
+  .profil-breadcrumb a:hover { color: var(--color-brand); }
 
   .profil-grid {
     display: grid;
@@ -35,15 +34,15 @@ const styles = `
   }
 
   .profil-card {
-    background: #fff;
-    border: 1.5px solid #e2e8f0;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
     border-radius: 18px;
     overflow: hidden;
     margin-bottom: 20px;
   }
   .profil-card-header {
     padding: 18px 22px 14px;
-    border-bottom: 1.5px solid #f1f5f9;
+    border-bottom: 1.5px solid var(--gray-100);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -51,7 +50,7 @@ const styles = `
   .profil-card-title {
     font-size: 11px;
     font-weight: 800;
-    color: #94a3b8;
+    color: var(--gray-400);
     text-transform: uppercase;
     letter-spacing: 1.2px;
   }
@@ -68,16 +67,16 @@ const styles = `
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    background: linear-gradient(135deg, var(--color-brand-dark) 0%, var(--color-brand) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 900;
-    color: #fff;
+    color: var(--white);
     margin-bottom: 16px;
-    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.28);
+    box-shadow: var(--shadow-brand);
     position: relative;
     flex-shrink: 0;
   }
@@ -86,14 +85,14 @@ const styles = `
     bottom: 2px; right: 2px;
     width: 22px; height: 22px;
     background: #10b981;
-    border: 3px solid #fff;
+    border: 3px solid var(--white);
     border-radius: 50%;
   }
   .profil-nama {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--gray-900);
     margin-bottom: 4px;
   }
   .profil-role-badge {
@@ -101,68 +100,68 @@ const styles = `
     align-items: center;
     gap: 5px;
     padding: 4px 12px;
-    background: #f5f3ff;
-    color: #7c3aed;
+    background: var(--color-info-bg);
+    color: var(--color-brand);
     border-radius: 100px;
     font-size: 11px;
     font-weight: 700;
     margin-bottom: 20px;
   }
-  .profil-divider { width: 100%; height: 1px; background: #f1f5f9; margin-bottom: 20px; }
+  .profil-divider { width: 100%; height: 1px; background: var(--gray-100); margin-bottom: 20px; }
 
   .profil-info-list { width: 100%; display: flex; flex-direction: column; gap: 14px; }
   .profil-info-item { display: flex; align-items: flex-start; gap: 12px; text-align: left; }
   .profil-info-icon {
     width: 34px; height: 34px;
     border-radius: 9px;
-    background: #f5f3ff;
+    background: var(--color-info-bg);
     display: flex; align-items: center; justify-content: center;
     font-size: 15px; flex-shrink: 0;
   }
-  .profil-info-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .profil-info-label { font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
   .profil-info-val { font-size: 13.5px; color: #1e293b; font-weight: 600; word-break: break-word; }
-  .profil-info-val.muted { color: #94a3b8; font-weight: 500; font-style: italic; }
+  .profil-info-val.muted { color: var(--gray-400); font-weight: 500; font-style: italic; }
 
   .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
   .stat-box {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
     border-radius: 14px;
     padding: 18px 14px;
     text-align: center;
     transition: transform 0.18s, box-shadow 0.18s;
   }
   .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-  .stat-box.handled { border-color: #ddd6fe; background: #f5f3ff; }
+  .stat-box.handled { border-color: #bfdbfe; background: var(--color-info-bg); }
   .stat-box.selesai  { border-color: #bbf7d0; background: #f0fdf4; }
   .stat-box.avg      { border-color: #fed7aa; background: #fff7ed; }
   .stat-box-num {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 6px;
   }
-  .stat-box.handled .stat-box-num { color: #7c3aed; }
+  .stat-box.handled .stat-box-num { color: var(--color-brand); }
   .stat-box.selesai  .stat-box-num { color: #15803d; }
   .stat-box.avg      .stat-box-num { color: #c2410c; font-size: 22px; padding-top: 7px; }
-  .stat-box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #64748b; }
+  .stat-box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--gray-500); }
 
   .completion-wrap { margin-bottom: 20px; }
-  .completion-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; }
-  .completion-bar-bg { height: 8px; background: #f1f5f9; border-radius: 100px; overflow: hidden; }
-  .completion-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #7c3aed, #2563eb); transition: width 0.8s ease; }
+  .completion-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--gray-500); margin-bottom: 8px; }
+  .completion-bar-bg { height: 8px; background: var(--gray-100); border-radius: 100px; overflow: hidden; }
+  .completion-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--color-brand-dark), var(--color-brand)); transition: width 0.8s ease; }
 
   .tiket-list-mini { display: flex; flex-direction: column; gap: 10px; }
   .tiket-mini-item {
     display: flex; align-items: center;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: var(--gray-50);
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--gray-200);
     text-decoration: none;
     transition: background 0.18s;
     gap: 10px;
   }
-  .tiket-mini-item:hover { background: #f5f3ff; border-color: #ddd6fe; }
-  .tiket-mini-id { font-size: 12px; font-weight: 700; color: #94a3b8; white-space: nowrap; }
+  .tiket-mini-item:hover { background: var(--color-info-bg); border-color: #bfdbfe; }
+  .tiket-mini-id { font-size: 12px; font-weight: 700; color: var(--gray-400); white-space: nowrap; }
   .tiket-mini-subj { font-size: 13px; font-weight: 600; color: #1e293b; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tiket-mini-pill { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 100px; white-space: nowrap; }
   .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
@@ -170,24 +169,24 @@ const styles = `
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
   .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .tiket-mini-empty { text-align: center; padding: 24px; color: #94a3b8; font-size: 13px; }
+  .tiket-mini-empty { text-align: center; padding: 24px; color: var(--gray-400); font-size: 13px; }
 
   .form-group { margin-bottom: 18px; }
   .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
   .form-input {
-    width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px;
     padding: 10px 14px; font-size: 14px; color: #1e293b;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    outline: none; background: #f8fafc;
+    font-family: var(--font-sans);
+    outline: none; background: var(--gray-50);
     transition: border-color 0.18s, background 0.18s; box-sizing: border-box;
   }
-  .form-input:focus { border-color: #7c3aed; background: #fff; }
-  .form-input.readonly { color: #64748b; cursor: default; }
+  .form-input:focus { border-color: var(--color-brand); background: var(--white); }
+  .form-input.readonly { color: var(--gray-500); cursor: default; }
   .form-select {
-    width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 10px;
     padding: 10px 14px; font-size: 14px; color: #1e293b;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    outline: none; background: #f8fafc; cursor: pointer;
+    font-family: var(--font-sans);
+    outline: none; background: var(--gray-50); cursor: pointer;
     transition: border-color 0.18s; box-sizing: border-box;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -195,30 +194,30 @@ const styles = `
     background-position: right 14px center;
     padding-right: 36px;
   }
-  .form-select:focus { border-color: #7c3aed; background-color: #fff; }
-  .form-hint { font-size: 11px; color: #94a3b8; margin-top: 5px; }
+  .form-select:focus { border-color: var(--color-brand); background-color: var(--white); }
+  .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 5px; }
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .btn-primary-sm {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; background: #7c3aed; color: #fff;
+    padding: 9px 18px; background: var(--color-brand); color: var(--white);
     border: none; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.18s;
+    cursor: pointer; font-family: var(--font-sans); transition: background 0.18s;
   }
-  .btn-primary-sm:hover { background: #6d28d9; }
+  .btn-primary-sm:hover { background: #1d4ed8; }
   .btn-primary-sm:disabled { background: #c4b5fd; cursor: not-allowed; }
   .btn-outline-sm {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; background: #fff; color: #334155;
-    border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s;
+    padding: 9px 18px; background: var(--white); color: var(--gray-700);
+    border: 1.5px solid var(--gray-200); border-radius: 9px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: var(--font-sans); transition: all 0.18s;
   }
-  .btn-outline-sm:hover { background: #f8fafc; border-color: #cbd5e1; }
+  .btn-outline-sm:hover { background: var(--gray-50); border-color: #cbd5e1; }
   .btn-danger-sm {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 9px 18px; background: #fef2f2; color: #dc2626;
     border: 1.5px solid #fecaca; border-radius: 9px; font-size: 13px; font-weight: 700;
-    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s;
+    cursor: pointer; font-family: var(--font-sans); transition: all 0.18s;
   }
   .btn-danger-sm:hover { background: #fee2e2; }
 
@@ -226,22 +225,14 @@ const styles = `
   .alert-error   { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #dc2626; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .modal-box { background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); animation: modalIn 0.22s ease; }
+  .modal-box { background: var(--white); border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); animation: modalIn 0.22s ease; }
   @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-  .modal-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-  .modal-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+  .modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 24px; line-height: 1.5; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 
-  .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+  .skeleton { background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
   @keyframes shimmer { to { background-position: -200% 0; } }
-
-  /* Divisi grup info badge */
-  .divisi-grup-badge {
-    margin-top: 6px; padding: 8px 12px;
-    background: #f5f3ff; border: 1px solid #ddd6fe;
-    border-radius: 8px; font-size: 12px; color: #6d28d9;
-    display: flex; gap: 6px; align-items: center; line-height: 1.5;
-  }
 
   @media (max-width: 900px) {
     .profil-main { padding: 20px 16px; }
@@ -249,78 +240,6 @@ const styles = `
     .stat-row { grid-template-columns: repeat(3, 1fr); }
   }
 `;
-
-// ─────────────────────────── DATA DIVISI ──────────────────────────────────────
-// ✅ PERBAIKAN: Sama persis dengan RegisterPage — pakai nama string, BUKAN ID numerik
-const DIVISI_STAF = [
-  {
-    grup: "Kemahasiswaan & Akademik",
-    divisi: [
-      "Admin Kemahasiswaan Ormawa",
-      "Bantuan Pendidikan Non Beasiswa",
-      "Evaluasi Pendidikan",
-      "Kesejahteraan Mahasiswa",
-      "KKNT IPB",
-      "KRS Multistrata",
-      "Lomba Mahasiswa dan SKPI",
-      "MBKM Program Studi",
-      "Ormawa dan Softskill",
-      "Penerimaan Mahasiswa Baru",
-      "Perencanaan dan Info Pendidikan",
-      "PPKU IPB",
-      "Program Pendidikan Internasional",
-      "UKT Multistrata",
-    ],
-  },
-  {
-    grup: "Administrasi & Dokumen",
-    divisi: [
-      "Admin Surat/Dokumen APPMB",
-      "Administrasi Fakultas/Departemen",
-      "Akademik Pascasarjana",
-      "Akademik Sekolah Bisnis",
-      "Akademik Sekolah Vokasi",
-      "Arsip",
-      "Update-No Rekening-KBM",
-    ],
-  },
-  {
-    grup: "Pengaduan & Kepatuhan",
-    divisi: [
-      "Crisis Center-Pengaduan",
-      "Pengaduan Dugaan Korupsi",
-      "Pengaduan Kekerasan Seksual",
-      "Pengaduan Melanggar Kode Etik",
-      "Pengaduan Melanggar Tata Tertib",
-      "KMMAI-Standar Mutu",
-    ],
-  },
-  {
-    grup: "SDM & Keuangan",
-    divisi: [
-      "BKD SISTER",
-      "Pengembangan SDM dan PKK",
-      "Rekrutmen Evaluasi Kinerja",
-      "Remunerasi dan Kesejahteraan",
-    ],
-  },
-  {
-    grup: "Layanan & Fasilitas",
-    divisi: [
-      "Informasi Publik",
-      "Kehumasan",
-      "Layanan Pengembangan Karir",
-      "Layanan Perpustakaan",
-      "Layanan Promosi IPB",
-      "Layanan Unit Kesehatan",
-      "Museum & Galeri IPB Future",
-      "Perpustakaan",
-      "Riset dan Inovasi",
-      "Sarana Dan Prasarana",
-      "Teknologi Informasi",
-    ],
-  },
-];
 
 // ─────────────────────────── HELPERS ──────────────────────────────────────────
 function getInitials(nama = "") {
@@ -332,26 +251,18 @@ function hitungRataWaktu(tiketSelesai) {
   return `~${Math.ceil(tiketSelesai.length * 0.5 + 1)} hari`;
 }
 
-// Cari nama grup berdasarkan nama divisi
-function findGrupDivisi(divisiName) {
-  for (const g of DIVISI_STAF) {
-    if (g.divisi.includes(divisiName)) return g.grup;
-  }
-  return null;
-}
-
 // ─────────────────────────── KOMPONEN UTAMA ───────────────────────────────────
 export default function ProfilStafPage() {
   const { user, logout, updateUser } = useAuth();
 
   const [tickets, setTickets]     = useState([]);
   const [loadingTiket, setLoadingTiket] = useState(true);
+  const [divisiList, setDivisiList] = useState([]);
 
   // ── State edit profil ──
   const [editMode, setEditMode]     = useState(false);
   const [formNama, setFormNama]     = useState(user?.nama   || "");
-  const [formDivisi, setFormDivisi] = useState(user?.divisi_id || ""); // store divisi_id when available
-  const [divisiList, setDivisiList] = useState([]);
+  const [formDivisiId, setFormDivisiId] = useState(user?.divisi_id || "");
   const [savingProfil, setSavingProfil] = useState(false);
   const [profilMsg, setProfilMsg]   = useState({ type: "", text: "" });
 
@@ -362,17 +273,19 @@ export default function ProfilStafPage() {
   const [pwMsg, setPwMsg]       = useState({ type: "", text: "" });
 
   useEffect(() => {
-    ticketService.getAllTiket()
+    ticketService.getMyTasks()
       .then(data => setTickets(Array.isArray(data) ? data : []))
       .catch(() => setTickets([]))
       .finally(() => setLoadingTiket(false));
-    // ambil daftar divisi dari backend untuk dropdown
+  }, []);
+
+  useEffect(() => {
     userService.getDivisi()
       .then(data => setDivisiList(Array.isArray(data) ? data : []))
       .catch(() => setDivisiList([]));
   }, []);
 
-  const milikku    = tickets.filter(t => t.staf_id === user?.id);
+  const milikku = tickets;
   const handled    = milikku.length;
   const selesai    = milikku.filter(t => t.status === "SELESAI").length;
   const aktif      = milikku.filter(t => t.status !== "SELESAI");
@@ -380,38 +293,31 @@ export default function ProfilStafPage() {
   const completion = handled > 0 ? Math.round((selesai / handled) * 100) : 0;
   const recentAktif = aktif.slice(0, 4);
 
-  // Divisi dari user atau form
-  const divisiTampil = user?.divisi_nama || user?.divisi || "—";
-  const grupDivisiEdit = divisiList.find(d => d.id === Number(formDivisi))?.nama_divisi || null;
+  const divisiTampil = user?.divisi_nama || "—";
+  const selectedDivisiName = divisiList.find(d => d.id === Number(formDivisiId))?.nama_divisi;
 
-  // ── Buka edit mode ──
   const handleOpenEdit = () => {
-    setFormNama(user?.nama   || "");
-    setFormDivisi(user?.divisi_id || user?.divisi || "");
+    setFormNama(user?.nama || "");
+    setFormDivisiId(user?.divisi_id || "");
     setEditMode(true);
   };
 
-  // ── Simpan profil ──
   const handleSaveProfil = async () => {
     if (!formNama.trim()) return;
     try {
       setSavingProfil(true);
       setProfilMsg({ type: "", text: "" });
-      // ✅ Kirim divisi sebagai nama string, backend yang handle mapping ke ID jika perlu
-      await apiClient.patch("/auth/me", {
-        nama:   formNama.trim(),
-        divisi_id: formDivisi ? Number(formDivisi) : null,
+      const divisiId = formDivisiId ? Number(formDivisiId) : null;
+      const updated = await userService.updateProfile({
+        nama: formNama.trim(),
+        divisi_id: divisiId,
       });
       setProfilMsg({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditMode(false);
-      // ✅ Update context + localStorage via updateUser agar data langsung sinkron
-      // Update context: keep divisi_nama for display and divisi_id for internal use
-      const divisiObj = divisiList.find(d => d.id === Number(formDivisi));
       updateUser({
-        nama:        formNama.trim(),
-        divisi_nama: divisiObj ? divisiObj.nama_divisi : (formDivisi || null),
-        divisi:      divisiObj ? divisiObj.nama_divisi : (formDivisi || null),
-        divisi_id:   formDivisi ? Number(formDivisi) : null,
+        nama: updated.nama,
+        divisi_id: updated.divisi_id,
+        divisi_nama: updated.divisi_nama,
       });
       setTimeout(() => setProfilMsg({ type: "", text: "" }), 3000);
     } catch {
@@ -503,7 +409,7 @@ export default function ProfilStafPage() {
         <div className="profil-breadcrumb">
           <Link to="/staff/dashboard">Dashboard</Link>
           <span>›</span>
-          <strong style={{ color: "#334155" }}>Profil Saya</strong>
+          <strong style={{ color: "var(--gray-700)" }}>Profil Saya</strong>
         </div>
 
         <div className="profil-grid">
@@ -554,17 +460,6 @@ export default function ProfilStafPage() {
                     </div>
                   </div>
 
-                  {/* Grup divisi — ✅ BARU: tampilkan kelompok divisi */}
-                  {user?.divisi && findGrupDivisi(user.divisi) && (
-                    <div className="profil-info-item">
-                      <div className="profil-info-icon">📂</div>
-                      <div>
-                        <div className="profil-info-label">Kelompok Divisi</div>
-                        <div className="profil-info-val">{findGrupDivisi(user.divisi)}</div>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Institusi */}
                   <div className="profil-info-item">
                     <div className="profil-info-icon">🏛️</div>
@@ -609,7 +504,7 @@ export default function ProfilStafPage() {
             <div className="profil-card">
               <div className="profil-card-header">
                 <span className="profil-card-title">Statistik Kinerja</span>
-                <Link to="/staff/tugas-saya" style={{ fontSize: 12, fontWeight: 700, color: "#7c3aed", textDecoration: "none" }}>
+                <Link to="/staff/tugas-saya" style={{ fontSize: 12, fontWeight: 700, color: "var(--color-brand)", textDecoration: "none" }}>
                   Lihat Tugas →
                 </Link>
               </div>
@@ -641,7 +536,7 @@ export default function ProfilStafPage() {
                       <div className="completion-wrap">
                         <div className="completion-label">
                           <span>Tingkat Penyelesaian</span>
-                          <span style={{ color: "#7c3aed" }}>{completion}%</span>
+                          <span style={{ color: "var(--color-brand)" }}>{completion}%</span>
                         </div>
                         <div className="completion-bar-bg">
                           <div className="completion-bar-fill" style={{ width: `${completion}%` }} />
@@ -652,7 +547,7 @@ export default function ProfilStafPage() {
                 )}
 
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 12 }}>
                     Tiket Aktif Saat Ini
                   </div>
                   {loadingTiket ? (
@@ -720,30 +615,32 @@ export default function ProfilStafPage() {
                   <div className="form-hint">Email tidak dapat diubah.</div>
                 </div>
 
-                {/* Divisi — ✅ PERBAIKAN: dropdown nama string, bukan ID numerik */}
                 <div className="form-group" style={{ marginBottom: editMode ? 18 : 0 }}>
-                  <label className="form-label">Nama Divisi</label>
+                  <label className="form-label">Divisi</label>
                   {editMode ? (
-                    <>
-                        <select
-                          className="form-select"
-                          value={formDivisi}
-                          onChange={e => setFormDivisi(e.target.value)}
-                        >
-                          <option value="">— Pilih Divisi —</option>
-                          {divisiList.map(d => (
-                            <option key={d.id} value={d.id}>{d.nama_divisi}</option>
-                          ))}
-                        </select>
-                    </>
+                    <select
+                      className="form-select"
+                      value={formDivisiId || ""}
+                      onChange={e => setFormDivisiId(e.target.value)}
+                    >
+                      <option value="">-- Pilih Divisi --</option>
+                      {divisiList.map(d => (
+                        <option key={d.id} value={d.id}>
+                          {d.nama_divisi}
+                        </option>
+                      ))}
+                    </select>
                   ) : (
                     <input
                       type="text"
                       className="form-input readonly"
-                      value={user?.divisi || ""}
+                      value={divisiTampil !== "—" ? divisiTampil : ""}
                       readOnly
                       placeholder="Belum ditentukan"
                     />
+                  )}
+                  {editMode && selectedDivisiName && (
+                    <div className="form-hint">Divisi terpilih: {selectedDivisiName}</div>
                   )}
                 </div>
 
@@ -773,10 +670,10 @@ export default function ProfilStafPage() {
                 <span className="profil-card-title">Keamanan Akun</span>
               </div>
               <div className="profil-card-body">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid #f1f5f9" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--gray-100)" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Password</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Pastikan password kamu aman dan unik</div>
+                    <div style={{ fontSize: 12, color: "var(--gray-400)" }}>Pastikan password kamu aman dan unik</div>
                   </div>
                   <button className="btn-outline-sm" onClick={() => setShowPwModal(true)}>
                     🔑 Ganti
@@ -785,9 +682,9 @@ export default function ProfilStafPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 0" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>Status Akun</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>Akun staf aktif</div>
+                    <div style={{ fontSize: 12, color: "var(--gray-400)" }}>Akun staf aktif</div>
                   </div>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", background: "#f5f3ff", color: "#7c3aed", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", background: "#f5f3ff", color: "var(--color-brand)", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
                     ● Aktif
                   </span>
                 </div>
