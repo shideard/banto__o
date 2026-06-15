@@ -29,7 +29,11 @@ class UserRepository:
         return divisi
 
     def get_all_divisi(self) -> List[DivisiStafORM]:
-        return self.db.query(DivisiStafORM).all()
+        return (
+            self.db.query(DivisiStafORM)
+            .order_by(DivisiStafORM.nama_divisi)
+            .all()
+        )
 
     def get_notifikasi_by_user_id(self, user_id: int) -> List[NotifikasiORM]:
         return (

@@ -89,6 +89,10 @@ class KomentarORM(Base):
     tiket   = relationship("TiketORM", back_populates="komentar")
     penulis = relationship("UserORM",  back_populates="komentar")
 
+    @property
+    def nama_penulis(self):
+        return self.penulis.nama if self.penulis else None
+
 class ChatSessionORM(Base):
     __tablename__ = "chat_sessions"
 

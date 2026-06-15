@@ -82,6 +82,20 @@
   --danger:         var(--color-danger);
   --danger-bg:      var(--color-danger-bg);
 
+  /* Status tiket (design system §3) */
+  --status-dibuat-bg:    #eff6ff;
+  --status-dibuat-text:  #1d4ed8;
+  --status-diklaim-bg:   #fefce8;
+  --status-diklaim-text: #a16207;
+  --status-diproses-bg:  #fff7ed;
+  --status-diproses-text:#c2410c;
+  --status-selesai-bg:   var(--color-success-bg);
+  --status-selesai-text: var(--color-success);
+  --status-revisi-bg:    var(--color-danger-bg);
+  --status-revisi-text:  var(--color-danger);
+  --status-ditutup-bg:   var(--color-gray-100);
+  --status-ditutup-text: #475569;
+
   /* alias LoginPage & RegisterPage (pakai --blue-xxx) */
   --blue-950: var(--color-brand-darkest);
   --blue-800: var(--color-brand-dark);

@@ -17,8 +17,7 @@ class UserDomain:
     id: Optional[int] = None
 
     def login(self) -> bool:
-        # Akan diimplementasi oleh JWT Auth Service
-        return True
+        return self.email is not None and self.email != ""
 
     def logout(self) -> None:
         pass
@@ -26,15 +25,22 @@ class UserDomain:
 
 @dataclass
 class MahasiswaDomain(UserDomain):
-    nim: str = ""   # - private
+    nim: Optional[str] = None
+    telepon: Optional[str] = None
+    fakultas: Optional[str] = None
+    departemen: Optional[str] = None
 
     def buat_tiket(self, subjek: str, deskripsi: str) -> dict:
-        """Initiate ticket creation — business logic di service layer."""
-        return {"subjek": subjek, "deskripsi": deskripsi, "mahasiswa_id": self.id}
+        if not subjek or not subjek.strip():
+            raise ValueError("Subjek tiket tidak boleh kosong.")
+        if not deskripsi or not deskripsi.strip():
+            raise ValueError("Deskripsi tiket tidak boleh kosong.")
+        return {"subjek": subjek.strip(), "deskripsi": deskripsi.strip()}
 
     def kirim_chatbot(self, tanya: str) -> str:
-        """Delegates ke ChatbotService."""
-        return tanya
+        if not tanya or not tanya.strip():
+            raise ValueError("Pertanyaan tidak boleh kosong.")
+        return tanya.strip()
 
 
 @dataclass
@@ -42,10 +48,12 @@ class StafAdministrasiDomain(UserDomain):
     divisi_id: Optional[int] = None
 
     def klaim_tiket(self, tiket_id: int) -> None:
-        pass
+        if tiket_id is None or tiket_id <= 0:
+            raise ValueError("ID tiket tidak valid.")
 
     def update_status(self, tiket_id: int, status: str) -> None:
-        pass
+        if not status:
+            raise ValueError("Status tidak boleh kosong.")
 
 
 @dataclass

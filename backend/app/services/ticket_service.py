@@ -1,5 +1,6 @@
 from typing import List, Optional
 import os, shutil
+from datetime import datetime
 
 from app.persistence.ticket_orm import (
     TiketORM, PengajuanORM, KomentarORM, KategoriTiketORM
@@ -92,6 +93,12 @@ class TicketService:
         if role == "mahasiswa":
             return self.repo.get_tiket_by_mahasiswa_id(user_id)
         return self.repo.get_all_tiket()
+
+    def get_tiket_by_staf(self, staf_id: int) -> List[TiketORM]:
+        return self.repo.get_tiket_by_staf(staf_id)
+
+    def get_tiket_unclaimed(self) -> List[TiketORM]:
+        return self.repo.get_tiket_unclaimed()
 
     def get_tiket_for_user(self, tiket_id: int, user_id: int, role: str) -> TiketORM:
         tiket = self.repo.get_tiket_by_id(tiket_id)
@@ -240,6 +247,7 @@ class TicketService:
             penulis_id=payload.penulis_id,
             role=payload.role,
             isi=payload.isi,
+            waktu=payload.waktu if payload.waktu else datetime.utcnow(),
         )
         komentar = self.repo.create_komentar(komentar)
 
@@ -261,7 +269,7 @@ class TicketService:
 
     def simpan_file_komentar(
         self, tiket_id: int, penulis_id: int, role: str,
-        nama_file: str, file_obj
+        nama_file: str, file_obj, waktu: Optional[datetime] = None
     ) -> KomentarORM:
         tiket = self.repo.get_tiket_by_id(tiket_id)
         if not tiket:
@@ -286,6 +294,7 @@ class TicketService:
             penulis_id=penulis_id,
             role=role,
             isi=f"[FILE] {nama_file} — {file_path}",
+            waktu=waktu if waktu else datetime.utcnow(),
         )
         return self.repo.create_komentar(komentar)
     
