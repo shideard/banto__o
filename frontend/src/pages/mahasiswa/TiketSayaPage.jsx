@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
+import { TOKEN_KEY } from "../../utils/constants";
 
 const styles = `
   /* --- HANYA MENYIMPAN CSS UNTUK KONTEN UTAMA --- */
@@ -30,7 +31,7 @@ const styles = `
   }
 
   .ts-header-text h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 800;
     color: var(--gray-900);
@@ -81,7 +82,7 @@ const styles = `
     padding: 10px 14px 10px 38px;
     border: 1.5px solid var(--gray-200);
     border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
@@ -100,7 +101,7 @@ const styles = `
     border: none;
     background: transparent;
     border-radius: 6px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     color: var(--gray-500);
@@ -125,6 +126,7 @@ const styles = `
   .table-scroll-area {
     max-height: 500px;
     overflow-y: auto;
+    overflow-x: auto;
   }
 
   .table-scroll-area::-webkit-scrollbar { width: 6px; }
@@ -135,6 +137,7 @@ const styles = `
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    min-width: 800px;
   }
   
   thead th {
@@ -185,11 +188,11 @@ const styles = `
   .pill-diproses { background: #fff7ed; color: #c2410c; }
   .pill-diproses::before { background: #ea580c; }
   .pill-dibuka { background: #eff6ff; color: #1d4ed8; }
-  .pill-dibuka::before { background: #2563eb; }
+  .pill-dibuka::before { background: var(--color-brand); }
   .pill-selesai { background: #f0fdf4; color: #15803d; }
   .pill-selesai::before { background: #16a34a; }
-  .pill-ditutup { background: #f1f5f9; color: #475569; }
-  .pill-ditutup::before { background: #64748b; }
+  .pill-ditutup { background: var(--gray-100); color: #475569; }
+  .pill-ditutup::before { background: var(--gray-500); }
 
   /* Modal Styles */
   .modal-overlay {
@@ -265,7 +268,7 @@ export default function TiketSayaPage() {
   const [selectedTicket, setSelectedTicket] = useState(null);
 
   // Perbaikan error warning: Cek token di awal sebelum render, lalu set nilai awal state loading
-  const hasToken = Boolean(localStorage.getItem("banto_token"));
+  const hasToken = Boolean(localStorage.getItem(TOKEN_KEY));
   const [loading, setLoading] = useState(hasToken);
 
   useEffect(() => {
@@ -357,8 +360,8 @@ export default function TiketSayaPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Subjek</th>
-                  <th>Kategori</th>
+                  <th>Subjek & Topik</th>
+                  <th>Prioritas</th>
                   <th>Status</th>
                   <th>Dibuat</th>
                   <th>Aksi</th>
@@ -376,10 +379,18 @@ export default function TiketSayaPage() {
                     <tr key={ticket.id} onClick={() => setSelectedTicket(ticket)}>
                       <td className="td-id">#{ticket.id}</td>
                       <td className="td-subjek">
-                        <p>{ticket.subjek}</p>
+                        <p style={{ margin: 0 }}>{ticket.subjek}</p>
+                        <span style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{ticket.kategori_nama || "Tanpa Topik"}</span>
                       </td>
-                      <td style={{ color: "var(--gray-500)", fontSize: 13 }}>
-                        {ticket.kategori_id || "—"}
+                      <td>
+                        <span className="tugas-label" style={{ 
+                          background: ticket.prioritas === 'Penting' ? '#fef2f2' : ticket.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                          color: ticket.prioritas === 'Penting' ? '#dc2626' : ticket.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                          border: `1px solid ${ticket.prioritas === 'Penting' ? '#fecaca' : ticket.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`,
+                          padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                        }}>
+                          {ticket.prioritas || "Normal"}
+                        </span>
                       </td>
                       <td>
                         <span className={`status-pill ${getStatusClass(ticket.status)}`}>
@@ -396,7 +407,7 @@ export default function TiketSayaPage() {
                             display: "inline-block",
                             padding: "5px 12px",
                             background: "#eff6ff",
-                            color: "#2563eb",
+                            color: "var(--color-brand)",
                             borderRadius: 6,
                             fontSize: 12,
                             fontWeight: 700,
@@ -445,8 +456,8 @@ export default function TiketSayaPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
               <div className="detail-group">
-                <div className="detail-label">Kategori</div>
-                <div className="detail-value">{selectedTicket.kategori_id || "—"}</div>
+                <div className="detail-label">Topik Bantuan</div>
+                <div className="detail-value">{selectedTicket.kategori_nama || "—"}</div>
               </div>
               <div className="detail-group">
                 <div className="detail-label">Waktu Dibuat</div>

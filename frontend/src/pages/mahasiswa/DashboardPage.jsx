@@ -29,7 +29,7 @@ const styles = `
   }
 
   .db-header h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     font-weight: 800;
     color: var(--gray-900);
@@ -66,7 +66,7 @@ const styles = `
   }
 
   .stat-value {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 36px;
     font-weight: 900;
     color: var(--ipb-blue-dark);
@@ -121,7 +121,7 @@ const styles = `
     border: 1.5px solid var(--gray-200);
     border-radius: 8px;
     background: var(--white);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     color: var(--gray-700);
@@ -188,11 +188,11 @@ const styles = `
   .pill-diproses { background: #fff7ed; color: #c2410c; }
   .pill-diproses::before { background: #ea580c; }
   .pill-dibuka { background: #eff6ff; color: #1d4ed8; }
-  .pill-dibuka::before { background: #2563eb; }
+  .pill-dibuka::before { background: var(--color-brand); }
   .pill-selesai { background: #f0fdf4; color: #15803d; }
   .pill-selesai::before { background: #16a34a; }
-  .pill-ditutup { background: #f1f5f9; color: #475569; }
-  .pill-ditutup::before { background: #64748b; }
+  .pill-ditutup { background: var(--gray-100); color: #475569; }
+  .pill-ditutup::before { background: var(--gray-500); }
 
   @media (max-width: 1024px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -282,8 +282,8 @@ export default function DashboardPage() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Subjek</th>
-                <th>Kategori</th>
+                <th>Subjek & Topik</th>
+                <th>Prioritas</th>
                 <th>Status</th>
                 <th>Dibuat</th>
               </tr>
@@ -292,12 +292,21 @@ export default function DashboardPage() {
               {tickets.length > 0 ? (
                 tickets.slice(0, 4).map((ticket, idx) => (
                   <tr key={idx}>
-                    <td className="td-id">{ticket.id}</td>
+                    <td className="td-id">#{ticket.id}</td>
                     <td className="td-subjek">
-                      <p>{ticket.subjek}</p>
-                      <span>{String(ticket.kategori_id || "").split(" & ")[0]}</span>
+                      <p style={{ margin: 0 }}>{ticket.subjek}</p>
+                      <span style={{ fontSize: 11, color: "var(--gray-500)", marginTop: 2 }}>{ticket.kategori_nama || "Tanpa Topik"}</span>
                     </td>
-                    <td style={{ color: "var(--gray-500)", fontSize: "13px" }}>{ticket.kategori_id || "—"}</td>
+                    <td>
+                      <span className="tugas-label" style={{ 
+                        background: ticket.prioritas === 'Penting' ? '#fef2f2' : ticket.prioritas === 'Mendesak' ? '#fff7ed' : '#f0fdf4',
+                        color: ticket.prioritas === 'Penting' ? '#dc2626' : ticket.prioritas === 'Mendesak' ? '#ea580c' : '#16a34a',
+                        border: `1px solid ${ticket.prioritas === 'Penting' ? '#fecaca' : ticket.prioritas === 'Mendesak' ? '#ffedd5' : '#bbf7d0'}`,
+                        padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                      }}>
+                        {ticket.prioritas || "Normal"}
+                      </span>
+                    </td>
                     <td>
                       <span className={`status-pill ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
                     </td>

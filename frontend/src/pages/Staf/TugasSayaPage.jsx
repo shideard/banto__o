@@ -5,60 +5,60 @@ import ticketService from "../../services/ticketService";
 import AppIcon from "../../components/ui/AppIcon";
 
 const styles = `
-  .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .staf-breadcrumb { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+  .staf-main { padding: 32px 40px; max-width: 1200px; width: 100%; margin: 0 auto; font-family: var(--font-sans); }
+  .staf-breadcrumb { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
   .staf-breadcrumb span { margin: 0 6px; }
-  .staf-breadcrumb a { color: #64748b; text-decoration: none; }
-  .staf-breadcrumb a:hover { color: #2563eb; }
-  .staf-breadcrumb strong { color: #334155; }
+  .staf-breadcrumb a { color: var(--gray-500); text-decoration: none; }
+  .staf-breadcrumb a:hover { color: var(--color-brand); }
+  .staf-breadcrumb strong { color: var(--gray-700); }
   .staf-page-header { margin-bottom: 24px; }
-  .staf-page-header h1 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-  .staf-page-header p { font-size: 14px; color: #64748b; }
+  .staf-page-header h1 { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+  .staf-page-header p { font-size: 14px; color: var(--gray-500); }
 
   .tugas-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
   .tugas-tabs { display: flex; gap: 0; }
-  .tugas-tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.18s; }
-  .tugas-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-  .tugas-tab:hover { color: #2563eb; }
-  .tugas-search { display: flex; align-items: center; gap: 8px; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; background: #f8fafc; min-width: 240px; }
-  .tugas-search input { border: none; background: transparent; font-size: 13px; color: #334155; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; }
-  .tugas-search input::placeholder { color: #94a3b8; }
+  .tugas-tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font-sans); transition: all 0.18s; }
+  .tugas-tab.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+  .tugas-tab:hover { color: var(--color-brand); }
+  .tugas-search { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 8px 14px; background: var(--gray-50); min-width: 240px; }
+  .tugas-search input { border: none; background: transparent; font-size: 13px; color: var(--gray-700); outline: none; font-family: var(--font-sans); width: 100%; }
+  .tugas-search input::placeholder { color: var(--gray-400); }
 
   .tugas-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-  .tugas-stat-mini { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .tugas-stat-mini .label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
-  .tugas-stat-mini .value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; color: #0f172a; }
+  .tugas-stat-mini { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .tugas-stat-mini .label { font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
+  .tugas-stat-mini .value { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--gray-900); }
   .tugas-stat-mini-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 
   .tugas-list { display: flex; flex-direction: column; gap: 16px; }
-  .tugas-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 20px 24px; transition: box-shadow 0.18s; cursor: default; }
+  .tugas-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 14px; padding: 20px 24px; transition: box-shadow 0.18s; cursor: default; }
   .tugas-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
   .tugas-card.urgent { border-left: 4px solid #ea580c; }
   .tugas-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
   .tugas-card-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .tugas-ticket-id { font-size: 12px; font-weight: 700; color: #94a3b8; }
+  .tugas-ticket-id { font-size: 12px; font-weight: 700; color: var(--gray-400); }
   .tugas-status-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; }
   .pill-DIBUAT   { background: #eff6ff; color: #1d4ed8; }
   .pill-DIKLAIM  { background: #fefce8; color: #a16207; }
   .pill-DIPROSES { background: #fff7ed; color: #c2410c; }
   .pill-SELESAI  { background: #f0fdf4; color: #15803d; }
   .pill-REVISI   { background: #fef2f2; color: #dc2626; }
-  .pill-DITOLAK  { background: #f1f5f9; color: #475569; }
-  .tugas-card-time { font-size: 12px; color: #94a3b8; white-space: nowrap; }
-  .tugas-card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-  .tugas-card-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 14px; }
+  .pill-DITOLAK  { background: var(--gray-100); color: #475569; }
+  .tugas-card-time { font-size: 12px; color: var(--gray-400); white-space: nowrap; }
+  .tugas-card-title { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+  .tugas-card-desc { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin-bottom: 14px; }
   .tugas-card-footer { display: flex; align-items: center; justify-content: space-between; }
-  .tugas-card-meta { display: flex; align-items: center; gap: 16px; font-size: 12.5px; color: #64748b; }
-  .btn-tugas-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; border: none; transition: all 0.18s; }
-  .btn-tugas-action.primary { background: #2563eb; color: #fff; }
+  .tugas-card-meta { display: flex; align-items: center; gap: 16px; font-size: 12.5px; color: var(--gray-500); }
+  .btn-tugas-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--font-sans); text-decoration: none; border: none; transition: all 0.18s; }
+  .btn-tugas-action.primary { background: var(--color-brand); color: var(--white); }
   .btn-tugas-action.primary:hover { background: #1d4ed8; }
-  .btn-tugas-action.secondary { background: #f1f5f9; color: #334155; border: 1.5px solid #e2e8f0; }
-  .btn-tugas-action.secondary:hover { background: #e2e8f0; }
+  .btn-tugas-action.secondary { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+  .btn-tugas-action.secondary:hover { background: var(--gray-200); }
 
-  .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--gray-400); }
   .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
-  .state-center { text-align: center; padding: 60px; color: #94a3b8; font-size: 14px; }
+  .state-center { text-align: center; padding: 60px; color: var(--gray-400); font-size: 14px; }
   .state-center.error { color: #dc2626; }
 `;
 
@@ -79,17 +79,14 @@ export default function TugasSayaPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await ticketService.getAllTiket();
-      const all = Array.isArray(res) ? res : [];
-      // Hanya tiket yang sudah diklaim oleh staf ini (staf_id cocok)
-      const mine = all.filter(t => t.staf_id === user?.id);
-      setTickets(mine);
+      const res = await ticketService.getMyTasks();
+      setTickets(Array.isArray(res) ? res : []);
     } catch {
       setError("Gagal memuat tiket. Coba refresh halaman.");
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
@@ -128,7 +125,7 @@ export default function TugasSayaPage() {
       <style>{styles}</style>
       <main className="staf-main">
         <div className="staf-breadcrumb">
-          <a href="/staff/dashboard">Portal Bantuan</a><span>›</span>
+          <Link to="/staff/dashboard">Portal Bantuan</Link><span>›</span>
           <strong>Tugas Tiket Saya</strong>
         </div>
         <div className="staf-page-header">
@@ -141,7 +138,7 @@ export default function TugasSayaPage() {
           <div className="tugas-stat-mini">
             <div>
               <div className="label">Tiket Aktif</div>
-              <div className="value" style={{ color: "#2563eb" }}>{aktif.length}</div>
+              <div className="value" style={{ color: "var(--color-brand)" }}>{aktif.length}</div>
             </div>
             <div className="tugas-stat-mini-icon" style={{ background: "#eff6ff", color: "var(--color-brand)" }}>
               <AppIcon name="ClipboardList" variant="lg" />
@@ -190,7 +187,7 @@ export default function TugasSayaPage() {
             </button>
           </div>
           <div className="tugas-search">
-            <AppIcon name="Search" variant="sm" style={{ color: "#94a3b8", flexShrink: 0 }} />
+            <AppIcon name="Search" variant="sm" style={{ color: "var(--gray-400)", flexShrink: 0 }} />
             <input
               placeholder="Cari ID atau judul..."
               value={search}

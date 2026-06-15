@@ -194,7 +194,7 @@ const styles = `
   .pg {
     min-height: 100vh;
     display: flex;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* ── LEFT PANEL ── */
@@ -204,17 +204,39 @@ const styles = `
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 44px 52px;
-    background: linear-gradient(150deg, #0a1f5c 0%, #1a3a8a 55%, #2563eb 100%);
+    background: var(--color-brand-darkest);
   }
+
+  /* IPB campus photo background */
+  .pg-left-img {
+    position: absolute;
+    inset: 0;
+    background-image: url('/ipb-bg.jpg');
+    background-size: cover;
+    background-position: center 60%;
+    opacity: 0.22;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Gradient overlay — keeps brand colors + readability */
   .pg-left::before {
     content: '';
     position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background: linear-gradient(
+      150deg,
+      rgba(10, 31, 92, 0.92) 0%,
+      rgba(26, 58, 138, 0.84) 55%,
+      rgba(37, 99, 235, 0.78) 100%
+    );
     pointer-events: none;
+    z-index: 1;
   }
-  .deco { position: absolute; border-radius: 50%; pointer-events: none; }
+
+  /* Decorative circles — z-index 2 above overlay */
+  .deco { position: absolute; border-radius: 50%; pointer-events: none; z-index: 2; }
   .deco-c1 { width: 500px; height: 500px; top: -180px; right: -140px; border: 1px solid rgba(255,255,255,0.06); }
   .deco-c2 { width: 280px; height: 280px; bottom: -60px; left: -60px; border: 1px solid rgba(255,255,255,0.06); }
   .deco-blob {
@@ -223,7 +245,7 @@ const styles = `
     bottom: -60px; right: -60px;
   }
 
-  .brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+  .brand { display: flex; align-items: center; gap: 14px; position: relative; z-index: 3; }
   .brand-icon {
     width: 48px; height: 48px; border-radius: 12px;
     background: rgba(255,255,255,0.14);
@@ -231,7 +253,7 @@ const styles = `
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; backdrop-filter: blur(8px);
   }
-  .brand-text { color: #ffffff; }
+  .brand-text { color: var(--white); }
   .brand-text .univ {
     font-size: 10px; font-weight: 600;
     letter-spacing: 2.5px; text-transform: uppercase;
@@ -239,7 +261,7 @@ const styles = `
   }
   .brand-text .prod { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
 
-  .hero { position: relative; z-index: 1; }
+  .hero { position: relative; z-index: 3; margin: auto 0; }
   .hero-pill {
     display: inline-flex; align-items: center; gap: 7px;
     background: rgba(255,255,255,0.1);
@@ -249,9 +271,9 @@ const styles = `
     color: rgba(255,255,255,0.8); margin-bottom: 20px;
   }
   .hero h1 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: clamp(26px, 2.8vw, 36px); font-weight: 800;
-    color: #ffffff; line-height: 1.15;
+    color: var(--white); line-height: 1.15;
     letter-spacing: -1px; margin-bottom: 16px;
   }
   .hero p {
@@ -259,7 +281,8 @@ const styles = `
     font-size: 13.5px; line-height: 1.75; max-width: 300px;
   }
 
-  .left-features { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+  .left-features { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 10px; }
+
   .feat-item {
     display: flex; align-items: center; gap: 10px;
     color: rgba(255,255,255,0.65); font-size: 12.5px;
@@ -273,7 +296,7 @@ const styles = `
   .pg-right {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: flex-start;
-    padding: 40px 40px; background: #ffffff;
+    padding: 40px 40px; background: var(--white);
     overflow-y: auto;
   }
   .form-box { width: 100%; max-width: 440px; padding-bottom: 40px; }
@@ -281,7 +304,7 @@ const styles = `
   /* ── TAB SWITCHER ── */
   .role-tabs {
     display: flex; gap: 0;
-    background: #f1f5f9;
+    background: var(--gray-100);
     border-radius: 10px;
     padding: 4px;
     margin-bottom: 24px;
@@ -289,14 +312,14 @@ const styles = `
   .role-tab {
     flex: 1; padding: 9px 16px;
     border: none; border-radius: 7px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px; font-weight: 600;
     cursor: pointer; transition: all 0.18s ease;
-    color: #64748b; background: transparent;
+    color: var(--gray-500); background: transparent;
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
   .role-tab.active {
-    background: #ffffff;
+    background: var(--white);
     color: #0a1f5c;
     box-shadow: 0 1px 6px rgba(0,0,0,0.08);
   }
@@ -305,43 +328,43 @@ const styles = `
   .form-head { margin-bottom: 20px; }
   .form-head .badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: #eff6ff; color: #2563eb;
+    background: #eff6ff; color: var(--color-brand);
     border: 1px solid #bfdbfe; border-radius: 100px;
     padding: 4px 11px; font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.6px;
     margin-bottom: 10px;
   }
   .form-head h2 {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display);
     font-size: 22px; font-weight: 800;
-    color: #0f172a; letter-spacing: -0.5px;
+    color: var(--gray-900); letter-spacing: -0.5px;
     margin-bottom: 5px;
   }
-  .form-head p { font-size: 13px; color: #64748b; line-height: 1.55; }
+  .form-head p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
 
   /* ── FIELD ── */
   .field { margin-bottom: 13px; }
   .field-lbl {
     font-size: 12.5px; font-weight: 600;
-    color: #334155; margin-bottom: 5px; display: block;
+    color: var(--gray-700); margin-bottom: 5px; display: block;
   }
   .input-wrap { position: relative; }
   .input-icon {
     position: absolute; left: 13px; top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8; pointer-events: none;
+    color: var(--gray-400); pointer-events: none;
     display: flex; align-items: center; justify-content: center;
   }
   .fi {
     width: 100%; height: 44px;
     padding: 0 13px 0 40px;
-    border: 1.5px solid #e2e8f0; border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px; color: #0f172a;
-    background: #ffffff; outline: none;
+    border: 1.5px solid var(--gray-200); border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 13.5px; color: var(--gray-900);
+    background: var(--white); outline: none;
     transition: all 0.18s ease;
   }
-  .fi::placeholder { color: #94a3b8; }
+  .fi::placeholder { color: var(--gray-400); }
   .fi:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
   .fi.err { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.07); }
   select.fi {
@@ -350,24 +373,24 @@ const styles = `
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 36px;
-    color: #0f172a;
+    color: var(--gray-900);
   }
-  select.fi option[value=""] { color: #94a3b8; }
-  select.fi:disabled { background-color: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+  select.fi option[value=""] { color: var(--gray-400); }
+  select.fi:disabled { background-color: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
   .eye {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer;
-    color: #94a3b8; padding: 0; transition: color 0.15s;
+    color: var(--gray-400); padding: 0; transition: color 0.15s;
     display: flex; align-items: center;
   }
-  .eye:hover { color: #64748b; }
+  .eye:hover { color: var(--gray-500); }
   .ferr { margin-top: 4px; font-size: 11.5px; color: #dc2626; }
 
   /* ── DIVISI GROUP LABEL ── */
   .select-group-label {
     font-size: 10px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.5px;
-    color: #94a3b8; padding: 6px 8px 2px;
+    color: var(--gray-400); padding: 6px 8px 2px;
     pointer-events: none;
   }
 
@@ -383,10 +406,10 @@ const styles = `
   .btn-submit {
     width: 100%; height: 48px; margin-top: 8px;
     border: none; border-radius: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px; font-weight: 700;
-    color: #ffffff; cursor: pointer;
-    background: linear-gradient(130deg, #0a1f5c 0%, #2563eb 60%, #0ea5e9 100%);
+    color: var(--white); cursor: pointer;
+    background: linear-gradient(130deg, #0a1f5c 0%, var(--color-brand) 60%, #0ea5e9 100%);
     box-shadow: 0 4px 18px rgba(37,99,235,0.28);
     transition: all 0.2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -400,10 +423,10 @@ const styles = `
   /* ── FOOTER ── */
   .footer-note {
     margin-top: 18px;
-    font-size: 13px; color: #64748b;
+    font-size: 13px; color: var(--gray-500);
     text-align: center; line-height: 1.9;
   }
-  .footer-note a { color: #2563eb; font-weight: 700; text-decoration: none; }
+  .footer-note a { color: var(--color-brand); font-weight: 700; text-decoration: none; }
   .footer-note a:hover { text-decoration: underline; }
 
   /* ── GRUP BADGE di divisi info ── */
@@ -790,12 +813,17 @@ export default function RegisterPage() {
       <div className="pg">
         {/* ── LEFT ── */}
         <div className="pg-left">
+          {/* IPB campus photo — sits behind everything */}
+          <div className="pg-left-img" />
+
           <div className="deco deco-c1" />
           <div className="deco deco-c2" />
           <div className="deco deco-blob" />
 
           <div className="brand">
-            <div className="brand-icon">🎓</div>
+            <div className="brand-icon">
+              <AppIcon name="GraduationCap" size={22} color="white" />
+            </div>
             <div className="brand-text">
               <span className="univ">IPB University</span>
               <span className="prod">banto__o</span>
@@ -808,14 +836,7 @@ export default function RegisterPage() {
             <p>{c.desc}</p>
           </div>
 
-          <div className="left-features">
-            {c.features.map(f => (
-              <div className="feat-item" key={f}>
-                <div className="feat-dot" />
-                {f}
-              </div>
-            ))}
-          </div>
+
         </div>
 
         {/* ── RIGHT ── */}

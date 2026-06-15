@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 
@@ -11,12 +11,12 @@ class DivisiStafDomain:
 @dataclass
 class UserDomain:
     nama: str
-    email: str
+    email: str      # # protected
+    password: str   # - private
     role: str       # 'mahasiswa' atau 'staf'
     id: Optional[int] = None
 
     def login(self) -> bool:
-        # Domain-level basic validation only
         return self.email is not None and self.email != ""
 
     def logout(self) -> None:
@@ -31,12 +31,11 @@ class MahasiswaDomain(UserDomain):
     departemen: Optional[str] = None
 
     def buat_tiket(self, subjek: str, deskripsi: str) -> dict:
-        """Validasi minimal sebelum tiket dibuat."""
         if not subjek or not subjek.strip():
             raise ValueError("Subjek tiket tidak boleh kosong.")
         if not deskripsi or not deskripsi.strip():
             raise ValueError("Deskripsi tiket tidak boleh kosong.")
-        return {"subjek": subjek.strip(), "deskripsi": deskripsi.strip(), "mahasiswa_id": self.id}
+        return {"subjek": subjek.strip(), "deskripsi": deskripsi.strip()}
 
     def kirim_chatbot(self, tanya: str) -> str:
         if not tanya or not tanya.strip():
